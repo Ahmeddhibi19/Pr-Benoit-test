@@ -44,13 +44,10 @@ sparse=(/README.md /pdfbox/)
 clone_at https://github.com/ASSERT-KTH/pankti-experiments.git "$src/pankti-experiments" 7bc7791e8cfbdee2268e077e9d289137541dc3a6
 add_worktree "$src/pankti-experiments" "$src/pankti-experiments-2021" 1d8f9aa150d9bfd99e3a38c987025cd6159494da
 
-listing="$data/pankti-data-v1.listing.txt"
-unzip -l "$zip" > "$listing"
-prefix=$(awk '$4 ~ /(^|\/)pdfbox\/$/ {print $4; exit}' "$listing")
-echo "pdfbox folder in archive: ${prefix:-not found}"
-if [ -n "$prefix" ]; then
-  unzip -q -o "$zip" "${prefix}*" \
-    -x '*-receiving.xml' '*-receiving-post.xml' '*-params.xml' '*-returned.xml' \
-    -d "$data/pankti-data-v1"
-fi
+python=$(command -v python3 || command -v python)
+here=$(cd "$(dirname "$0")" && pwd)
+listing="$data/pankti-data-v1.listing.csv"
+"$python" "$here/extract_zip.py" list "$zip" "$listing"
+"$python" "$here/extract_zip.py" extract "$zip" "$data/pankti-data-v1" "pankti-data/pdfbox/" \
+  --exclude-suffix -receiving.xml -receiving-post.xml -params.xml -returned.xml
 du -sh "$data/pankti-data-v1" 2>/dev/null || true

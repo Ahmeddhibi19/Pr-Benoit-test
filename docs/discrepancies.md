@@ -28,6 +28,13 @@ The passing rate is 98.29%: Table III rounds it to 98.2%, the text to 98.3%.
 Section V.B says that 15 target methods have passing tests but stay pseudo-tested. Table III gives 12 such PDFBox
 methods; together with 2 Broadleaf methods and 1 Jicofo method this makes 15, as stated.
 
+## 1b. The authors' raw profile data matches the paper
+
+**Status: explained.** From the Zenodo archive (version 1), the 46 `-count.txt` files sum to 121,175 invocations
+and the 46 `-object-profile-sizes.txt` files hold 57,563 sizes, as in Table III. The smallest profile is 158 bytes,
+as in the text. The largest is 57.4 MB = 54.7 MiB ("nearly 55 MB") and the total is 5.9 GB = 5.5 GiB ("5.5 GB"),
+so the paper reports sizes in binary units (MiB/GiB). The reproduction does the same.
+
 ## 2. #PASSING: 13,614 in the paper vs 2,001 executed passing tests
 
 **Status: explained.** `report.csv` has an `executed-tests` column. For `GlyfSimpleDescript.getFlags`, only

@@ -60,6 +60,19 @@ GovDocs1 files, as shipped in `pdfbox/execution/workload/` of the experiments re
 |---|---|---|---|---|
 | 4298605 (version 1, 2020-11-30) | 10.5281/zenodo.4298605 | `pankti-data.zip` | 1,374,537,485 | `9c902f3e2342338192197034413d70c0` |
 
+The archive holds 5,064 files, 11.2 GB uncompressed, under `pankti-data/` (README, `broadleaf/`, `jitsi-jicofo/`,
+`pdfbox/`). The `pdfbox/` part:
+
+| Folder | Files | Size | Content |
+|---|---|---|---|
+| `descartes-pseudo-tested-method-reports/` | 8 | 79.5 MB | Descartes `methods.json`, before (6 modules) and after (fontbox, pdfbox) |
+| `execution-workload-reproduction/` | 7 | 2.6 MB | `run.sh` and the 6 workload PDFs |
+| `pankti-collected-object-profiles/` | 231 | 5,898.8 MB | `invoked-methods.csv` and, per method, count, sizes, receiving, params, returned |
+| `pankti-generated-junit-tests/` | 4,492 | 5,205.7 MB | generated test classes and resource files |
+
+`setup/extract_zip.py` extracts `pdfbox/` without the raw `-receiving/-params/-returned.xml` files (136 files,
+177 MB). Info-ZIP's `unzip` can list this Zip64 archive but does not match file patterns in it.
+
 The paper cites the concept DOI 10.5281/zenodo.4298604, which now resolves to version 2 (record 4700393,
 4.09 GB). Version 1 is used here because it is the one contemporary with the PDFBox run. The archive is listed
 before extraction, and only `pdfbox/` is extracted, without the raw `-receiving/-params/-returned.xml` profiles
