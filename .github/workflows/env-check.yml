@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Free disk space
         run: bash scripts/ci/free-disk.sh
@@ -31,10 +31,10 @@ jobs:
         run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
 
       - name: Restore Maven repository
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v6
         with:
           path: ~/.m2/repository
-          key: m2-pdfbox-2.0.21-${{ hashFiles('scripts/pdfbox/*.sh') }}
+          key: m2-pdfbox-2.0.21-${{ github.run_id }}
           restore-keys: m2-pdfbox-2.0.21-
 
       - name: Environment report
@@ -58,13 +58,24 @@ jobs:
           echo "build_seconds=$SECONDS" >> ../out/timing.txt
           exit $rc
 
+      - name: Save Maven repository
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-pdfbox-2.0.21-${{ github.run_id }}
+
       - name: Summarise tests
         if: always()
         run: python3 scripts/pdfbox/test_summary.py pdfbox out
 
+      - name: Annotate build outcome
+        if: always()
+        run: bash scripts/ci/annotate-build.sh out
+
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: env-check-${{ github.run_number }}
           path: out/
