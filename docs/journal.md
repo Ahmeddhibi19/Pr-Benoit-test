@@ -56,9 +56,10 @@ comparison between the paper and the authors' artifacts.
      module and all `CertificateExpiredException`: the test keystore shipped with PDFBox 2.0.21 expired on
      2026-06-05. This is a time bomb in the test data, unrelated to the methods studied (fontbox and pdfbox).
   The download fixes reuse byte-identical files (the build checks their sha512). The expired certificate is
-  listed in `scripts/pdfbox/known-failures.txt`, so env-check only fails on unexpected failures. For Descartes
-  (Day 2), the examples suite needs to be green; the plan is to run it with the clock set back (libfaketime),
-  or to exclude these 13 tests and document it.
+  listed in `scripts/pdfbox/known-failures.txt`, so env-check only fails on unexpected failures.
+- Decision for Descartes, which needs a green suite: exclude the two test classes that contain the 13 errors
+  (`scripts/pdfbox/descartes-excluded-tests.txt`). PIT excludes by class, so 10 passing tests go too
+  (23 of 1,678 tests). Setting the clock back was the alternative and was not retained.
 - The Maven cache was not saved when the job failed. It is now restored and saved in separate steps.
 - Decision: all generated tests will be executed; non-executed tests will never be counted as passing.
 

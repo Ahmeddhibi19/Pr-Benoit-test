@@ -1,0 +1,9 @@
+# Test classes excluded from the Descartes (PIT) runs, one fully qualified name per line.
+# PIT needs a green test suite and excludes tests by class only.
+#
+# org.apache.pdfbox.examples.* : the keystore used by these tests expired on 2026-06-05
+# (CertificateExpiredException). 13 tests error: 12 of the 22 tests of TestCreateSignature and the single
+# test of CreatePDFATest. Excluding the two classes also removes 10 passing tests. None of these tests
+# exercises the fontbox or pdfbox methods of the case study.
+org.apache.pdfbox.examples.pdmodel.TestCreateSignature
+org.apache.pdfbox.examples.pdfa.CreatePDFATest

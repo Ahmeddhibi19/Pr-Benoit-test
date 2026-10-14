@@ -138,8 +138,14 @@ operations. The reproduction runs the script unchanged and reports this.
 
 With these adjustments the build runs 1,678 tests (the authors report 1,675 for the original suite). 13 tests of
 the examples module error with `CertificateExpiredException`: the keystore used by the signature tests expired
-on 2026-06-05. These tests do not touch the 46 target methods. **Status: open** for the Descartes runs, which
-need a green suite (clock set back, or documented exclusion).
+on 2026-06-05. These tests do not touch the 46 target methods.
+
+**Decision for the Descartes runs (assumption):** the two test classes containing these tests,
+`TestCreateSignature` and `CreatePDFATest`, are excluded (`scripts/pdfbox/descartes-excluded-tests.txt`).
+PIT excludes tests by class only, so 10 passing tests of `TestCreateSignature` are excluded too (23 tests in
+total, out of 1,678). The alternative, running these tests with the system clock set back to 2020, was not
+retained. Possible effect: a few methods of the examples module may be classified differently from the
+authors' "before" report. None of the 46 effective targets of the case study is in that module.
 
 ## 13. pdfbox-app jar
 
