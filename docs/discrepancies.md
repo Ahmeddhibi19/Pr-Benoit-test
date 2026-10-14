@@ -115,7 +115,18 @@ operations. The reproduction runs the script unchanged and reports this.
 **Status: open (low priority, outside Section IV.C).** Table II gives TMCov 6,049 / 11,042 and TLCov
 34,653 / 64,787 (53.5%), while `time-coverage-version.md` gives 6,050 / 11,042 and 34,652 / 64,787 (53.4%).
 
-## 12. pdfbox-app jar
+## 12. Building PDFBox 2.0.21 today
+
+**Status: assumption (build-only adjustments).** The unmodified 2.0.21 build fails in three places.
+`scripts/pdfbox/patch-build.sh` handles them without changing library or test code:
+- The IPA fonts used by the pdfbox tests return 404 (PDFBOX-5005). The 2.0.22 URLs serve the same files (same sha512).
+- The Isartor archive used by the preflight tests returns HTTP 403 at pdfa.org, also in later PDFBox versions.
+  The Internet Archive copy has the sha512 pinned in the pom (`66bf4ad4...`).
+- `PDAcroFormTest.testFlatten*` (3 tests) write into `target/test-output` without creating it. They pass only when
+  another test created the directory before, which depends on test execution order. In the first CI run they failed
+  with `FileNotFoundException`. The directory is created before the build.
+
+## 13. pdfbox-app jar
 
 **Status: open.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from
 the one on Maven Central (9,897,381 bytes): the authors built it from a local checkout. The reproduction builds
