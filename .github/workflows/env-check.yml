@@ -1,0 +1,74 @@
+name: env-check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/env-check.yml
+      - scripts/ci/**
+      - scripts/pdfbox/**
+
+jobs:
+  pdfbox-baseline:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-liberation
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Restore Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: m2-pdfbox-2.0.21-${{ hashFiles('scripts/pdfbox/*.sh') }}
+          restore-keys: m2-pdfbox-2.0.21-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh | tee out/env-report.txt
+
+      - name: Checkout PDFBox 2.0.21
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+
+      - name: Build and run the PDFBox test suite
+        working-directory: pdfbox
+        run: |
+          set +e
+          SECONDS=0
+          mvn -B -V -e install -fae -Dmaven.test.failure.ignore=true 2>&1 | tee ../out/build.log
+          rc=${PIPESTATUS[0]}
+          echo "maven_exit_code=$rc" >> ../out/timing.txt
+          echo "build_seconds=$SECONDS" >> ../out/timing.txt
+          exit $rc
+
+      - name: Summarise tests
+        if: always()
+        run: python3 scripts/pdfbox/test_summary.py pdfbox out
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-check-${{ github.run_number }}
+          path: out/
+          retention-days: 14
+
+      - name: Check test results
+        run: python3 scripts/pdfbox/test_summary.py pdfbox out --check
