@@ -1,0 +1,16 @@
+Reactor Summary for PDFBox reactor 2.0.21:
+
+PDFBox parent ...................................... SUCCESS [  1.338 s]
+Apache FontBox ..................................... SUCCESS [  9.312 s]
+Apache XmpBox ...................................... SUCCESS [  6.062 s]
+Apache PDFBox ...................................... SUCCESS [01:07 min]
+Apache Preflight ................................... SUCCESS [ 11.126 s]
+Apache Preflight application ....................... SUCCESS [  7.562 s]
+Apache PDFBox Debugger ............................. SUCCESS [  2.777 s]
+Apache PDFBox tools ................................ SUCCESS [  8.889 s]
+Apache PDFBox application .......................... SUCCESS [  7.253 s]
+Apache PDFBox Debugger application ................. SUCCESS [  7.303 s]
+Apache PDFBox examples ............................. SUCCESS [ 11.113 s]
+PDFBox reactor ..................................... SUCCESS [  0.121 s]
+------------------------------------------------------------------------
+BUILD SUCCESS

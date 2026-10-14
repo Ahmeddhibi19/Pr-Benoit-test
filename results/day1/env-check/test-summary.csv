@@ -1,0 +1,8 @@
+module,suites,tests,failures,errors,skipped,time_s
+examples,3,24,0,13,0,6.0
+fontbox,11,27,0,0,0,0.5
+pdfbox,102,531,0,0,0,42.3
+preflight,22,281,0,0,0,3.3
+tools,4,5,0,0,0,5.3
+xmpbox,29,810,0,0,0,1.1
+TOTAL,171,1678,0,13,0,58.6

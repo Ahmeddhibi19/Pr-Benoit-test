@@ -62,6 +62,21 @@ comparison between the paper and the authors' artifacts.
 - The Maven cache was not saved when the job failed. It is now restored and saved in separate steps.
 - Decision: all generated tests will be executed; non-executed tests will never be counted as passing.
 
+### Baseline on the CI runner (run 38542374578, results in `results/day1/env-check/`)
+
+Runner image ubuntu22 20261004.315.1, 4 vCPU (AMD EPYC 7763), 15 GiB RAM, AdoptOpenJDK 11.0.8+10, 57 fonts
+(16 Liberation entries). PDFBox commit `fa8029d8` (tag 2.0.21). Build and tests: 143 s.
+
+| module | tests | errors |
+|---|---|---|
+| fontbox | 27 | 0 |
+| pdfbox | 531 | 0 |
+| xmpbox | 810 | 0 |
+| preflight | 281 | 0 |
+| tools | 5 | 0 |
+| examples | 24 | 13 (expired test keystore) |
+| total | 1,678 | 13 |
+
 ### Next (Day 2)
 
 Fix the baseline build if needed. Set up PIT 1.4.x + Descartes 1.2.x with the 21 operators and start the "before"

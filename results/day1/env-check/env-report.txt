@@ -1,0 +1,105 @@
+
+== date (UTC)
+2026-10-14T09:31:35Z
+
+== runner image
+ubuntu22 20261004.315.1
+
+== os
+Linux runnervmwvtoz 6.8.0-1064-azure #72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+NAME="Ubuntu"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+
+== cpu
+4
+model name	: AMD EPYC 7763 64-Core Processor
+
+== memory
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       607Mi        10Gi        46Mi       5.0Gi        14Gi
+Swap:          3.0Gi          0B       3.0Gi
+
+== disk
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       146G   39G  107G  27% /
+/dev/root       146G   39G  107G  27% /
+
+== java
+openjdk version "11.0.8" 2020-07-14
+OpenJDK Runtime Environment AdoptOpenJDK (build 11.0.8+10)
+OpenJDK 64-Bit Server VM AdoptOpenJDK (build 11.0.8+10, mixed mode)
+JAVA_HOME=/home/runner/work/_temp/jdk-11.0.8+10
+
+== maven
+Apache Maven 3.6.3 (cecedd343002696d0abb50b32b541b8a6ba2883f)
+Maven home: /home/runner/work/_temp/apache-maven-3.6.3
+Java version: 11.0.8, vendor: AdoptOpenJDK, runtime: /home/runner/work/_temp/jdk-11.0.8+10
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "6.8.0-1064-azure", arch: "amd64", family: "unix"
+
+== python
+Python 3.10.12
+
+== locale
+LANG=C.UTF-8
+LANGUAGE=
+LC_CTYPE="C.UTF-8"
+
+== fonts (57)
+DejaVu Math TeX Gyre|Regular|/usr/share/fonts/truetype/dejavu/DejaVuMathTeXGyre.ttf
+DejaVu Sans Mono|Bold Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSansMono-BoldOblique.ttf
+DejaVu Sans Mono|Bold|/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf
+DejaVu Sans Mono|Book|/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf
+DejaVu Sans Mono|Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Oblique.ttf
+DejaVu Sans|Bold Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf
+DejaVu Sans|Bold|/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+DejaVu Sans|Book|/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+DejaVu Sans|Condensed Bold Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-BoldOblique.ttf
+DejaVu Sans|Condensed Bold|/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf
+DejaVu Sans|Condensed Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Oblique.ttf
+DejaVu Sans|Condensed|/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed.ttf
+DejaVu Sans|ExtraLight|/usr/share/fonts/truetype/dejavu/DejaVuSans-ExtraLight.ttf
+DejaVu Sans|Oblique|/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf
+DejaVu Serif|Bold Italic|/usr/share/fonts/truetype/dejavu/DejaVuSerif-BoldItalic.ttf
+DejaVu Serif|Bold|/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf
+DejaVu Serif|Book|/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
+DejaVu Serif|Condensed Bold Italic|/usr/share/fonts/truetype/dejavu/DejaVuSerifCondensed-BoldItalic.ttf
+DejaVu Serif|Condensed Bold|/usr/share/fonts/truetype/dejavu/DejaVuSerifCondensed-Bold.ttf
+DejaVu Serif|Condensed Italic|/usr/share/fonts/truetype/dejavu/DejaVuSerifCondensed-Italic.ttf
+DejaVu Serif|Condensed|/usr/share/fonts/truetype/dejavu/DejaVuSerifCondensed.ttf
+DejaVu Serif|Italic|/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf
+Lato|Black Italic|/usr/share/fonts/truetype/lato/Lato-BlackItalic.ttf
+Lato|Black|/usr/share/fonts/truetype/lato/Lato-Black.ttf
+Lato|Bold Italic|/usr/share/fonts/truetype/lato/Lato-BoldItalic.ttf
+Lato|Bold|/usr/share/fonts/truetype/lato/Lato-Bold.ttf
+Lato|Hairline Italic|/usr/share/fonts/truetype/lato/Lato-HairlineItalic.ttf
+Lato|Hairline|/usr/share/fonts/truetype/lato/Lato-Hairline.ttf
+Lato|Heavy Italic|/usr/share/fonts/truetype/lato/Lato-HeavyItalic.ttf
+Lato|Heavy|/usr/share/fonts/truetype/lato/Lato-Heavy.ttf
+Lato|Italic|/usr/share/fonts/truetype/lato/Lato-Italic.ttf
+Lato|Light Italic|/usr/share/fonts/truetype/lato/Lato-LightItalic.ttf
+Lato|Light|/usr/share/fonts/truetype/lato/Lato-Light.ttf
+Lato|Medium Italic|/usr/share/fonts/truetype/lato/Lato-MediumItalic.ttf
+Lato|Medium|/usr/share/fonts/truetype/lato/Lato-Medium.ttf
+Lato|Regular|/usr/share/fonts/truetype/lato/Lato-Regular.ttf
+Lato|Semibold Italic|/usr/share/fonts/truetype/lato/Lato-SemiboldItalic.ttf
+Lato|Semibold|/usr/share/fonts/truetype/lato/Lato-Semibold.ttf
+Lato|Thin Italic|/usr/share/fonts/truetype/lato/Lato-ThinItalic.ttf
+Lato|Thin|/usr/share/fonts/truetype/lato/Lato-Thin.ttf
+Liberation Mono|Bold Italic|/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf
+Liberation Mono|Bold|/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf
+Liberation Mono|Italic|/usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf
+Liberation Mono|Regular|/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf
+Liberation Sans Narrow|Bold Italic|/usr/share/fonts/truetype/liberation/LiberationSansNarrow-BoldItalic.ttf
+Liberation Sans Narrow|Bold|/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf
+Liberation Sans Narrow|Italic|/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Italic.ttf
+Liberation Sans Narrow|Regular|/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Regular.ttf
+Liberation Sans|Bold Italic|/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf
+Liberation Sans|Bold|/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf
+Liberation Sans|Italic|/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf
+Liberation Sans|Regular|/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf
+Liberation Serif|Bold Italic|/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf
+Liberation Serif|Bold|/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf
+Liberation Serif|Italic|/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf
+Liberation Serif|Regular|/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf
+Noto Color Emoji|Regular|/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf
