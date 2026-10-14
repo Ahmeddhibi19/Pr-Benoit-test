@@ -117,11 +117,14 @@ operations. The reproduction runs the script unchanged and reports this.
 
 ## 12. Building PDFBox 2.0.21 today
 
-**Status: assumption (build-only adjustments).** The unmodified 2.0.21 build fails in three places.
+**Status: assumption (build-only adjustments).** The unmodified 2.0.21 build fails in four places.
 `scripts/pdfbox/patch-build.sh` handles them without changing library or test code:
 - The IPA fonts used by the pdfbox tests return 404 (PDFBOX-5005). The 2.0.22 URLs serve the same files (same sha512).
 - The Isartor archive used by the preflight tests returns HTTP 403 at pdfa.org, also in later PDFBox versions.
   The Internet Archive copy has the sha512 pinned in the pom (`66bf4ad4...`).
+- The certificate policy PDF used by the examples tests (`QV_RCA1_RCA3_CPCPS_V4_11.pdf`) cannot be fetched from
+  the CI runners ("Could not get content"), although it answers from other networks. The Internet Archive copy of
+  2020 has the pinned sha512 (`940ab0cc...`). Later PDFBox versions use a different file for this test.
 - `PDAcroFormTest.testFlatten*` (3 tests) write into `target/test-output` without creating it. They pass only when
   another test created the directory before, which depends on test execution order. In the first CI run they failed
   with `FileNotFoundException`. The directory is created before the build.

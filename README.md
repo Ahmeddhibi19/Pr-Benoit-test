@@ -61,11 +61,12 @@ bash setup/fetch-artifacts.sh /c/w
 
 ## Deviations from the original setup
 
-The PDFBox 2.0.21 test build needs three adjustments today (`scripts/pdfbox/patch-build.sh`). The library code and
+The PDFBox 2.0.21 test build needs four adjustments today (`scripts/pdfbox/patch-build.sh`). The library code and
 the tests are unchanged:
 - two IPA fonts moved to another host (PDFBOX-5005), so the URLs used from PDFBox 2.0.22 onwards are used;
-- the Isartor test suite of the preflight module is no longer served by pdfa.org, so the identical file (same
-  sha512, checked during the build) is taken from the Internet Archive;
+- two test files are no longer served to the CI runners: the Isartor suite (preflight module) and a certificate
+  policy PDF (examples module). The identical files (same sha512, checked during the build) are taken from the
+  Internet Archive;
 - `PDAcroFormTest` writes into `pdfbox/target/test-output` without creating it, so the directory is created first.
 
 All deviations and simplifying assumptions are listed in [docs/discrepancies.md](docs/discrepancies.md).

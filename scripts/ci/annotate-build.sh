@@ -21,7 +21,7 @@ if [ -f "$log" ]; then
   failed_modules=$(grep -E 'FAILURE|SKIPPED' "$out/reactor.txt" | tr -s ' ' | paste -sd ';' -)
   [ -n "$failed_modules" ] && echo "::error title=Reactor::$(echo "$failed_modules" | escape)"
   { grep -E '^\[ERROR\] Failed to execute goal' "$log"; grep -E '^\[ERROR\] ' "$log" | grep -v 'Failed to execute goal'; } \
-    | grep -vE '^\[ERROR\] *$|^\[ERROR\] -> \[Help|Re-run Maven|full stack trace|For more information|To see the full|After correcting|mvn <args>' \
+    | grep -vE '^\[ERROR\] *$|^\[ERROR\] (-> )?\[Help [0-9]+\]|Re-run Maven|full stack trace|For more information|To see the full|After correcting|mvn <args>' \
     | awk '!seen[$0]++' | head -8 | while IFS= read -r line; do
       echo "::error title=Maven::$(echo "${line#\[ERROR\] }" | cut -c1-400 | escape)"
     done
