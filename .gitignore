@@ -1,0 +1,10 @@
+target/
+.venv/
+__pycache__/
+*.pyc
+*.zip
+*.tar.gz
+work/
+.work/
+out/
+pankti-object-data/
