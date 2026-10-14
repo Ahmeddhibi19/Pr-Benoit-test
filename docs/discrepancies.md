@@ -129,6 +129,11 @@ operations. The reproduction runs the script unchanged and reports this.
   another test created the directory before, which depends on test execution order. In the first CI run they failed
   with `FileNotFoundException`. The directory is created before the build.
 
+With these adjustments the build runs 1,678 tests (the authors report 1,675 for the original suite). 13 tests of
+the examples module error with `CertificateExpiredException`: the keystore used by the signature tests expired
+on 2026-06-05. These tests do not touch the 46 target methods. **Status: open** for the Descartes runs, which
+need a green suite (clock set back, or documented exclusion).
+
 ## 13. pdfbox-app jar
 
 **Status: open.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from

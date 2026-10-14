@@ -63,8 +63,25 @@ def main(argv):
         print("FAILED", " | ".join(str(x) for x in row))
 
     if "--check" in argv:
-        return 1 if total["tests"] == 0 or total["failures"] or total["errors"] else 0
+        known = load_known(Path(__file__).with_name("known-failures.txt"))
+        unexpected = [row for row in failing if (row[0], row[4]) not in known]
+        expected = len(failing) - len(unexpected)
+        print(f"known failures: {expected}, unexpected: {len(unexpected)}")
+        for row in unexpected:
+            print("UNEXPECTED", " | ".join(str(x) for x in row))
+        return 1 if total["tests"] == 0 or unexpected else 0
     return 0
+
+
+def load_known(path):
+    """Lines 'module | exception type | reason': failures with a documented cause outside the code under study."""
+    known = set()
+    if path.exists():
+        for line in path.read_text().splitlines():
+            if line.strip() and not line.startswith("#"):
+                module, exception = [p.strip() for p in line.split("|")[:2]]
+                known.add((module, exception))
+    return known
 
 
 if __name__ == "__main__":

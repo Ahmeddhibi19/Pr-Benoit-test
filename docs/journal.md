@@ -44,9 +44,21 @@ comparison between the paper and the authors' artifacts.
 
 ### Problems and decisions
 
-- First `env-check` run: the build step failed after about 2 minutes (before the test suite ran). The job log
-  needs authentication even for a public repository, so the workflow now publishes the Maven errors, the
-  reactor summary and the test summary as annotations, which are readable without logging in.
+- Getting the PDFBox 2.0.21 test suite to run on the CI runner took four iterations:
+  1. Run 1: build step failed after about 2 minutes. The job log needs authentication even for a public
+     repository, so the workflow now publishes the Maven errors, the reactor summary and the test summary as
+     annotations, which can be read without logging in.
+  2. Run 2: 3 errors in `PDAcroFormTest` (writes into a directory it never creates; passes only when another test
+     ran first) and the preflight module failed to download the Isartor suite (HTTP 403 at pdfa.org).
+  3. Run 3: everything up to preflight passed (1,654 tests, 0 failures); the examples module failed to download a
+     certificate policy PDF.
+  4. Run 4: full build, **1,678 tests** (the authors report 1,675), 0 failures, 13 errors, all in the examples
+     module and all `CertificateExpiredException`: the test keystore shipped with PDFBox 2.0.21 expired on
+     2026-06-05. This is a time bomb in the test data, unrelated to the methods studied (fontbox and pdfbox).
+  The download fixes reuse byte-identical files (the build checks their sha512). The expired certificate is
+  listed in `scripts/pdfbox/known-failures.txt`, so env-check only fails on unexpected failures. For Descartes
+  (Day 2), the examples suite needs to be green; the plan is to run it with the clock set back (libfaketime),
+  or to exclude these 13 tests and document it.
 - The Maven cache was not saved when the job failed. It is now restored and saved in separate steps.
 - Decision: all generated tests will be executed; non-executed tests will never be counted as passing.
 

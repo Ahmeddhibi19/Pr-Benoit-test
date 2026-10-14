@@ -1,0 +1,3 @@
+# module | exception type | reason
+# Failures accepted by the env-check workflow. Each one has a cause outside the code under study.
+examples | java.security.cert.CertificateExpiredException | the test keystore shipped with PDFBox 2.0.21 expired on 2026-06-05 (signature tests)
