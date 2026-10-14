@@ -1,16 +1,32 @@
 #!/usr/bin/env bash
-# Build-only fix for PDFBOX-5005: the IPA fonts used by the test suite moved.
-# Same files and checksums, new host (the URLs used from PDFBox 2.0.22 on).
+# Build-only adjustments so that the PDFBox 2.0.21 test suite runs today. No library or test code is changed.
+#  1. PDFBOX-5005: the IPA fonts used by the tests moved (same files and sha512, the URLs used from 2.0.22 on).
+#  2. The Isartor test suite of the preflight module is no longer served by pdfa.org (HTTP 403). The same file
+#     is taken from the Internet Archive; the download plugin still checks the sha512 given in the pom.
+#  3. PDAcroFormTest writes into pdfbox/target/test-output but never creates it; it only passes when another
+#     test created the directory before. The directory is created up front.
 set -euo pipefail
 
-pom="${1:-pdfbox}/pdfbox/pom.xml"
-old="https://ipafont.ipa.go.jp/IPAfont/"
-new="https://moji.or.jp/wp-content/ipafont/IPAfont/"
+root="${1:-pdfbox}"
 
-n=$(grep -cF "$old" "$pom" || true)
-if [ "$n" -ne 2 ]; then
-  echo "expected 2 IPA font URLs in $pom, found $n" >&2
-  exit 1
-fi
-sed -i "s#${old}#${new}#g" "$pom"
-grep -nF "$new" "$pom"
+replace() {
+  local file=$1 old=$2 new=$3 expected=$4
+  local n
+  n=$(grep -cF "$old" "$file" || true)
+  if [ "$n" -ne "$expected" ]; then
+    echo "expected $expected occurrence(s) of $old in $file, found $n" >&2
+    exit 1
+  fi
+  sed -i "s#${old}#${new}#g" "$file"
+  grep -nF "$new" "$file"
+}
+
+replace "$root/pdfbox/pom.xml" \
+  "https://ipafont.ipa.go.jp/IPAfont/" \
+  "https://moji.or.jp/wp-content/ipafont/IPAfont/" 2
+
+replace "$root/preflight/pom.xml" \
+  "https://www.pdfa.org/wp-content/until2016_uploads/2011/08/isartor-pdfa-2008-08-13.zip" \
+  "https://web.archive.org/web/2020id_/https://www.pdfa.org/wp-content/until2016_uploads/2011/08/isartor-pdfa-2008-08-13.zip" 1
+
+mkdir -p "$root/pdfbox/target/test-output"
