@@ -1,0 +1,35 @@
+OK   number of methods = 46 (expected 46, rows 30-75)
+OK   sum of invocations = 121,175 (printed total 121,175)
+OK   sum of collected = 57,563 (printed total 57,563)
+OK   sum of unique = 13,851 (printed total 13,851)
+OK   sum of tests = 13,851 (printed total 13,851)
+OK   sum of passing = 13,614 (printed total 13,614)
+OK   sum of failing = 237 (printed total 237)
+OK   well-tested = 28 (printed 28)
+OK   pseudo-tested = 18 (printed 18)
+OK   passing + failing = tests in every row 
+OK   tests = unique in every row 
+OK   rows with collected < invocations (200 MB threshold hit) = 19 (text says 19): [31, 33, 34, 35, 36, 37, 38, 42, 45, 46, 47, 48, 49, 50, 51, 53, 55, 56, 58]
+OK   methods with a single test = 7 (text says 7): [30, 68, 69, 70, 71, 74, 75]
+OK   max tests = 11730 for GlyfSimpleDescript_getFlags (text says 11,730)
+
+Ratios recomputed from the counts:
+  collected / invocations = 47.50% (printed 47.5%)
+  unique / collected      = 24.06% (printed 24%)
+  passing / tests         = 98.29% (printed 98.2% in Table III, 98.3% in the text)
+  well-tested / methods   = 60.87% (printed 60.9%)
+
+Still pseudo-tested although at least one generated test passes: 12 PDFBox methods
+  (Section V.B counts 15 such methods over the three projects)
+  row 37 DefaultResourceCache_getFont (passing 5/29)
+  row 44 FontCache_getFont (passing 83/106)
+  row 45 DefaultResourceCache_getColorSpace (passing 4/23)
+  row 46 DefaultResourceCache_getXObject (passing 13/15)
+  row 48 PDImageXObject_getMask (passing 13/13)
+  row 50 DefaultResourceCache_getExtGState (passing 4/22)
+  row 53 COSParser_getEncryption (passing 13/33)
+  row 55 PDImageXObject_getColorKeyMask (passing 7/7)
+  row 56 PDImageXObject_getDecode (passing 7/7)
+  row 58 PDImageXObject_getOptionalContent (passing 7/7)
+  row 66 PDExtendedGraphicsState_getSoftMask (passing 4/4)
+  row 72 PDDocumentCatalog_getViewerPreferences (passing 6/8)
