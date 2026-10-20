@@ -1,0 +1,99 @@
+name: production-run
+
+# PANKTI on PDFBox 2.0.21: build the instrumentation plugin for the frozen target list (results/targets.csv),
+# install it into Glowroot 0.13.6, build pdfbox-app from the sources, then (later modes) run the workload.
+# See docs/instrumentation.md.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: dry-run (build and agent check only, no workload)
+        type: choice
+        options: [dry-run]
+        default: dry-run
+      pankti_commit:
+        description: PANKTI commit
+        default: 0fddf273a8a6acbaba51a318fcc7fc6e5b84058f
+
+jobs:
+  production-run:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    env:
+      GLOWROOT_DIR: ${{ github.workspace }}/glowroot-install
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-liberation
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Install Python packages
+        run: python3 -m pip install --quiet pandas==1.5.3 numpy==1.26.4
+
+      - name: Restore Maven repository
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-production-${{ github.run_id }}
+          restore-keys: |
+            m2-production-
+            m2-pdfbox-2.0.21-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh > out/env-report.txt
+          sha256sum results/targets.csv | tee out/targets.sha256
+
+      - name: Build the PANKTI plugin for the frozen targets
+        run: |
+          git clone --quiet https://github.com/ASSERT-KTH/pankti.git pankti
+          git -C pankti checkout --quiet "${{ inputs.pankti_commit }}"
+          PYTHON=python3 bash scripts/pankti/build-plugin.sh pankti results/targets.csv out/plugin
+
+      - name: Install Glowroot with the plugin
+        run: bash scripts/glowroot/install-glowroot.sh "$GLOWROOT_DIR" out/plugin/pankti-plugin.jar
+
+      - name: Build pdfbox-app 2.0.21
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+          bash scripts/pdfbox/build-app.sh pdfbox out/app
+
+      - name: Agent check
+        run: bash scripts/glowroot/check-agent.sh "$GLOWROOT_DIR/glowroot" out/app/pdfbox-app-2.0.21.jar out/agent
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### production-run (${{ inputs.mode }})"; echo; echo '```'
+            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt 2>/dev/null
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save Maven repository
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-production-${{ github.run_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-run-${{ inputs.mode }}-${{ github.run_number }}
+          path: out/
+          retention-days: 5
