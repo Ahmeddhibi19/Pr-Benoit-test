@@ -1,0 +1,4 @@
+targets: 138, generated aspects: 138, listed: 138, classes in jar: 138
+OK   one aspect per target
+OK   aspects listed in glowroot.plugin.json
+OK   aspect classes in the jar

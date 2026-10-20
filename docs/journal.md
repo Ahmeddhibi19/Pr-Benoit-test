@@ -160,3 +160,55 @@ All 46 effective targets of Table III are pseudo-tested in the reproduction's "b
 Freeze `results/targets.csv` from `results/day2/instrumentation-candidates-pdfbox.csv`. Then start the production
 run as a dry run: download Glowroot 0.13.6, build pankti-instrument at `0fddf27`, generate the aspects with
 `instrument.py`, build the plugin jar, and install it into Glowroot on CI.
+
+## Day 3 - 2026-10-20: frozen targets and instrumentation dry run
+
+**Goal of the day (plan):** freeze the target list and check that the instrumentation builds and installs on CI,
+without running the workload yet. Plan tasks 3.1 and 3.2 (download and compare the Descartes reports, own #TARGET)
+were already done on Day 2.
+
+### Done
+
+- `results/targets.csv`: the 138 targets from the authors' "before" reports (assumption A8), frozen with its sha256.
+- `scripts/pankti/build-plugin.sh`: runs the authors' `instrument.py` on a copy of PANKTI `0fddf27` and builds the
+  Glowroot plugin. It checks that there is one aspect per target and that all aspects are listed and packaged, and it
+  writes the aspect -> target mapping.
+- `scripts/glowroot/install-glowroot.sh` (Glowroot 0.13.6, sha256 pinned) and `check-agent.sh`. The check starts
+  pdfbox-app under the agent without a command. It verifies that Glowroot starts without warnings and registers the
+  plugin, and that no profile is written. It was tested both ways: it passes with the plugin and fails without it.
+- `scripts/pdfbox/build-app.sh` and `analysis/compare_jars.py`.
+- Workflow `production-run`, mode `dry-run`: run 39431056888 is green, outputs in `results/day3/`.
+- Documentation:
+  - new `docs/instrumentation.md`: what PANKTI records, the build, the dry-run results and the known limitations;
+  - new `docs/experiments.md`: experiment log E1-E8;
+  - assumptions A12 and A13 added;
+  - discrepancy 13 explained;
+  - README updated.
+
+### Results
+
+- Plugin: 138 / 138 aspects. Glowroot 0.13.6 starts on Java 11.0.8 (Linux) with the plugin, without warnings.
+- pdfbox-app built from tag 2.0.21 on the runner has the same content as the jar the authors ran: the same 5,786
+  entries, all 5,644 class files identical, and only 3 build-metadata entries differ (build date 2020-09-21 on their
+  side). The authors therefore ran plain PDFBox 2.0.21 (open question T11).
+
+### Problems and decisions
+
+- The first dry run (39428845392) failed: `install-glowroot.sh` changed directory before copying the plugin given
+  with a relative path, and the local test had used an absolute one. The fix was checked by replaying all remaining
+  steps locally with the workflow's relative paths before re-running.
+- A pdfbox-app build on Windows differs from the authors' jar in 118 text resources (line endings of the Windows
+  checkout). Builds and runs that produce measurements stay on Linux.
+- Two builds of the jar from the same sources differ by a few bytes (timestamps), so jars are compared entry by
+  entry, never by file checksum.
+- The checksum of `results/targets.csv` must be computed on the committed (LF) content. It was first computed on a
+  Windows working copy with CRLF line endings and corrected before the push.
+
+### Next (Day 4)
+
+Add the `smoke` and `full` modes to `production-run`:
+- smoke: one PDF and one command; `isFill` profiles must appear in `/tmp/pankti-object-data`, the XML must parse, and
+  the count file must increase across JVM launches;
+- full: the authors' `run.sh` with a cold font cache, then `analysis/profile_stats.py` on the profiles, the
+  receiving/params/returned fragment counts (pairing check), and a comparison of the console log with the authors'
+  `execution.log`.

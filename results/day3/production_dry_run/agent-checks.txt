@@ -1,0 +1,5 @@
+OK   Glowroot 0.13.6 started
+OK   no WARN or ERROR in the Glowroot log
+OK   plugin panktiplugin registered in config.json
+OK   pdfbox-app ran under the agent
+OK   no object profile written (no target invoked)

@@ -1,0 +1,8 @@
+A: pdfbox-app-2.0.21.jar, 9,890,413 bytes, 5786 entries
+B: pdfbox-app-2.0.21.jar, 9,890,400 bytes, 5786 entries
+only in A: 0, only in B: 0
+identical entries: 5783 / 5786 (class files: 5644 / 5644)
+different entries:
+  META-INF/MANIFEST.MF
+  META-INF/NOTICE
+  META-INF/maven/org.apache.pdfbox/pdfbox-app/pom.properties

@@ -18,6 +18,8 @@ filled in once it is known. Related observations (differences between the paper 
 | A9 | [Building pankti-extract today](#a9-building-pankti-extract-today) | validated |
 | A10 | [Meaning of "well-tested"](#a10-meaning-of-well-tested) | validated on the authors' data |
 | A11 | [What #PASSING counts](#a11-what-passing-counts) | decided |
+| A12 | [The pdfbox-app jar](#a12-the-pdfbox-app-jar) | validated (identical content) |
+| A13 | [Glowroot configuration](#a13-glowroot-configuration) | in use |
 
 ## A1. Build-only adjustments of PDFBox 2.0.21
 
@@ -109,7 +111,7 @@ filled in once it is known. Related observations (differences between the paper 
 |---|---|
 | Original requirement | Targets = pseudo-tested methods found by Descartes, filtered by PANKTI. |
 | Problem | Time: the schedule required starting the instrumentation before the reproduction's own Descartes run could be fully analysed. |
-| Simplification | The target list instrumented on Day 3 is the one computed from the authors' "before" reports (`results/day2/instrumentation-candidates-pdfbox.csv`). The reproduction's own Descartes run is compared with it method by method. |
+| Simplification | The target list instrumented from Day 3 on is the one computed from the authors' "before" reports, frozen as `results/targets.csv` (copy of `results/day2/instrumentation-candidates-pdfbox.csv`, sha256 in `results/targets.sha256`). The reproduction's own Descartes run is compared with it method by method. |
 | Justification | The reproduction's own run gives 138 targets as well, 137 of them in common with the authors' list, and all 46 effective targets (`results/day2/targets_own_reports.txt`). |
 | Expected impact | One target differs in each direction (`PDFontDescriptor.getFontFile` is instrumented, `PDAnnotation.isNoRotate` is not); neither is an effective target in the paper. |
 | Validation | `analysis/compare_descartes_runs.py` and `analysis/count_targets.py` on both sets of reports. Whether `isNoRotate` is invoked by the workload will be checked on Day 4. |
@@ -150,3 +152,27 @@ filled in once it is known. Related observations (differences between the paper 
 | Expected impact | #PASSING may be lower than in the paper if some getFlags tests fail. |
 | Validation | Day 6 (test execution). |
 | Reporting | Results; discussion of the difference. |
+
+## A12. The pdfbox-app jar
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Run the workload on `pdfbox-app-2.0.21.jar`, as the authors' `run.sh` does. |
+| Problem | The authors' jar (9,890,400 bytes, in the experiments repository) is not the one published on Maven Central (9,897,381 bytes): they built it from a local checkout. |
+| Simplification | Build the jar from tag 2.0.21 with the same JDK (`scripts/pdfbox/build-app.sh`). |
+| Justification | Running a jar built from the documented sources is reproducible; the authors' jar is used only for comparison. |
+| Expected impact | None if the contents are the same. |
+| Validation | Built on the Linux runner (run 39431056888), the jar has the same 5,786 entries as the authors' jar; all 5,644 class files are byte-identical and only 3 build-metadata entries differ (`results/day3/app_jar_vs_authors.txt`). A Windows build also differs in 118 text resources because of line endings. |
+| Reporting | Experimental setup. |
+
+## A13. Glowroot configuration
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Run the workload with the PANKTI plugin inside Glowroot (paper, Section II.G). |
+| Problem | No Glowroot configuration file is published; only the version (0.13.6) is known from the authors' execution log. |
+| Simplification | Glowroot 0.13.6 with its default configuration; the plugin jar is the only addition. |
+| Justification | Nothing indicates a custom configuration; PANKTI's code does not depend on Glowroot settings (it writes its own files). |
+| Expected impact | Glowroot's own data (traces, UI) may differ; the files written by PANKTI should not. |
+| Validation | Agent check: Glowroot starts without warnings and registers the plugin (`scripts/glowroot/check-agent.sh`); profiles are checked from Day 4. |
+| Reporting | Experimental setup. |

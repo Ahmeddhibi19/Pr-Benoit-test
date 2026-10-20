@@ -1,0 +1,4 @@
+file=pdfbox-app-2.0.21.jar
+bytes=9890413
+sha256=889bebed18f537b9bc8cbc741a75ccc359af6e13f08265362ad8480c85a54fa9
+pdfbox_commit=fa8029d80e39ff4febd1ce0d6ecc628bf2970ca0

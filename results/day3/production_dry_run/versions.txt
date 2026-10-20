@@ -1,0 +1,2 @@
+pankti 0fddf273a8a6acbaba51a318fcc7fc6e5b84058f
+0c7204900deb0447ea2a2d0193157b87c26b3ad14dfc8d8e9638f01fce9ac8ef  pankti-plugin.jar

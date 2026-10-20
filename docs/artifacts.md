@@ -85,7 +85,8 @@ before extraction, and only `pdfbox/` is extracted, without the raw `-receiving/
 
 | Tool | Version | Use |
 |---|---|---|
-| Glowroot | 0.13.6 (`glowroot-0.13.6-dist.zip`) | agent hosting the PANKTI instrumentation plugin (plugin API 0.13.6) |
+| Glowroot | 0.13.6 (`glowroot-0.13.6-dist.zip`, 18,566,598 bytes, sha256 `f1e76f3a...4a968`, computed on the first download: the release publishes no checksum) | agent hosting the PANKTI instrumentation plugin (plugin API 0.13.6), `scripts/glowroot/install-glowroot.sh` |
+| pankti-instrument | built from `ASSERT-KTH/pankti` at `0fddf27` with the authors' `instrument.py` (`scripts/pankti/build-plugin.sh`) | Glowroot plugin, one aspect per target |
 | PIT + Descartes | pitest-maven 1.4.10 + `eu.stamp-project:descartes` 1.2.6 (Maven Central) | pseudo-tested methods, 21 mutation operators as in the authors' reports ([descartes.md](descartes.md)) |
 | pankti-extract | built from `ASSERT-KTH/pankti` at `0fddf27` (`scripts/pankti/extract-targets.sh`) | candidate target methods; Spoon 8.0.0 |
 | JaCoCo | 0.8.5 | coverage (optional, Table II) |

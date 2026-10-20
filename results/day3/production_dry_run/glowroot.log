@@ -1,0 +1,5 @@
+2026-10-20 13:34:44.514 INFO  org.glowroot - Glowroot version: 0.13.6, built 2020-03-01 01:25:31 +0000
+2026-10-20 13:34:44.515 INFO  org.glowroot - Java version: 11.0.8 (AdoptOpenJDK / Linux)
+2026-10-20 13:34:44.515 INFO  org.glowroot - Java args: -javaagent:/home/runner/work/Pr-Benoit-test/Pr-Benoit-test/glowroot-install/glowroot/glowroot.jar
+2026-10-20 13:34:45.728 INFO  org.glowroot - creating glowroot schema...
+2026-10-20 13:34:45.866 INFO  org.glowroot - glowroot schema created

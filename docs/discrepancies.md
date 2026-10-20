@@ -168,9 +168,12 @@ authors' "before" report. None of the 46 effective targets of the case study is 
 
 ## 13. pdfbox-app jar
 
-**Status: open.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from
+**Status: explained.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from
 the one on Maven Central (9,897,381 bytes): the authors built it from a local checkout. The reproduction builds
-the jar from the `2.0.21` tag.
+the jar from the `2.0.21` tag on the Linux runner (`scripts/pdfbox/build-app.sh`, 9,890,413 bytes). Entry by entry
+(`analysis/compare_jars.py`, `results/day3/app_jar_vs_authors.txt`) the two jars are identical: same 5,786 entries,
+all 5,644 class files byte-identical, and only `MANIFEST.MF`, the copyright year in `NOTICE` and the build date in
+`pom.properties` differ. The authors' jar is plain PDFBox 2.0.21, built on 2020-09-21 with JDK 11.0.8.
 
 ## 14. Descartes "before" run of the reproduction vs the authors' reports
 
