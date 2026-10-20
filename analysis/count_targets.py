@@ -19,9 +19,18 @@ from descartes import find_reports, load_method_list, load_report
 PAPER_TARGET, PAPER_EFF_TARGET, README_INSTRUMENTED = 138, 46, 129
 
 
+MODULES = ["examples", "fontbox", "pdfbox", "preflight", "tools", "xmpbox"]
+
+
 def module_of(report_path):
-    """.../before/<module>/target/pit-reports/<date>/methods.json -> <module>"""
-    return Path(report_path).parents[3].name
+    """The PDFBox module of a report, from its path: the authors' layout
+    (.../before/<module>/target/pit-reports/<date>/methods.json), the CI artifacts (.../descartes-before-<module>/)
+    or results/ (<module>.methods.json.gz)."""
+    for part in reversed(Path(report_path).parts):
+        for m in MODULES:
+            if part == m or part.endswith("-" + m) or part.startswith(m + ".methods.json"):
+                return m
+    return ""
 
 
 def main(argv):

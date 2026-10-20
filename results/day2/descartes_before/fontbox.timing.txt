@@ -1,0 +1,7 @@
+install_seconds=10
+descartes_seconds=43
+descartes_exit_code=0
+module=fontbox
+target_classes=org.apache.fontbox.*
+threads=4
+report_dir=202610201042

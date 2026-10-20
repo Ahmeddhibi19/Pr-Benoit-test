@@ -1,0 +1,34 @@
+reproduction: 6 report(s), 6373 methods, mutators per report: [21]
+authors: 6 report(s), 6373 methods, mutators per report: [21]
+
+classification    reproduction   authors
+tested                  2397      2439
+partially-tested         161       164
+pseudo-tested            613       644
+not-covered             3202      3126
+absent                     0         0
+
+same classification: 6276 / 6373 methods (98.48%)
+pseudo-tested: 603 in both, 10 only in reproduction, 41 only in authors; Jaccard index 0.9220
+
+differences (A -> B: count):
+  not-covered -> tested: 42
+  not-covered -> pseudo-tested: 37
+  pseudo-tested -> tested: 5
+  pseudo-tested -> not-covered: 4
+  tested -> pseudo-tested: 3
+  not-covered -> partially-tested: 2
+  tested -> partially-tested: 1
+  partially-tested -> pseudo-tested: 1
+  tested -> not-covered: 1
+  pseudo-tested -> partially-tested: 1
+
+mutant statuses:
+  reproduction: NO_COVERAGE 4296, KILLED 3361, SURVIVED 949, TIMED_OUT 73
+  authors: NO_COVERAGE 4206, KILLED 3414, SURVIVED 990, TIMED_OUT 69
+  6 methods have more detected mutants in reproduction than in authors; those extra mutants are KILLED 9, TIMED_OUT 1
+    killing test classes: TestTextStripper 6, ControlCharacterTest 2, MultilineFieldsTest 1
+  50 methods have more detected mutants in authors than in reproduction; those extra mutants are KILLED 59
+    killing test classes: TestCreateSignature 53, PDAcroFormFlattenTest 3, TestSymmetricKeyEncryption 2, TestTextStripper 1
+
+Table III effective targets pseudo-tested: reproduction 46 / 46, authors 46 / 46

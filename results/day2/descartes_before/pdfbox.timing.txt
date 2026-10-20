@@ -1,0 +1,7 @@
+install_seconds=31
+descartes_seconds=4100
+descartes_exit_code=0
+module=pdfbox
+target_classes=org.apache.pdfbox.*
+threads=1
+report_dir=202610201138

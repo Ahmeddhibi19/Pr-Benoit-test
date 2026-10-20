@@ -8,6 +8,7 @@ used by the authors' `find-pseudo-tested.py`. Matching on the name alone merges 
 (`PDSimpleFont.toUnicode(int)` is pseudo-tested, `toUnicode(int, GlyphList)` is tested).
 """
 import csv
+import gzip
 import json
 import re
 from pathlib import Path
@@ -26,10 +27,16 @@ def method_key(method):
     return fqn, method["name"], param_descriptor(method["description"])
 
 
+def _read_json(path):
+    """methods.json, or methods.json.gz as stored under results/."""
+    opener = gzip.open if str(path).endswith(".gz") else open
+    with opener(path, "rt", encoding="utf-8-sig") as f:
+        return json.load(f)
+
+
 def load_report(path):
     """methods.json -> {key: method entry}."""
-    with open(path, encoding="utf-8-sig") as f:
-        data = json.load(f)
+    data = _read_json(path)
     methods = {}
     for m in data["methods"]:
         key = method_key(m)
@@ -51,13 +58,13 @@ def load_reports(paths):
 
 
 def find_reports(root):
-    """All methods.json files below root, sorted."""
-    return sorted(Path(root).glob("**/methods.json"))
+    """All reports below root, sorted: methods.json (Descartes output) or <module>.methods.json.gz (results/)."""
+    root = Path(root)
+    return sorted(list(root.glob("**/methods.json")) + list(root.glob("**/*methods.json.gz")))
 
 
 def mutators(path):
-    with open(path, encoding="utf-8-sig") as f:
-        return json.load(f).get("analysis", {}).get("mutators", [])
+    return _read_json(path).get("analysis", {}).get("mutators", [])
 
 
 def well_tested(classification):

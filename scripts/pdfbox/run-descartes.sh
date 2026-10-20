@@ -8,7 +8,7 @@ set -euo pipefail
 root=$1
 module=$2
 out=$3
-threads="${4:-4}"
+threads="${4:-1}"
 
 # PIT defaults targetClasses to "<groupId>*", i.e. org.apache.pdfbox*, which would select no class in fontbox and
 # xmpbox (their packages are org.apache.fontbox and org.apache.xmpbox). The authors' reports contain exactly these

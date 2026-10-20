@@ -1,0 +1,29 @@
+pdfbox-4-threads: 1 report(s), 4438 methods, mutators per report: [21]
+authors: 1 report(s), 4438 methods, mutators per report: [21]
+
+classification    pdfbox-4-threads   authors
+tested                  1799      1580
+partially-tested          40        98
+pseudo-tested            301       458
+not-covered             2298      2302
+absent                     0         0
+
+same classification: 4202 / 4438 methods (94.68%)
+pseudo-tested: 294 in both, 7 only in pdfbox-4-threads, 164 only in authors; Jaccard index 0.6323
+
+differences (A -> B: count):
+  tested -> pseudo-tested: 157
+  tested -> partially-tested: 64
+  partially-tested -> pseudo-tested: 6
+  pseudo-tested -> not-covered: 4
+  pseudo-tested -> tested: 3
+  not-covered -> pseudo-tested: 1
+  tested -> not-covered: 1
+
+mutant statuses:
+  pdfbox-4-threads: NO_COVERAGE 3129, KILLED 2192, SURVIVED 413, TIMED_OUT 310
+  authors: NO_COVERAGE 3135, KILLED 2163, SURVIVED 684, TIMED_OUT 62
+  230 methods have more detected mutants in pdfbox-4-threads than in authors; those extra mutants are TIMED_OUT 215, KILLED 65
+    killing test classes: PDAcroFormFlattenTest 38, TestTextStripper 11, TestSymmetricKeyEncryption 7, pdfwriter 5, ControlCharacterTest 2, PDFontTest 1
+  3 methods have more detected mutants in authors than in pdfbox-4-threads; those extra mutants are KILLED 3
+    killing test classes: TestSymmetricKeyEncryption 2, TestTextStripper 1

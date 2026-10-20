@@ -9,8 +9,8 @@ on:
         description: JSON list of modules
         default: '["examples", "fontbox", "pdfbox", "preflight", "tools", "xmpbox"]'
       threads:
-        description: PIT threads
-        default: '4'
+        description: PIT threads (1 for pdfbox, see docs/descartes.md)
+        default: '1'
 
 jobs:
   descartes:

@@ -1,0 +1,7 @@
+install_seconds=8
+descartes_seconds=54
+descartes_exit_code=0
+module=xmpbox
+target_classes=org.apache.xmpbox.*
+threads=4
+report_dir=202610201042

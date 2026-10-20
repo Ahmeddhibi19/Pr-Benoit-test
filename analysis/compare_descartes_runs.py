@@ -85,6 +85,31 @@ def main(argv):
         if s != t:
             lines.append(f"  {s} -> {t}: {n}")
 
+    # Why do classifications differ? PIT counts a mutant as detected when a test fails (KILLED) but also when the
+    # run times out (TIMED_OUT) or crashes (MEMORY_ERROR, RUN_ERROR).
+    lines += ["", "mutant statuses:"]
+    for label, methods in ((labels[0], a), (labels[1], b)):
+        st = Counter(x["status"] for m in methods.values() for x in m.get("mutations", []))
+        lines.append(f"  {label}: " + ", ".join(f"{s} {n}" for s, n in st.most_common()))
+    for first, second, la, lb in ((a, b, labels[0], labels[1]), (b, a, labels[1], labels[0])):
+        more = [k for k in keys if k in first and k in second
+                and len(first[k].get("detected", [])) > len(second[k].get("detected", []))]
+        if not more:
+            continue
+        how = Counter()
+        killers = Counter()
+        for k in more:
+            for x in first[k].get("mutations", []):
+                if x["mutator"] in first[k].get("detected", []) and x["mutator"] not in second[k].get("detected", []):
+                    how[x["status"]] += 1
+                    for t in x.get("killing-tests", []):
+                        killers[t.split("(")[0].rsplit(".", 1)[0]] += 1
+        lines.append(f"  {len(more)} methods have more detected mutants in {la} than in {lb}; those extra mutants are "
+                     + ", ".join(f"{s} {n}" for s, n in how.most_common()))
+        if killers:
+            lines.append("    killing test classes: "
+                         + ", ".join(f"{t.rsplit('.', 1)[-1]} {n}" for t, n in killers.most_common(6)))
+
     if table3:
         with open(HERE / "paper" / "table3_pdfbox.csv", newline="") as f:
             paper = [r["class_method"] for r in csv.DictReader(f)]

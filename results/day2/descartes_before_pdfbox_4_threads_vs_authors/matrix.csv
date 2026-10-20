@@ -1,0 +1,6 @@
+pdfbox-4-threads \ authors,tested,partially-tested,pseudo-tested,not-covered,absent
+tested,1577,64,157,1,0
+partially-tested,0,34,6,0,0
+pseudo-tested,3,0,294,4,0
+not-covered,0,0,1,2297,0
+absent,0,0,0,0,0

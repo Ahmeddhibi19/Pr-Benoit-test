@@ -5,7 +5,8 @@
 #   - the 21 extreme-mutation operators listed in every report of the authors (Descartes 1.2.x default set)
 #   - METHODS output (methods.json, the file the authors published) and JSON output (mutations.json)
 # Test classes listed in descartes-excluded-tests.txt are excluded (PIT needs a green suite, see that file).
-# targetClasses is set per module by run-descartes.sh; threads come from -Ddescartes.threads (default 4).
+# targetClasses is set per module by run-descartes.sh; threads come from -Ddescartes.threads (default 1: with more
+# threads, PDFBox tests that share files and download test data make PIT report spurious kills and timeouts).
 # Usage: add-descartes-profile.sh <pdfbox_dir>
 set -euo pipefail
 
@@ -42,7 +43,7 @@ profile=$(cat <<EOF
         <profile>
             <id>descartes</id>
             <properties>
-                <descartes.threads>4</descartes.threads>
+                <descartes.threads>1</descartes.threads>
             </properties>
             <build>
                 <plugins>
