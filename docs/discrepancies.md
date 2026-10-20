@@ -208,3 +208,35 @@ worker JVMs share the module directory and the network. With 1 thread the result
 paper does not mention this setting. A reproduction that uses the machine's cores, as is usual for PIT, finds 91
 targets instead of 138, and only 21 of the 46 effective targets of Table III among them. Details:
 [descartes.md](descartes.md).
+
+## 17. Nesting depth 36
+
+**Status: open.** The paper reports a maximum nesting level of 36 without defining it. The authors' own profiles have
+a maximum XML element depth of 73 (`COSParser.getEncryption`, receiving object); other plausible definitions give 72
+or 51. The paper's other figure (toUnicode nested 13 levels, Section II.D.3) matches the XML depth minus one. The
+reproduction reports the XML depth for both data sets (assumption A16).
+
+## 18. Profile pairing in the authors' data (open question T8)
+
+**Status: explained.** In every method of the authors' data, the receiving, params and returned files hold the same
+number of fragments (`results/day4/authors_profile_metrics.txt`), so the pairing problem possible in PANKTI
+`0fddf27` (item 9) did not affect the paper's PDFBox numbers.
+
+## 19. Outcome of the authors' workload
+
+**Status: explained.** `analysis/workload_log.py` on the authors' `execution.log`: 39 of the 50 commands succeed.
+All 9 errors concern `000809.pdf`: `Encrypt` fails ("Document is already encrypted"), so the 7 commands that read
+`000809-locked.pdf` or its outputs fail, and `OverlayPDF` fails on the encrypted original. The 2 usage messages are
+`PDFMerger` on `000809` and `000810` (fewer than two files to merge).
+
+## 20. Workload metrics of the reproduction vs Table III
+
+**Status: probable cause identified (installed fonts), not verified.** Run 39444526027 (`results/day4/table3_comparison.*`): the 46 effective targets
+of Table III are all invoked, `RenderingMode.isFill` matches exactly (30,944 invocations, 1 unique profile of 158 B),
+and 41 / 40 / 38 of the 46 rows have the paper's #INVOCATIONS / #COLLECTED / #UNIQUE. The differing rows are font
+methods (`NamingTable.getName`, `PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`,
+`FontCache.getFont`) and two methods whose collected profiles depend on what was stored before the 200 MB threshold
+(`DefaultResourceCache.getColorSpace`, `COSParser.getEncryption`). One more target, `TrueTypeFont.getOS2Windows`, is
+invoked here and not in the authors' run. PDFBox substitutes and caches system fonts when a PDF uses a font it does
+not embed, so these counts depend on the fonts installed: the runner has 57 font files (`env-report.txt`), the
+authors' machine is unknown. Verifying this would need a run with another font set (a sensitivity run, dropped for time). Totals differ by 1.0% (invocations), 1.9% (collected) and 6.0% (unique).

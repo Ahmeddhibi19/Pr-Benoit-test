@@ -16,6 +16,9 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E6](#e6-descartes-before-pdfbox-1-thread) | 2026-10-20 | Is the pdfbox difference caused by parallelism? | yes: with 1 thread pdfbox matches |
 | [E7](#e7-target-extraction) | 2026-10-20 | Does the authors' pipeline give #TARGET = 138? | yes, with both sets of reports |
 | [E8](#e8-production-run-dry-run) | 2026-10-20 | Do the plugin, Glowroot and pdfbox-app build and start together on CI? | yes (second run); app jar identical to the authors' |
+| [E9](#e9-profile-metrics-on-the-authors-data) | 2026-10-20 | Do the metric scripts reproduce Table III from the authors' raw profiles? | yes for all 46 methods; depth 36 not reproduced |
+| [E10](#e10-smoke-test-of-the-instrumentation) | 2026-10-20 | Does the instrumentation record profiles on CI? | yes; isFill as in the paper; counts cumulative |
+| [E11](#e11-full-workload) | 2026-10-20 | Columns 1-3 of Table III with our own run | 46/46 effective targets, isFill exact, totals within 1-6%; differences on font methods |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -101,3 +104,38 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Result | 138 / 138 aspects; Glowroot starts without warnings and registers `panktiplugin`; no profile written. pdfbox-app built on the runner: all 5,644 class files and all other entries identical to the authors' jar except 3 build-metadata files. (`results/day3/`) |
 | Failures | Run 39428845392: `install-glowroot.sh` lost the relative plugin path after `cd` (the local test had used an absolute path). Fixed and replayed locally with relative paths before re-running. |
 | Interpretation | The instrumentation is ready for the workload (Day 4). The authors ran plain PDFBox 2.0.21 (open question T11 answered). Whether the aspects actually capture profiles is only visible once a target runs (Day 4 smoke test). |
+
+## E9. Profile metrics on the authors' data
+
+| | |
+|---|---|
+| Objective | Validate the metric script before applying it to the reproduction's profiles. |
+| Data | Zenodo record 4298605, `pdfbox/pankti-collected-object-profiles/`: 231 files, 5.9 GB of XML. |
+| Method | `analysis/profile_stats.py --fragments` (pankti-generate's pairing and uniqueness rule, maximum element depth). |
+| Reference | Table III and the text of Section IV.C. |
+| Result | #INVOCATIONS, #COLLECTED and #UNIQUE equal to Table III for all 46 methods (121,175 / 57,563 / 13,851). No method has different numbers of receiving, params and returned fragments. Maximum XML element depth: 73 (`COSParser.getEncryption`). 167 s on the laptop. (`results/day4/authors_profile_metrics.*`) |
+| Failures | First run crashed: for an empty element (`<null/>`) expat reports the position after the tag, not a closing tag. Fixed, with unit tests. |
+| Interpretation | The uniqueness rule is validated. The pairing problem possible in PANKTI `0fddf27` (a call that throws leaves a receiving object without a returned value) did not occur in the authors' run. The paper's depth of 36 has an undocumented definition (A16). |
+
+## E10. Smoke test of the instrumentation
+
+| | |
+|---|---|
+| Objective | Plan task 4.1: does the plugin record profiles, does the XML parse, is the count cumulative over JVM launches? |
+| Method | `production-run` mode `smoke`, run 39442198598: `PDFToImage` on `000752.pdf`, twice, each in a new JVM, cold font cache. |
+| Expected | isFill files present; count after the second launch = 2 x first; isFill profiles of 158 bytes, 1 unique (paper). |
+| Result | All checks pass. isFill: 4,349 then 8,698 invocations, every profile 158 bytes, 1 unique. 27 targets invoked, 3.4 GB of profiles, 11 methods already at the 200 MB threshold, no fragment mismatch, maximum depth 39. 237 s. (`results/day4/smoke/`) |
+| Interpretation | The instrumentation works as described in the paper; counts accumulate across JVM launches (T7). The threshold is reached very quickly. |
+
+## E11. Full workload
+
+| | |
+|---|---|
+| Objective | Plan tasks 4.2-4.5: run the authors' workload under PANKTI and compare columns #INVOCATIONS, #COLLECTED, #UNIQUE of Table III. |
+| Method | `production-run` mode `full`, run 39444526027: the authors' `run.sh` (only its two jar paths replaced, `run-sh.diff`), 50 JVM launches, cold font cache, frozen 138 targets. Metrics: `profile_stats.py --fragments`, `compare_table3.py`, `workload_log.py`. |
+| Environment | `ubuntu-22.04` runner (image 20261012), 57 fonts installed (DejaVu, Lato, Liberation, Noto Color Emoji; list in `env-report.txt`). |
+| Reference | Table III rows 30-75 and Section IV.C; the authors' `execution.log`. |
+| Result | Workload: 50 / 50 commands with the same outcome as the authors' (39 ok, 9 errors on `000809.pdf`, 2 PDFMerger usage messages); 687 s (the authors' log spans about 16 min). Profiles: 47 methods invoked, all 46 of Table III plus `TrueTypeFont.getOS2Windows` (342 invocations). Totals: 122,384 invocations (paper 121,175), 58,672 collected (57,563), 14,679 unique (13,851); collected/invocations 47.9% (47.5%), unique/collected 25.0% (24.0%). 19 methods hit the threshold (19). Smallest profile 158 B, largest 54.7 MiB, 5.30 GiB in total (paper 5.5 GB). Maximum XML depth 73, the same as the authors' data. **isFill: 30,944 / 30,944 / 1 unique, 158 B each: exact match.** Per method, 41 of 46 invocation counts, 40 collected counts and 38 unique counts are identical to Table III. (`results/day4/full/`, `results/day4/table3_comparison.*`) |
+| Differences | `NamingTable.getName` (650 -> 1,457 invocations, 273 -> 976 unique), `PDFontDescriptor.getFlags` (227 -> 257), `isSerif`/`isItalic`/`isFixedPitch` (21 -> 31), `FontCache.getFont` (106 -> 103 unique), `DefaultResourceCache.getColorSpace` (25 -> 29 collected), `COSParser.getEncryption` (33 -> 35 unique), and the extra `TrueTypeFont.getOS2Windows`. |
+| Interpretation | The workload behaves exactly as the authors' did. All non-font methods match and the font methods do not, which points to the fonts installed on the machine (PDFBox matches and caches system fonts); the authors' font set is unknown (risk R3, assumption A5). This cause is probable, not verified. |
+

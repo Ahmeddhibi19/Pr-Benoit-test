@@ -212,3 +212,55 @@ Add the `smoke` and `full` modes to `production-run`:
 - full: the authors' `run.sh` with a cold font cache, then `analysis/profile_stats.py` on the profiles, the
   receiving/params/returned fragment counts (pairing check), and a comparison of the console log with the authors'
   `execution.log`.
+
+## Day 4 - 2026-10-20: the workload under PANKTI, Table III columns 1-3
+
+**Goal of the day (plan):** run the authors' workload with the instrumentation and measure #INVOCATIONS,
+#COLLECTED, #UNIQUE, the threshold, the sizes and the depth, then compare them with Table III.
+
+### Done
+
+- `analysis/profile_stats.py --fragments`: #UNIQUE with pankti-generate's rule, fragment counts per file and the
+  maximum element depth. It was validated first on the authors' 5.9 GB of raw profiles: Table III's #INVOCATIONS,
+  #COLLECTED and #UNIQUE are reproduced for all 46 methods.
+- `scripts/pankti/get-workload.sh` and `run-workload.sh`, and the `production-run` modes `smoke` and `full`.
+- `analysis/workload_log.py` (per-command outcome) and `analysis/compare_table3.py`.
+- `tests/test_analysis.py`: the first unit tests (8), covering the parsing and counting rules.
+- Runs: smoke 39442198598 and full 39444526027, both green.
+- Documentation: E9-E11 in `docs/experiments.md`, A14-A16 in `docs/assumptions.md`, discrepancy items 17-20, a
+  workload section in `docs/instrumentation.md`, the README, and the research report started in `report/rapport.md`.
+
+### Results
+
+- **Smoke run:** `isFill` is recorded (158-byte profiles, 1 unique), and its count goes from 4,349 to 8,698 over
+  two JVM launches, so the count is cumulative.
+- **Full run:**
+  - all 50 commands have the same outcome as in the authors' log;
+  - all 46 effective targets are invoked, plus `TrueTypeFont.getOS2Windows`;
+  - 122,384 / 58,672 / 14,679 invocations / collected / unique (paper: 121,175 / 57,563 / 13,851);
+  - 19 methods hit the threshold, sizes range from 158 B to 54.7 MiB;
+  - isFill is an exact match;
+  - 41 / 40 / 38 of the 46 rows are identical, and the differing rows are font methods.
+- **Authors' data:** no pairing mismatch (open question T8). The maximum XML depth is 73 in both data sets, while
+  the paper's 36 is undefined.
+
+### Problems and decisions
+
+- The first run of the fragment parser crashed. For an empty element, expat reports the position after the tag.
+  Fixed, with unit tests.
+- Twice, Python edit scripts passed inline through the shell were rejected by the shell's quoting. The edits were
+  then made with files instead.
+- A local test of `get-workload.sh` that disabled Git Bash path conversion for the whole script made git clone into
+  a stray folder. The conversion is now disabled only for the sparse-checkout command, which is also what the
+  setup script does.
+- The paper's nesting depth of 36 could not be reproduced with any definition tried (assumption A16).
+- The differences on font methods are most likely caused by the fonts installed. Checking this would need a run
+  with another font set, which is a sensitivity run dropped for time.
+
+### Next (Day 5)
+
+- Figure 5 from the reproduction's sizes, next to the authors' data.
+- pankti-generate on the reproduction's profiles (archived for 3 days, and also kept locally), checking that the
+  number of generated tests equals #UNIQUE.
+- Prepare the integration of the generated tests into fontbox and pdfbox (XStream test dependency, compiler level 9,
+  animal-sniffer).

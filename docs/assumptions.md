@@ -20,6 +20,9 @@ filled in once it is known. Related observations (differences between the paper 
 | A11 | [What #PASSING counts](#a11-what-passing-counts) | decided |
 | A12 | [The pdfbox-app jar](#a12-the-pdfbox-app-jar) | validated (identical content) |
 | A13 | [Glowroot configuration](#a13-glowroot-configuration) | in use |
+| A14 | [The workload script](#a14-the-workload-script) | in use |
+| A15 | [How #UNIQUE is computed](#a15-how-unique-is-computed) | validated on the authors' data |
+| A16 | [Nesting depth](#a16-nesting-depth) | open (the paper's value is not reproduced) |
 
 ## A1. Build-only adjustments of PDFBox 2.0.21
 
@@ -176,3 +179,39 @@ filled in once it is known. Related observations (differences between the paper 
 | Expected impact | Glowroot's own data (traces, UI) may differ; the files written by PANKTI should not. |
 | Validation | Agent check: Glowroot starts without warnings and registers the plugin (`scripts/glowroot/check-agent.sh`); profiles are checked from Day 4. |
 | Reporting | Experimental setup. |
+
+## A14. The workload script
+
+| Item | Explanation |
+|---|---|
+| Original requirement | The PDFBox workload: 10 command-line features on 5 GovDocs1 PDFs (paper, Section III.B), exactly as in the authors' `run.sh`. |
+| Problem | `run.sh` hard-codes two paths of the authors' machine (`/home/user/glowroot/glowroot.jar`, `/home/user/dev/pdfbox/app/target/pdfbox-app-2.0.21.jar`). |
+| Simplification | `scripts/pankti/run-workload.sh` copies `run.sh` and replaces only these two lines; the diff is saved with the results (`run-sh.diff`). Commands, order, inputs and the failing file `000809.pdf` are unchanged. Before the run the profile directory is emptied and `~/.pdfbox.cache` is deleted (cold font cache). |
+| Justification | Fidelity to the authors' execution, including its failures. |
+| Expected impact | None on the commands. The font cache state of the authors' run is unknown (cold is assumed). |
+| Validation | Per-command outcomes compared with the authors' `execution.log` (`analysis/workload_log.py`). |
+| Reporting | Experimental protocol. |
+
+## A15. How #UNIQUE is computed
+
+| Item | Explanation |
+|---|---|
+| Original requirement | #UNIQUE: the number of unique object profiles, i.e. the number of tests pankti-generate creates. |
+| Problem | Running pankti-generate is the next step (Day 5); the metric is needed when the profiles are collected, and pankti-generate's parser loads whole files in memory. |
+| Simplification | `analysis/profile_stats.py --fragments` applies pankti-generate's rule (`ObjectXMLParser`, commit `0fddf27`): top-level XML fragments of the receiving, params and returned files, paired by position, and the number of distinct triples (params only for methods with parameters). Fragments are compared on their exact text; pankti-generate compares them after a deterministic re-serialisation. |
+| Justification | Equal texts give equal re-serialisations; XStream writes a given object the same way every time. |
+| Expected impact | None found. |
+| Validation | On the authors' raw data (5.9 GB), the script gives the #UNIQUE of Table III for all 46 methods (13,851 in total), as well as #INVOCATIONS and #COLLECTED (`results/day4/authors_profile_metrics.*`). Unit tests in `tests/test_analysis.py`. The number of tests pankti-generate actually produces is compared on Day 5. |
+| Reporting | Methodology. |
+
+## A16. Nesting depth
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Paper, Section IV.C: "the maximum level of nesting we observe in a collected object profile is 36". |
+| Problem | The measure is not defined. On the authors' raw data the maximum depth of XML elements in a profile is 73 (`COSParser.getEncryption`, receiving object); ignoring XStream's `entry` elements gives 72, counting typed elements only gives 51. None gives 36. The paper's other figure, "toUnicode ... nested 13 levels deep" (Section II.D.3), matches the XML depth minus one (14 - 1). |
+| Simplification | Report the maximum XML element depth of a fragment (its root element has depth 1), computed the same way on the authors' data and on this reproduction's. |
+| Justification | A defined measure applied identically to both data sets allows a like-for-like comparison. |
+| Expected impact | The absolute value is not comparable with the paper's 36. |
+| Validation | Not possible without the authors' definition. |
+| Reporting | Results (as an unreproduced number) and limitations. |

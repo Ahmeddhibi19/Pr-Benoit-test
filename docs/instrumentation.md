@@ -91,3 +91,26 @@ to run the workload on Linux only.
 The first dry run (39428845392) failed in the Glowroot installation step: the script resolved the plugin path after
 changing directory. Fixed in `install-glowroot.sh` and checked by replaying the remaining steps with the workflow's
 relative paths.
+
+## Workload
+
+`production-run` mode `full` fetches the authors' workload (`scripts/pankti/get-workload.sh`: `run.sh`, the six PDFs
+with their sha256, the authors' `execution.log`, from `pankti-experiments` at `7bc7791`) and runs it with
+`scripts/pankti/run-workload.sh`: empty profile directory, deleted font cache, `run.sh` with only its two jar paths
+replaced (assumption A14), 50 JVM launches. The job then computes the metrics (`analysis/profile_stats.py
+--fragments`), compares each command's outcome with the authors' log (`analysis/workload_log.py`), uploads the
+summaries and archives the raw profiles (about 5.7 GB, 326 MB compressed, kept 3 days) for test generation.
+Mode `smoke` runs `PDFToImage` on one PDF twice and checks that isFill is recorded and that counts accumulate.
+
+Results (run 39444526027, `results/day4/full/`): see [experiments.md](experiments.md) (E11) and
+[discrepancies.md](discrepancies.md) (item 20). Summary against Table III:
+
+| | Paper | Reproduction |
+|---|---|---|
+| Commands with the same outcome as the authors' log | | 50 / 50 (39 ok, 9 errors on `000809.pdf`, 2 usage) |
+| #EFF_TARGET | 46 | 47 (the 46 + `TrueTypeFont.getOS2Windows`) |
+| #INVOCATIONS / #COLLECTED / #UNIQUE | 121,175 / 57,563 / 13,851 | 122,384 / 58,672 / 14,679 |
+| Methods hitting the 200 MB threshold | 19 | 19 |
+| Smallest / largest profile, total | 158 B / about 55 MB / 5.5 GB | 158 B / 54.7 MiB / 5.30 GiB |
+| isFill | 30,944 / 30,944 / 1, 158 B | identical |
+| Rows identical to Table III (INV / COLL / UNIQ) | | 41 / 40 / 38 of 46; the others are font methods |
