@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.font.PDCIDFontType2.getPath_int: 6

@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.font.PDTrueTypeFont.getPath_int: 782

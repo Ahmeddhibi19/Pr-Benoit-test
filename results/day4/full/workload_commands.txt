@@ -1,0 +1,14 @@
+commands: 50 (ok 39, error 9, usage 2)
+reference: 50 (ok 39, error 9, usage 2)
+same outcome: 50 / 50
+  Encrypt         000809.pdf    error  Error: Document is already encrypted.                         | reference: error Error: Document is already encrypted.
+  Decrypt         000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  ExtractText     000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  ExtractImages   000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  PDFToImage      000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  TextToPDF       000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  PDFSplit        000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  PDFMerger       000809.pdf    usage  Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles   | reference: usage Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <i
+  WriteDecodedDoc 000809.pdf    error  Exception in thread "main" java.io.FileNotFoundException: ./  | reference: error Exception in thread "main" java.io.FileNotFoundExc
+  OverlayPDF      000809.pdf    error  Exception in thread "main" java.lang.IllegalStateException:   | reference: error Exception in thread "main" java.lang.IllegalStateE
+  PDFMerger       000810.pdf    usage  Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles   | reference: usage Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <i

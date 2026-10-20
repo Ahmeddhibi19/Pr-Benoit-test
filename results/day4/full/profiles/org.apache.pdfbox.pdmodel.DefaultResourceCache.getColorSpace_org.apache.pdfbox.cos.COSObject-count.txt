@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.DefaultResourceCache.getColorSpace_org.apache.pdfbox.cos.COSObject: 72

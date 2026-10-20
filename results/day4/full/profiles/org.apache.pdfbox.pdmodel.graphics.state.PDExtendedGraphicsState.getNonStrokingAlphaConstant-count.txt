@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getNonStrokingAlphaConstant: 12

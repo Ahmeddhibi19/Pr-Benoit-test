@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.rendering.TTFGlyph2D.getPathForCharacterCode_int: 15472

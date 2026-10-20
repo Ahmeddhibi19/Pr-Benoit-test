@@ -1,0 +1,1 @@
+Invocation count for org.apache.fontbox.ttf.HorizontalMetricsTable.getLeftSideBearing_int: 431

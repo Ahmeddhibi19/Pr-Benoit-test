@@ -1,0 +1,10 @@
+== before
+2026-10-20T14:49:28Z
+/dev/root       146G   39G  107G  27% /
+== after
+2026-10-20T14:53:25Z
+/dev/root       146G   42G  104G  29% /
+workload_seconds=237
+jvm_launches=2
+profile_dir_bytes=3392615073
+profile_files=136

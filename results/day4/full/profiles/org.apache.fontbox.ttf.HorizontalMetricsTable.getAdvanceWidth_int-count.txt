@@ -1,0 +1,1 @@
+Invocation count for org.apache.fontbox.ttf.HorizontalMetricsTable.getAdvanceWidth_int: 275

@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo.getOrdering: 12

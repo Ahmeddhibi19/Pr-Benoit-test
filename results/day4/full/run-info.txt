@@ -1,0 +1,11 @@
+== before
+2026-10-20T15:05:34Z
+/dev/root       146G   39G  107G  27% /
+run.sh exit code: 0
+== after
+2026-10-20T15:17:01Z
+/dev/root       146G   45G  102G  31% /
+workload_seconds=687
+jvm_launches=50
+profile_dir_bytes=5694347251
+profile_files=236

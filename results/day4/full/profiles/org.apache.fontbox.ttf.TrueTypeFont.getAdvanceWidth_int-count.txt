@@ -1,0 +1,1 @@
+Invocation count for org.apache.fontbox.ttf.TrueTypeFont.getAdvanceWidth_int: 275

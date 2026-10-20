@@ -1,0 +1,1 @@
+Invocation count for org.apache.fontbox.ttf.TTFDataStream.readUnsignedByteArray_int: 431

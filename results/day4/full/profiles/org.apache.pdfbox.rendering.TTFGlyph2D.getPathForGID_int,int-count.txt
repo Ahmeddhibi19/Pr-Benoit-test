@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.rendering.TTFGlyph2D.getPathForGID_int,int: 15472

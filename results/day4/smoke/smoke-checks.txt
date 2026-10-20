@@ -1,0 +1,4 @@
+OK   invoked-methods.csv written
+OK   isFill receiving and returned profiles written
+OK   isFill count cumulative over 2 JVM launches (4349 then 8698)
+OK   profiles parsed (profile_stats.py --fragments)

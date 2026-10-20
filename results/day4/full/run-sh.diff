@@ -1,0 +1,6 @@
+6,7c6,7
+< glowroot_jar_loc="/home/user/glowroot/glowroot.jar"
+< pdfbox_jar_loc="/home/user/dev/pdfbox/app/target/pdfbox-app-2.0.21.jar"
+---
+> glowroot_jar_loc="/home/runner/work/Pr-Benoit-test/Pr-Benoit-test/glowroot-install/glowroot/glowroot.jar"
+> pdfbox_jar_loc="/home/runner/work/Pr-Benoit-test/Pr-Benoit-test/out/app/pdfbox-app-2.0.21.jar"

@@ -1,0 +1,1 @@
+Invocation count for org.apache.fontbox.ttf.NamingTable.getName_int,int,int,int: 1457

@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getDecode: 39

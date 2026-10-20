@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdfparser.XrefTrailerResolver.getXrefType: 46

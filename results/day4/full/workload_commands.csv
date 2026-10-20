@@ -1,0 +1,51 @@
+command,file,status,message,reference_status,reference_message,same
+Encrypt,000752.pdf,ok,,ok,,True
+Decrypt,000752.pdf,ok,,ok,,True
+ExtractText,000752.pdf,ok,,ok,,True
+ExtractImages,000752.pdf,ok,,ok,,True
+PDFToImage,000752.pdf,ok,,ok,,True
+TextToPDF,000752.pdf,ok,,ok,,True
+PDFSplit,000752.pdf,ok,,ok,,True
+PDFMerger,000752.pdf,ok,,ok,,True
+WriteDecodedDoc,000752.pdf,ok,,ok,,True
+OverlayPDF,000752.pdf,ok,,ok,,True
+Encrypt,000753.pdf,ok,,ok,,True
+Decrypt,000753.pdf,ok,,ok,,True
+ExtractText,000753.pdf,ok,,ok,,True
+ExtractImages,000753.pdf,ok,,ok,,True
+PDFToImage,000753.pdf,ok,,ok,,True
+TextToPDF,000753.pdf,ok,,ok,,True
+PDFSplit,000753.pdf,ok,,ok,,True
+PDFMerger,000753.pdf,ok,,ok,,True
+WriteDecodedDoc,000753.pdf,ok,,ok,,True
+OverlayPDF,000753.pdf,ok,,ok,,True
+Encrypt,000809.pdf,error,Error: Document is already encrypted.,error,Error: Document is already encrypted.,True
+Decrypt,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+ExtractText,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+ExtractImages,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+PDFToImage,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+TextToPDF,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-from-pdf.txt (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-from-pdf.txt (No such file or directory)",True
+PDFSplit,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+PDFMerger,000809.pdf,usage,Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles 2..n> <outputfile>,usage,Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles 2..n> <outputfile>,True
+WriteDecodedDoc,000809.pdf,error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",error,"Exception in thread ""main"" java.io.FileNotFoundException: ./workload/000809-locked.pdf (No such file or directory)",True
+OverlayPDF,000809.pdf,error,"Exception in thread ""main"" java.lang.IllegalStateException: PDF contains an encryption dictionary, please remove it with",error,"Exception in thread ""main"" java.lang.IllegalStateException: PDF contains an encryption dictionary, please remove it with",True
+Encrypt,000810.pdf,ok,,ok,,True
+Decrypt,000810.pdf,ok,,ok,,True
+ExtractText,000810.pdf,ok,,ok,,True
+ExtractImages,000810.pdf,ok,,ok,,True
+PDFToImage,000810.pdf,ok,,ok,,True
+TextToPDF,000810.pdf,ok,,ok,,True
+PDFSplit,000810.pdf,ok,,ok,,True
+PDFMerger,000810.pdf,usage,Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles 2..n> <outputfile>,usage,Usage: java -jar pdfbox-app-x.y.z.jar PDFMerger <inputfiles 2..n> <outputfile>,True
+WriteDecodedDoc,000810.pdf,ok,,ok,,True
+OverlayPDF,000810.pdf,ok,,ok,,True
+Encrypt,000817.pdf,ok,,ok,,True
+Decrypt,000817.pdf,ok,,ok,,True
+ExtractText,000817.pdf,ok,,ok,,True
+ExtractImages,000817.pdf,ok,,ok,,True
+PDFToImage,000817.pdf,ok,,ok,,True
+TextToPDF,000817.pdf,ok,,ok,,True
+PDFSplit,000817.pdf,ok,,ok,,True
+PDFMerger,000817.pdf,ok,,ok,,True
+WriteDecodedDoc,000817.pdf,ok,,ok,,True
+OverlayPDF,000817.pdf,ok,,ok,,True

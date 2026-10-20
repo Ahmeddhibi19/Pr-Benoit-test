@@ -1,0 +1,1 @@
+Invocation count for org.apache.pdfbox.pdmodel.DefaultResourceCache.getFont_org.apache.pdfbox.cos.COSObject: 546

@@ -1,0 +1,12 @@
+methods with a count file : 47 (paper: 46)
+#INVOCATIONS total        : 122,384 (paper: 121,175)
+#COLLECTED total          : 58,672 (paper: 57,563)
+smallest profile          : 158 bytes (paper: 158 bytes)
+largest profile           : 57,385,628 bytes = 57.4 MB = 54.7 MiB (paper: nearly 55 MB)
+XML files on disk         : 5,694,027,799 bytes = 5.69 GB = 5.30 GiB (paper: 5.5 GB)
+collected < invocations   : 19 methods (paper: 19 hit the 200 MB threshold)
+  of which with an XML file >= 200 MiB: 19
+profile sizes per 10 MiB bin (Figure 5): [0-10) 58563, [10-20) 75, [20-30) 3, [30-40) 23, [40-50) 5, >= 50: 3
+#UNIQUE total (pankti-generate rule): 14,679 (paper: 13,851)
+maximum element depth in a fragment: 73 (paper: 36)
+methods whose receiving/params/returned files hold different numbers of fragments: 0
