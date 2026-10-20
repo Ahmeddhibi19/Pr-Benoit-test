@@ -1,0 +1,9 @@
+methods kept by pankti-extract          : 3,587
+#TARGET (extracted and pseudo-tested)   : 138 (paper: 138; README of the experiments: 129 instrumented)
+  per module: fontbox 8, pdfbox 117, preflight 1, xmpbox 12
+effective targets among them           : 46 / 46 (paper #EFF_TARGET: 46)
+
+Variants (to discuss the definition of #TARGET):
+  pseudo-tested methods in the reports, before any filter: 644 (examples 39, fontbox 61, pdfbox 458, preflight 63, tools 5, xmpbox 18)
+  of which removed by the pankti-extract filter: 506 (void, static, private, deprecated, ...)
+  extracted methods that are not covered by any test: 1089 (later PANKTI versions also target these)
