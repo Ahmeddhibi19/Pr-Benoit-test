@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: dry-run (build and agent check only, no workload)
+        description: dry-run (build and agent check), smoke (one PDF, one command, twice), full (the authors' run.sh)
         type: choice
-        options: [dry-run]
+        options: [dry-run, smoke, full]
         default: dry-run
       pankti_commit:
         description: PANKTI commit
@@ -74,12 +74,38 @@ jobs:
       - name: Agent check
         run: bash scripts/glowroot/check-agent.sh "$GLOWROOT_DIR/glowroot" out/app/pdfbox-app-2.0.21.jar out/agent
 
+      - name: Fetch the workload
+        if: inputs.mode != 'dry-run'
+        run: bash scripts/pankti/get-workload.sh workload
+
+      - name: Run the workload
+        if: inputs.mode != 'dry-run'
+        run: >-
+          bash scripts/pankti/run-workload.sh ${{ inputs.mode }} "$GLOWROOT_DIR/glowroot/glowroot.jar"
+          out/app/pdfbox-app-2.0.21.jar workload out/workload
+
+      - name: Archive the object profiles
+        if: always() && inputs.mode == 'full'
+        run: |
+          mkdir -p profiles-archive
+          tar -C /tmp -cf - pankti-object-data | zstd -q -T0 -10 -o profiles-archive/pankti-object-data.tar.zst
+          ls -l profiles-archive | tee out/workload/profiles-archive.txt
+
+      - name: Upload the object profiles
+        if: always() && inputs.mode == 'full'
+        uses: actions/upload-artifact@v7
+        with:
+          name: object-profiles-${{ github.run_number }}
+          path: profiles-archive/
+          retention-days: 3
+          compression-level: 0
+
       - name: Summarise
         if: always()
         run: |
           {
             echo "### production-run (${{ inputs.mode }})"; echo; echo '```'
-            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt 2>/dev/null || true
+            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt out/workload/smoke-checks.txt                 out/workload/run-info.txt out/workload/profile_stats.txt out/workload/workload_commands.txt 2>/dev/null || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
