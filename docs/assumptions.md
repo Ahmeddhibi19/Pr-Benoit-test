@@ -1,0 +1,152 @@
+# Simplifying assumptions and deviations
+
+Each entry states what the paper (or the authors' artifacts) requires, what prevented doing exactly that, what was
+done instead, and how the choice is checked. Entries are added when a decision is taken; the outcome of the check is
+filled in once it is known. Related observations (differences between the paper and the authors' artifacts) are in
+[discrepancies.md](discrepancies.md).
+
+| # | Topic | Status |
+|---|---|---|
+| A1 | [Build-only adjustments of PDFBox 2.0.21](#a1-build-only-adjustments-of-pdfbox-2021) | validated |
+| A2 | [Test classes excluded from the Descartes runs](#a2-test-classes-excluded-from-the-descartes-runs) | validated, effect measured |
+| A3 | [PIT and Descartes versions, operators and threads](#a3-pit-and-descartes-versions-and-operators) | validated |
+| A4 | [Classes analysed per module](#a4-classes-analysed-per-module) | validated |
+| A5 | [Execution environment](#a5-execution-environment) | partly validated |
+| A6 | [PANKTI version](#a6-pankti-version) | in use |
+| A7 | [Replication data version](#a7-replication-data-version) | validated |
+| A8 | [Source of the frozen target list](#a8-source-of-the-frozen-target-list) | decided, checked |
+| A9 | [Building pankti-extract today](#a9-building-pankti-extract-today) | validated |
+| A10 | [Meaning of "well-tested"](#a10-meaning-of-well-tested) | validated on the authors' data |
+| A11 | [What #PASSING counts](#a11-what-passing-counts) | decided |
+
+## A1. Build-only adjustments of PDFBox 2.0.21
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Build PDFBox 2.0.21 and run its test suite (1,675 tests according to the authors). |
+| Problem | Six years later the unmodified build fails: two IPA font URLs return 404 (PDFBOX-5005), the Isartor archive returns HTTP 403, a certificate-policy PDF is not served to CI runners, and `PDAcroFormTest` depends on test execution order (it writes into a directory it does not create). |
+| Simplification | `scripts/pdfbox/patch-build.sh`: the same files from other locations (sha512 checked by the build), and the missing directory created before the build. No library or test code is changed. |
+| Justification | The downloaded files are byte-identical to the originals; creating an output directory does not change any test's logic. |
+| Expected impact | None on the code under study. |
+| Validation | CI run 38542374578: 1,678 tests, 0 failures, 13 errors that are all explained by A2. The same patched build passes locally (fontbox and pdfbox modules, 558 tests). |
+| Reporting | Report section on the experimental setup; observation on build decay in the reflections. |
+
+## A2. Test classes excluded from the Descartes runs
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Run Descartes on the original test suite (PIT requires a green suite). |
+| Problem | The keystore shipped with the PDFBox 2.0.21 tests expired on 2026-06-05: 13 tests of the `examples` module fail with `CertificateExpiredException`. |
+| Simplification | Exclude the two test classes that contain them, `TestCreateSignature` and `CreatePDFATest` (`scripts/pdfbox/descartes-excluded-tests.txt`). PIT excludes whole classes, so 10 passing tests go too (23 of 1,678 tests). |
+| Justification | The excluded tests only exercise the `examples` module. None of the 138 targets and none of the 46 effective targets is in that module (`results/day2/targets_authors_reports.txt`). Setting the clock back to 2020 was the alternative; it would affect every test that reads the date. |
+| Expected impact | Methods of `examples` lose their coverage. No effect on fontbox, pdfbox, xmpbox, preflight and tools. |
+| Validation | Measured in the "before" run: `examples` has 3 pseudo-tested methods instead of 39 and 308 not-covered instead of 228 (the module has only 24 tests, 23 of them excluded). fontbox, xmpbox, preflight and tools are identical to the authors' reports method by method, pdfbox differs on 17 of 4,438 methods for unrelated reasons (see [descartes.md](descartes.md)). |
+| Reporting | Limitations; #TARGET is unaffected because pankti-extract keeps no method of `examples` that is pseudo-tested in the authors' reports. |
+
+## A3. PIT and Descartes versions and operators
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Find pseudo-tested methods with Descartes. The paper gives no version or configuration. |
+| Problem | The versions are not documented anywhere. |
+| Simplification | pitest-maven 1.4.10 with Descartes 1.2.6, the 21 mutation operators listed in every methods.json of the authors, PIT's default timeouts and a single analysis thread (PIT's default). |
+| Justification | The authors' reports are dated 2020-09-21. Descartes 1.2.6 (October 2019) was the latest release at that date (1.3 is from December 2020) and is built against PIT 1.4.10. The operator list is read from the reports. One thread: with 4 threads, pdfbox tests that share files under `target/test-output` and download test data during the test produce spurious kills and timeouts (see [descartes.md](descartes.md)); the authors' pdfbox run time (83 min) is consistent with one thread. |
+| Expected impact | Small classification differences from non-deterministic tests. |
+| Validation | fontbox, xmpbox, preflight, tools: the authors' classification for every method. pdfbox with 1 thread: 4,421 of 4,438 methods identical, 64 timeouts (authors: 62); with 4 threads only 4,202, 310 timeouts, and 25 of the 40 pdfbox targets wrongly "tested". All 46 effective targets are pseudo-tested in the 1-thread run. |
+| Reporting | Experimental setup. |
+
+## A4. Classes analysed per module
+
+| Item | Explanation |
+|---|---|
+| Original requirement | One Descartes run per module, as in the authors' artifacts. |
+| Problem | PIT's default `targetClasses` is `<groupId>*` = `org.apache.pdfbox*`, which selects no class in `fontbox` (`org.apache.fontbox`) and `xmpbox` (`org.apache.xmpbox`). |
+| Simplification | `targetClasses` is set per module in `scripts/pdfbox/run-descartes.sh`. |
+| Justification | The authors' reports contain exactly these packages per module. |
+| Expected impact | None. |
+| Validation | Same number of methods per module as the authors' reports (fontbox 550, xmpbox 550, preflight 398, tools 126, examples 311; pdfbox in [descartes.md](descartes.md)). |
+| Reporting | Experimental setup. |
+
+## A5. Execution environment
+
+| Item | Explanation |
+|---|---|
+| Original requirement | The paper gives none. The authors' execution log shows Linux with AdoptOpenJDK 11.0.8 and Glowroot 0.13.6. |
+| Problem | The authors' machine (fonts, font cache, CPU) is unknown. Several targets are font methods whose invocation counts depend on the installed fonts. |
+| Simplification | All measured runs use a GitHub-hosted `ubuntu-22.04` runner with AdoptOpenJDK 11.0.8+10, Maven 3.6.3 and `fonts-liberation` (the font of the paper's Figure 2). Every run records the runner image, CPU, memory and font list. A Windows laptop is used for development and smoke tests only. |
+| Justification | Closest available match to the authors' setup that can be re-run by anyone. |
+| Expected impact | Font-dependent counts of the workload may differ from the paper (checked from Day 4 on). |
+| Validation | Descartes: Linux results are identical to the authors' reports, while a local Windows run of fontbox differs on 4 methods, all of them OS-specific font-directory finders (`WindowsFontDirFinder` vs `UnixFontDirFinder`). This confirms that the OS matters and that Linux is the right choice. |
+| Reporting | Experimental setup; threats to validity. |
+
+## A6. PANKTI version
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Use PANKTI as in the paper. The paper names no commit. |
+| Problem | PANKTI evolved after the PDFBox run (void methods, profile writing, mocks). |
+| Simplification | Commit `0fddf27` (2020-10-26), the last commit before the authors' PDFBox run of 2020-11-03. `326a753` (2021-03-14, last commit before paper v4) is kept as a fallback. |
+| Justification | Date of the authors' `execution.log`. |
+| Expected impact | Reproduces the behaviour of the tool at the time, including its known limits (profile pairing, discrepancies.md §9). |
+| Validation | pankti-extract at this commit, applied to the authors' reports, gives exactly the paper's #TARGET = 138. |
+| Reporting | Experimental setup. |
+
+## A7. Replication data version
+
+| Item | Explanation |
+|---|---|
+| Original requirement | The paper cites the concept DOI 10.5281/zenodo.4298604. |
+| Problem | It now resolves to version 2 (4.09 GB), published after the paper's PDFBox numbers. |
+| Simplification | Version 1 (record 4298605, 2020-11-30), checked against its md5. |
+| Justification | Contemporary with the PDFBox run. |
+| Expected impact | None found. |
+| Validation | Its PDFBox profiles give exactly the totals of Section IV.C (`results/day1/authors_profile_stats.txt`). |
+| Reporting | Experimental setup. |
+
+## A8. Source of the frozen target list
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Targets = pseudo-tested methods found by Descartes, filtered by PANKTI. |
+| Problem | Time: the schedule required starting the instrumentation before the reproduction's own Descartes run could be fully analysed. |
+| Simplification | The target list instrumented on Day 3 is the one computed from the authors' "before" reports (`results/day2/instrumentation-candidates-pdfbox.csv`). The reproduction's own Descartes run is compared with it method by method. |
+| Justification | The reproduction's own run gives 138 targets as well, 137 of them in common with the authors' list, and all 46 effective targets (`results/day2/targets_own_reports.txt`). |
+| Expected impact | One target differs in each direction (`PDFontDescriptor.getFontFile` is instrumented, `PDAnnotation.isNoRotate` is not); neither is an effective target in the paper. |
+| Validation | `analysis/compare_descartes_runs.py` and `analysis/count_targets.py` on both sets of reports. Whether `isNoRotate` is invoked by the workload will be checked on Day 4. |
+| Reporting | Methodology. |
+
+## A9. Building pankti-extract today
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Run pankti-extract at `0fddf27`. |
+| Problem | Spoon 8.0.0 declares a snapshot repository that no longer exists, and its JDT dependency pulls Eclipse platform jars through open version ranges. Maven now resolves recent versions, some of them compiled for Java 17 (class file version 61), while the tool runs on Java 11. |
+| Simplification | Built as is. The unreachable repository only produces warnings, and the Java 17 classes are never loaded on the code path used. |
+| Justification | No dependency was upgraded or pinned, so the tool's own code and its Spoon/JDT versions are unchanged. |
+| Expected impact | None observed. The build is not exactly reproducible over time (another resolution could pull other platform versions). |
+| Validation | The tool runs on JDK 11.0.8 and gives #TARGET = 138, as in the paper. Two runs give the same candidate list; the full method list has the same content but a different row order (it is written from a hash map). |
+| Reporting | Reflections on reproducibility (dependency version ranges). |
+
+## A10. Meaning of "well-tested"
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Paper, Section III.E, metric 14: after adding the generated tests, a target "is either still pseudo-tested, or is not pseudo-tested anymore. In the latter case, we give it the status of well-tested." |
+| Problem | Descartes has two non-pseudo-tested statuses for a covered method: `tested` and `partially-tested`. |
+| Simplification | well-tested = `tested` or `partially-tested`. Strict counts (`tested` only) are reported as well. |
+| Justification | Follows from the paper's definition. The authors' README splits its 28 well-tested methods into 17 tested and 11 partially tested. |
+| Expected impact | None. |
+| Validation | With this reading, the authors' last "after" reports give the status printed in Table III for all 46 methods (`results/day1/authors_report_vs_paper.csv`). |
+| Reporting | Methodology. |
+
+## A11. What #PASSING counts
+
+| Item | Explanation |
+|---|---|
+| Original requirement | #PASSING: generated tests that pass when executed. |
+| Problem | The authors' artifacts show that 11,613 of the 11,730 tests of `GlyfSimpleDescript.getFlags` were not executed but are counted as passing in the paper (discrepancies.md §2). |
+| Simplification | None: every generated test is executed, and only tests that actually pass are counted. The paper's way of counting is reported next to it. |
+| Justification | Measures what the metric claims to measure. |
+| Expected impact | #PASSING may be lower than in the paper if some getFlags tests fail. |
+| Validation | Day 6 (test execution). |
+| Reporting | Results; discussion of the difference. |

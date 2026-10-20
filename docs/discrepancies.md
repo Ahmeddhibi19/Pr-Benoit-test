@@ -35,6 +35,10 @@ and the 46 `-object-profile-sizes.txt` files hold 57,563 sizes, as in Table III.
 as in the text. The largest is 57.4 MB = 54.7 MiB ("nearly 55 MB") and the total is 5.9 GB = 5.5 GiB ("5.5 GB"),
 so the paper reports sizes in binary units (MiB/GiB). The reproduction does the same.
 
+Script: `analysis/profile_stats.py` -> `results/day1/authors_profile_stats.{csv,txt}`. It also shows that each of the 19
+methods with fewer collected profiles than invocations has an XML file of at least 200 MiB, which confirms that the
+threshold explains them. The 57,563 sizes fall into the 10 MiB bins of Figure 5 as 57,458 / 71 / 3 / 23 / 5 / 3.
+
 ## 2. #PASSING: 13,614 in the paper vs 2,001 executed passing tests
 
 **Status: explained.** `report.csv` has an `executed-tests` column. For `GlyfSimpleDescript.getFlags`, only
@@ -71,10 +75,21 @@ is not), and the paper counts it as well-tested.
 
 ## 5. #TARGET: 138 (paper) vs 129 instrumented (README)
 
-**Status: open.** To be recomputed on Day 2 from the authors' "before" reports with pankti-extract and
-`find-pseudo-tested.py`. For reference, the six "before" reports contain 644 pseudo-tested methods in total
-(fontbox 61, pdfbox 458, preflight 63, examples 39, xmpbox 18, tools 5), before the public / non-static /
-non-void filter.
+**Status: explained (138 reproduced exactly; 129 most likely an earlier iteration).**
+`scripts/pankti/extract-targets.sh` builds pankti-extract at `0fddf27`, applies it to PDFBox 2.0.21 (3,588 methods kept
+out of 9,021) and runs the authors' `find-pseudo-tested.py` on their six "before" reports. Result: **138 targets**, the
+paper's #TARGET, including all 46 effective targets (`results/day2/targets_authors_reports.{csv,txt}`). Per module:
+pdfbox 117, xmpbox 12, fontbox 8, preflight 1, examples 0, tools 0.
+
+The six reports contain 644 pseudo-tested methods before the filter (fontbox 61, pdfbox 458, preflight 63,
+examples 39, xmpbox 18, tools 5); the filter (public, non-static, non-abstract, non-void, non-deprecated, non-empty)
+removes 506 of them.
+
+The "129 instrumented" of the experiments README cannot be checked directly: no instrumentation list is published.
+The README was last changed on 2020-10-06, a month before the run reported in the paper (2020-11-03), and all its other
+numbers also differ from the paper's (13,804 generated tests instead of 13,851, 1,840 executed instead of 2,238). It
+therefore most likely describes an earlier iteration. Excluding the methods of modules that are not in the
+`pdfbox-app` jar would remove only 1 target (preflight), so it does not explain the difference.
 
 ## 6. Descartes configuration
 
@@ -92,9 +107,13 @@ re-running Descartes: the reproduction runs "before" and "after" with the same c
 
 ## 8. Overloaded methods
 
-**Status: assumption.** `PDSimpleFont.toUnicode` and `PDTrueTypeFont.getPath` are overloaded. The Descartes
-reports classify each overload separately (one pseudo-tested, the other tested or not covered). The paper's
-target is the pseudo-tested overload, so matching must use the full signature from `invoked-methods.csv`.
+**Status: explained (fixed in the analysis code).** `PDSimpleFont.toUnicode` and `PDTrueTypeFont.getPath` are
+overloaded. The Descartes reports classify each overload separately (one pseudo-tested, the other tested or not
+covered). The paper's target is the pseudo-tested overload, so matching must use the full signature from
+`invoked-methods.csv`. The first version of `compare_authors_report.py` matched on class and method name only and
+showed merged statuses for rows 31 and 35. All scripts now use `analysis/descartes.py`, which identifies a method by
+class, name and parameter descriptor, as PANKTI does. With it, all 46 targets are pseudo-tested in the authors'
+"before" reports.
 
 ## 9. Invocation counting and profile pairing in PANKTI (`0fddf27`)
 
@@ -152,3 +171,37 @@ authors' "before" report. None of the 46 effective targets of the case study is 
 **Status: open.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from
 the one on Maven Central (9,897,381 bytes): the authors built it from a local checkout. The reproduction builds
 the jar from the `2.0.21` tag.
+
+## 14. Descartes "before" run of the reproduction vs the authors' reports
+
+**Status: explained.** Runs 39409510406 and 39415980930 (GitHub Actions, configuration in
+[descartes.md](descartes.md)) compared method by method with the authors' reports of 2020-09-21
+(`analysis/compare_descartes_runs.py`, output in `results/day2/descartes_before_vs_authors/`). All 46 effective
+targets are pseudo-tested in both. Per module:
+- fontbox, xmpbox, preflight and tools: the same classification for every method (1,624 methods, Jaccard index of the
+  pseudo-tested sets 1.0).
+- pdfbox (1 thread): 4,421 of 4,438 methods agree (Jaccard 0.97); the 17 differences involve tests that read and
+  write shared files or download test data, and none of them is an effective target. With 4 threads the result
+  is very different (§16).
+- examples: 231 of 311 methods agree. All 80 differences are methods that are covered by the authors' run and not
+  covered here, a direct effect of excluding `TestCreateSignature` and `CreatePDFATest` (assumption A2): they hold
+  23 of the module's 24 tests. No target comes from this module.
+
+## 15. Descartes classification depends on the operating system
+
+**Status: explained.** A local run of Descartes on fontbox under Windows differs from the authors' report on 4 of
+550 methods, all in `org.apache.fontbox.util.autodetect`: `WindowsFontDirFinder.find` and `getWinDir` are exercised,
+`UnixFontDirFinder.getSearchableDirectories` and `NativeFontDirFinder.find` are not. On the Linux runner the four
+methods have the authors' classification. The tests reach different code depending on the platform's font
+directories, which supports running every measurement on Linux (assumption A5).
+
+## 16. Parallel mutation analysis gives spurious detections in pdfbox
+
+**Status: explained (configuration: 1 thread).** Descartes on pdfbox with 4 PIT threads classifies 1,799 methods as
+tested instead of 1,580, has 310 timed-out mutants instead of 62, and turns 25 of the 40 pdfbox targets (among them
+`RenderingMode.isFill`) into "tested". The extra detections are timeouts (215) and failures of tests that use fixed
+file names under `target/test-output` or download PDFs during the test (65, mostly `PDAcroFormFlattenTest`): several
+worker JVMs share the module directory and the network. With 1 thread the result matches the authors' (§14). The
+paper does not mention this setting. A reproduction that uses the machine's cores, as is usual for PIT, finds 91
+targets instead of 138, and only 21 of the 46 effective targets of Table III among them. Details:
+[descartes.md](descartes.md).

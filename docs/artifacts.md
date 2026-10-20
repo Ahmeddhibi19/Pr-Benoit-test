@@ -9,7 +9,10 @@ authors' artifacts. The CI scripts fetch the toolchain and PDFBox.
 |---|---|---|
 | Apache PDFBox sources | tag `2.0.21` | commit `fa8029d80e39ff4febd1ce0d6ecc628bf2970ca0` (tag object `159cb7f5`) on github.com/apache/pdfbox |
 
-Build-only change: the two IPA font URLs of `pdfbox/pom.xml` (PDFBOX-5005), see `scripts/pdfbox/patch-build.sh`.
+Build-only changes (`scripts/pdfbox/patch-build.sh`, assumption A1 in [assumptions.md](assumptions.md)): the two IPA font
+URLs of `pdfbox/pom.xml` (PDFBOX-5005), the Isartor archive and a certificate-policy PDF taken from the Internet
+Archive (same sha512), and the `pdfbox/target/test-output` directory created before the build. For the Descartes
+runs, `scripts/pdfbox/add-descartes-profile.sh` adds a Maven profile to `parent/pom.xml`.
 
 ## Authors' tool and experiment repositories
 
@@ -83,5 +86,6 @@ before extraction, and only `pdfbox/` is extracted, without the raw `-receiving/
 | Tool | Version | Use |
 |---|---|---|
 | Glowroot | 0.13.6 (`glowroot-0.13.6-dist.zip`) | agent hosting the PANKTI instrumentation plugin (plugin API 0.13.6) |
-| PIT + Descartes | 1.4.x + 1.2.x (set up on Day 2) | pseudo-tested methods, 21 mutation operators as in the authors' reports |
+| PIT + Descartes | pitest-maven 1.4.10 + `eu.stamp-project:descartes` 1.2.6 (Maven Central) | pseudo-tested methods, 21 mutation operators as in the authors' reports ([descartes.md](descartes.md)) |
+| pankti-extract | built from `ASSERT-KTH/pankti` at `0fddf27` (`scripts/pankti/extract-targets.sh`) | candidate target methods; Spoon 8.0.0 |
 | JaCoCo | 0.8.5 | coverage (optional, Table II) |

@@ -82,3 +82,81 @@ Runner image ubuntu22 20261004.315.1, 4 vCPU (AMD EPYC 7763), 15 GiB RAM, AdoptO
 
 Fix the baseline build if needed. Set up PIT 1.4.x + Descartes 1.2.x with the 21 operators and start the "before"
 runs for the 6 modules. Recompute #TARGET from the authors' "before" reports with pankti-extract.
+
+## 15-19 Oct: no progress
+
+No work was done on these days. On 20 Oct the work moved to another computer. The local toolchain and the authors'
+artifacts were rebuilt with the repository's own scripts (`setup/windows/install-tools.ps1`,
+`setup/fetch-artifacts.sh`; about 30 minutes, 7.4 GB). On the new machine, the Day-1 analyses give byte-identical
+results, and a local build of the PDFBox fontbox and pdfbox modules passes its 558 tests.
+
+## Day 2 - 2026-10-20: pseudo-tested methods and targets
+
+**Goal of the day (plan):** Descartes "before" runs on CI for the six modules, the target count from the authors'
+reports, and a script that compares two sets of Descartes reports.
+
+### Done
+
+- Two Day-1 fixes:
+  - `analysis/descartes.py` identifies methods by class, name and parameter descriptor. The previous comparison
+    merged overloads, which gave wrong "before" statuses for Table III rows 31 and 35. With the fix, all 46 targets
+    are pseudo-tested in the authors' "before" reports and all 46 "after" statuses match the paper.
+  - `analysis/profile_stats.py` recomputes the profile facts of Section IV.C from the replication data
+    (121,175 / 57,563 / 158 B / 54.7 MiB / 5.49 GiB / 19 methods). It also shows that each of the 19 capped methods
+    has an XML file of at least 200 MiB.
+- Descartes configuration (`scripts/pdfbox/add-descartes-profile.sh`, `run-descartes.sh`): PIT 1.4.10, Descartes
+  1.2.6, the 21 operators of the authors' reports, `targetClasses` per module. A local smoke run on fontbox gave the
+  authors' counts (550 / 168 / 6 / 61 / 315).
+- Workflow `descartes-before` (one job per module) and two runs: 39409510406 (all modules, 4 threads) and
+  39415980930 (pdfbox, 1 thread).
+- Targets: `scripts/pankti/extract-targets.sh` builds pankti-extract at `0fddf27` and runs the authors'
+  `find-pseudo-tested.py`.
+  - With the authors' reports: **138 targets**, exactly the paper's #TARGET.
+  - With the reproduction's own reports: also 138, 137 of them in common with the authors' list.
+  - Both lists contain the 46 effective targets.
+- `analysis/compare_descartes_runs.py`: per-method comparison of two sets of reports (classification matrix, Jaccard
+  index, mutant statuses, killing tests, Table III targets). It was checked on the authors' reports compared with
+  themselves (100% agreement) and on their before/after reports (which shows the known 1,580 -> 1,488 drop in pdfbox).
+- Documentation:
+  - new `docs/descartes.md` (method, configuration, results);
+  - new `docs/assumptions.md` (11 assumptions in a fixed format);
+  - `docs/discrepancies.md` items 1b, 5 and 8 updated, items 14-16 added;
+  - README.
+
+### Results
+
+| Module | Same classification as the authors | Note |
+|---|---|---|
+| fontbox, xmpbox, preflight, tools | 1,624 / 1,624 | identical |
+| pdfbox (1 thread) | 4,421 / 4,438 | differences come from tests with shared files and network downloads |
+| examples | 231 / 311 | excluded test classes (expired keystore), no target in this module |
+
+All 46 effective targets of Table III are pseudo-tested in the reproduction's "before" run.
+
+### Problems and decisions
+
+- **4 threads change the result for pdfbox.** The first run used the runner's 4 vCPUs. pdfbox then had 310 timed-out
+  mutants (authors: 62), 1,799 tested methods (authors: 1,580), and 25 of the 40 pdfbox targets became "tested",
+  `isFill` among them. The extra detections come from timeouts and from tests that write fixed files under
+  `target/test-output` and download PDFs during the test (mostly `PDAcroFormFlattenTest`): parallel PIT workers
+  interfere with each other. A re-run with 1 thread matches the authors (the authors' 83-minute run time is
+  consistent with one thread). Decision: 1 thread for every module. With the 4-thread report, the pipeline would
+  have selected 91 targets instead of 138, and only 21 of the 46 effective targets.
+- **examples:** excluding the two test classes with the expired keystore removes 23 of the module's 24 tests. 80
+  methods lose their coverage. This has no effect on the targets.
+- **pankti-extract (2020) still builds and runs**, with two fragilities:
+  - Spoon declares a snapshot repository that no longer exists (warnings only).
+  - JDT's open version ranges now resolve Eclipse platform jars compiled for Java 17. They are never loaded on the
+    code path used, so the Java 11 tool still works.
+
+  Its full method list is written in hash-map order, so two runs differ in row order only.
+- **OS sensitivity:** a local Windows run of fontbox differs from the authors on 4 font-directory-finder methods,
+  which match on Linux. This confirms that every measurement must run on the Linux runner.
+- **Target list for Day 3:** frozen from the authors' reports, as decided (assumption A8). The reproduction's own
+  list differs by one method in each direction.
+
+### Next (Day 3)
+
+Freeze `results/targets.csv` from `results/day2/instrumentation-candidates-pdfbox.csv`. Then start the production
+run as a dry run: download Glowroot 0.13.6, build pankti-instrument at `0fddf27`, generate the aspects with
+`instrument.py`, build the plugin jar, and install it into Glowroot on CI.
