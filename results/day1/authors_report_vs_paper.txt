@@ -1,6 +1,4 @@
-46 methods compared, 4 with at least one difference
-  row 31 PDSimpleFont_toUnicode: before = pseudo-tested/tested
+46 methods compared, 2 with at least one difference
   row 32 GlyfSimpleDescript_getFlags: passing 11730 vs 117
-  row 35 PDTrueTypeFont_getPath: before = not-covered/pseudo-tested
   row 45 DefaultResourceCache_getColorSpace: status paper pseudo-tested vs report tested
 executed tests in report.csv: 2238
