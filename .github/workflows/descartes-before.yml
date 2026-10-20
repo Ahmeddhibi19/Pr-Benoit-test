@@ -1,0 +1,89 @@
+name: descartes-before
+
+# Pseudo-tested methods of PDFBox 2.0.21 with the original test suite (PIT + Descartes), one job per module.
+# The configuration is described in docs/descartes.md.
+on:
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: JSON list of modules
+        default: '["examples", "fontbox", "pdfbox", "preflight", "tools", "xmpbox"]'
+      threads:
+        description: PIT threads
+        default: '4'
+
+jobs:
+  descartes:
+    name: descartes (${{ matrix.module }})
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(inputs.modules) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-liberation
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Restore Maven repository
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-pdfbox-2.0.21-descartes-${{ matrix.module }}-${{ github.run_id }}
+          restore-keys: |
+            m2-pdfbox-2.0.21-descartes-${{ matrix.module }}-
+            m2-pdfbox-2.0.21-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh > out/env-report.txt
+
+      - name: Checkout PDFBox 2.0.21 and add the Descartes profile
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+          bash scripts/pdfbox/add-descartes-profile.sh pdfbox
+
+      - name: Run Descartes
+        run: bash scripts/pdfbox/run-descartes.sh pdfbox ${{ matrix.module }} out ${{ inputs.threads }}
+
+      - name: Summarise
+        if: always()
+        run: |
+          gzip -f out/*.log || true
+          if [ -f out/methods.json ]; then
+            python3 analysis/summarize_descartes_reports.py out | tee out/summary.csv
+            { echo "### ${{ matrix.module }}"; echo; echo '```'; cat out/summary.csv out/timing.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice title=${{ matrix.module }}::$(tail -1 out/summary.csv) | $(grep descartes_seconds out/timing.txt)"
+          else
+            echo "::error title=${{ matrix.module }}::no methods.json produced"
+          fi
+
+      - name: Save Maven repository
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-pdfbox-2.0.21-descartes-${{ matrix.module }}-${{ github.run_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: descartes-before-${{ matrix.module }}
+          path: out/
+          retention-days: 5
