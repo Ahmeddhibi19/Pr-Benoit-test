@@ -7,6 +7,8 @@ set -euo pipefail
 
 dest=$1
 plugin="${2:-}"
+# Resolve the plugin path before changing directory.
+[ -z "$plugin" ] || plugin="$(cd "$(dirname "$plugin")" && pwd)/$(basename "$plugin")"
 version=0.13.6
 file="glowroot-$version-dist.zip"
 sha256=f1e76f3ac1b08587a5694fe9fd0b852313177643347e3fd2ec811588129a4968

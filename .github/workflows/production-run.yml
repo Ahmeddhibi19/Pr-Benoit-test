@@ -79,7 +79,7 @@ jobs:
         run: |
           {
             echo "### production-run (${{ inputs.mode }})"; echo; echo '```'
-            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt 2>/dev/null
+            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt 2>/dev/null || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
