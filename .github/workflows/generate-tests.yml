@@ -13,6 +13,9 @@ on:
       generator_commit:
         description: PANKTI commit of pankti-generate
         default: 7afc58492f35a1cdb419b30872814e5f2b4d7f42
+      sources:
+        description: JSON list of profile sources (reproduction, authors)
+        default: '["reproduction", "authors"]'
 
 permissions:
   actions: read
@@ -26,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        source: [reproduction, authors]
+        source: ${{ fromJSON(inputs.sources) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -77,7 +80,9 @@ jobs:
         if: matrix.source == 'reproduction'
         run: |
           mkdir -p profiles
-          zstd -dc profiles-archive/*/pankti-object-data.tar.zst | tar -x -C profiles
+          # download-artifact puts a single artifact directly in its path, several in one sub-folder each
+          archive=$(find profiles-archive -name pankti-object-data.tar.zst | head -1)
+          zstd -dc "$archive" | tar -x -C profiles
           mv profiles/pankti-object-data profiles/data
           echo "profiles from production-run ${{ inputs.profiles_run_id }}" | tee out/profiles-source.txt
 
