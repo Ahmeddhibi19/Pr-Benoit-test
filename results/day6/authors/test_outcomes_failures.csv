@@ -1,0 +1,14 @@
+class,method,params,status,exception_type,occurrences_over_runs
+org.apache.pdfbox.pdfparser.COSParser,getEncryption,,failure,java.lang.AssertionError,100
+org.apache.pdfbox.pdmodel.DefaultResourceCache,getColorSpace,org.apache.pdfbox.cos.COSObject,failure,java.lang.AssertionError,95
+org.apache.pdfbox.pdmodel.DefaultResourceCache,getExtGState,org.apache.pdfbox.cos.COSObject,failure,java.lang.AssertionError,90
+org.apache.pdfbox.pdmodel.DefaultResourceCache,getFont,org.apache.pdfbox.cos.COSObject,failure,java.lang.AssertionError,120
+org.apache.pdfbox.pdmodel.DefaultResourceCache,getXObject,org.apache.pdfbox.cos.COSObject,failure,java.lang.AssertionError,10
+org.apache.pdfbox.pdmodel.PDDocumentCatalog,getViewerPreferences,,failure,java.lang.AssertionError,10
+org.apache.pdfbox.pdmodel.PDResources,getExtGState,org.apache.pdfbox.cos.COSName,failure,java.lang.AssertionError,90
+org.apache.pdfbox.pdmodel.font.FontCache,getFont,org.apache.pdfbox.pdmodel.font.FontInfo,failure,java.lang.AssertionError,115
+org.apache.pdfbox.pdmodel.font.PDCIDFont,getCIDSystemInfo,,failure,java.lang.AssertionError,5
+org.apache.pdfbox.pdmodel.font.PDCIDFontType2,getPath,int,failure,java.lang.AssertionError,30
+org.apache.pdfbox.pdmodel.font.PDTrueTypeFont,getPath,int,failure,java.lang.AssertionError,180
+org.apache.pdfbox.rendering.TTFGlyph2D,getPathForCharacterCode,int,failure,java.lang.AssertionError,170
+org.apache.pdfbox.rendering.TTFGlyph2D,getPathForGID,"int,int",failure,java.lang.AssertionError,170

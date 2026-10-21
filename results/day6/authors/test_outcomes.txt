@@ -1,0 +1,7 @@
+runs: 5; tests seen: 13,851; not attributed to a target: 0
+generated: 13,851
+executed: 13,851; passing in every run: 13,614; failing in every run: 237; flaky: 0; not run in some run: 0
+passing / executed: 98.29%
+failure types (occurrences over all runs): java.lang.AssertionError 1185
+
+methods whose #PASSING / #FAILING differ from the paper:

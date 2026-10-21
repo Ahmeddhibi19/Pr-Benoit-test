@@ -1,0 +1,15 @@
+                                                tests   passing   failing   flaky  pass rate
+paper (Table III)                              13,851    13,614       237             98.29%
+authors published tests, run here 5 times      13,851    13,614       237       0     98.29%
+this reproduction, run 5 times                 14,679    14,314       365       0     97.51%
+
+Table III rows with the paper's #PASSING and #FAILING: authors' tests run here 46 / 46, this reproduction 38 / 46
+  row 36 NamingTable.getName: paper 273 / 0, ours 976 / 0 of 976
+  row 43 PDFontDescriptor.getFlags: paper 54 / 0, ours 56 / 0 of 56
+  row 44 FontCache.getFont: paper 83 / 23, ours 72 / 31 of 103
+  row 45 DefaultResourceCache.getColorSpace: paper 4 / 19, ours 4 / 23 of 27
+  row 53 COSParser.getEncryption: paper 13 / 20, ours 13 / 22 of 35
+  row 63 PDFontDescriptor.isFixedPitch: paper 6 / 0, ours 8 / 0 of 8
+  row 64 PDFontDescriptor.isItalic: paper 6 / 0, ours 8 / 0 of 8
+  row 65 PDFontDescriptor.isSerif: paper 6 / 0, ours 8 / 0 of 8
+  not in Table III: TrueTypeFont.getOS2Windows: ours 0 / 114 of 114

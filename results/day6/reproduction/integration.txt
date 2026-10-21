@@ -1,0 +1,5 @@
+TestGlyfSimpleDescriptPanktiGen.java: 11730 tests -> 24 classes of at most 500
+TestHorizontalMetricsTablePanktiGen.java: 534 tests -> 2 classes of at most 500
+TestNamingTablePanktiGen.java: 976 tests -> 2 classes of at most 500
+fontbox: 30 generated test classes, 13959 tests, 4532 resource files
+pdfbox: 17 generated test classes, 720 tests, 882 resource files

@@ -1,0 +1,23 @@
+TestGlyfSimpleDescriptPanktiGen.java: 11730 tests -> 24 classes of at most 500
+TestHorizontalMetricsTablePanktiGen.java: 534 tests -> 2 classes of at most 500
+added the missing import org.junit.Before to TestTrueTypeFontPanktiGen.java
+added the missing import org.junit.Before to TestHorizontalMetricsTablePanktiGenPart2.java
+added the missing import org.junit.Before to TestNamingTablePanktiGen.java
+added the missing import org.junit.Before to TestHorizontalMetricsTablePanktiGenPart1.java
+added the missing import org.junit.Before to TestTTFDataStreamPanktiGen.java
+added the missing import org.junit.Before to TestDefaultResourceCachePanktiGen.java
+added the missing import org.junit.Before to TestPDImageXObjectPanktiGen.java
+added the missing import org.junit.Before to TestPDICCBasedPanktiGen.java
+added the missing import org.junit.Before to TestPDExtendedGraphicsStatePanktiGen.java
+added the missing import org.junit.Before to TestPDResourcesPanktiGen.java
+added the missing import org.junit.Before to TestPDSimpleFontPanktiGen.java
+added the missing import org.junit.Before to TestPDCIDFontType2PanktiGen.java
+added the missing import org.junit.Before to TestPDTrueTypeFontPanktiGen.java
+added the missing import org.junit.Before to TestPDCIDFontPanktiGen.java
+added the missing import org.junit.Before to TestPDCIDSystemInfoPanktiGen.java
+added the missing import org.junit.Before to TestFontCachePanktiGen.java
+added the missing import org.junit.Before to TestPDFontDescriptorPanktiGen.java
+added the missing import org.junit.Before to TestPDDocumentCatalogPanktiGen.java
+added the missing import org.junit.Before to TestCOSParserPanktiGen.java
+fontbox: 29 generated test classes, 13142 tests, 3601 resource files
+pdfbox: 17 generated test classes, 709 tests, 863 resource files

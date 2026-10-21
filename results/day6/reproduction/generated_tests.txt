@@ -1,0 +1,2 @@
+test classes: 22; tests: 14,679; target methods with tests: 47
+tests not attributed to a target: 0

@@ -1,0 +1,15 @@
+runs: 5; tests seen: 14,679; not attributed to a target: 0
+generated: 14,679
+executed: 14,679; passing in every run: 14,314; failing in every run: 365; flaky: 0; not run in some run: 0
+passing / executed: 97.51%
+failure types (occurrences over all runs): java.lang.AssertionError 1789, java.io.EOFException 28, java.io.IOException 8
+
+methods whose #PASSING / #FAILING differ from the paper:
+  row 36 NamingTable.getName: paper 273 / 0, here 976 / 0 (flaky 0), authors executed 273: 273 / 0
+  row 53 COSParser.getEncryption: paper 13 / 20, here 13 / 22 (flaky 0), authors executed 33: 13 / 20
+  row 45 DefaultResourceCache.getColorSpace: paper 4 / 19, here 4 / 23 (flaky 0), authors executed 23: 4 / 19
+  row 44 FontCache.getFont: paper 83 / 23, here 72 / 31 (flaky 0), authors executed 106: 83 / 23
+  row 43 PDFontDescriptor.getFlags: paper 54 / 0, here 56 / 0 (flaky 0), authors executed 54: 54 / 0
+  row 63 PDFontDescriptor.isFixedPitch: paper 6 / 0, here 8 / 0 (flaky 0), authors executed 6: 6 / 0
+  row 64 PDFontDescriptor.isItalic: paper 6 / 0, here 8 / 0 (flaky 0), authors executed 6: 6 / 0
+  row 65 PDFontDescriptor.isSerif: paper 6 / 0, here 8 / 0 (flaky 0), authors executed 6: 6 / 0
