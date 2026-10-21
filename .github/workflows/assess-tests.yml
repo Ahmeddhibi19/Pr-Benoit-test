@@ -1,0 +1,148 @@
+name: assess-tests
+
+# Run the generated differential unit tests inside PDFBox 2.0.21 several times (see docs/execution.md).
+#   reproduction: the tests generated from this repository's profiles (artifact of a generate-tests run)
+#   authors:      the tests the authors published (Zenodo record 4298605), run in the same environment, to separate
+#                 the effect of the environment from the effect of the profiles
+on:
+  workflow_dispatch:
+    inputs:
+      tests_run_id:
+        description: generate-tests run whose generated tests are used
+        default: '39588027907'
+      runs:
+        description: number of separate runs
+        default: '5'
+      sources:
+        description: JSON list of test sources (reproduction, authors)
+        default: '["reproduction", "authors"]'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  assess:
+    name: assess (${{ matrix.source }})
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        source: ${{ fromJSON(inputs.sources) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-liberation
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Restore Maven repository
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-assess-${{ github.run_id }}
+          restore-keys: |
+            m2-assess-
+            m2-generate-
+            m2-pdfbox-2.0.21-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh > out/env-report.txt
+
+      - name: Checkout PDFBox 2.0.21 and PANKTI
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+          git clone --quiet https://github.com/ASSERT-KTH/pankti.git pankti
+          git -C pankti checkout --quiet 7afc58492f35a1cdb419b30872814e5f2b4d7f42
+
+      - name: Download the reproduction's generated tests
+        if: matrix.source == 'reproduction'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: generated-tests-*
+          run-id: ${{ inputs.tests_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: tests-archive
+
+      - name: Unpack the reproduction's generated tests
+        if: matrix.source == 'reproduction'
+        run: |
+          mkdir -p generated
+          archive=$(find tests-archive -name generated-tests.tar.zst | head -1)
+          zstd -dc "$archive" | tar -x -C generated
+          echo "tests from generate-tests run ${{ inputs.tests_run_id }}" | tee out/tests-source.txt
+
+      - name: Fetch the authors' published tests
+        if: matrix.source == 'authors'
+        run: |
+          curl -fsSL --retry 5 -o pankti-data.zip "https://zenodo.org/records/4298605/files/pankti-data.zip?download=1"
+          echo "9c902f3e2342338192197034413d70c0  pankti-data.zip" | md5sum -c -
+          python3 setup/extract_zip.py extract pankti-data.zip extracted pankti-data/pdfbox/pankti-generated-junit-tests/
+          rm pankti-data.zip
+          mkdir -p generated
+          mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/tests generated/tests
+          mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/resource-files generated/resources
+          echo "tests from Zenodo record 4298605 (pdfbox/pankti-generated-junit-tests)" | tee out/tests-source.txt
+
+      - name: Integrate the tests into fontbox and pdfbox
+        run: |
+          bash scripts/pankti/integrate-tests.sh pdfbox generated \
+            pankti/pankti-instrument/src/main/java/se/kth/castor/pankti/instrument/converters | tee out/integration.txt
+          cp results/day4/full/profiles/invoked-methods.csv out/invoked-methods.csv
+
+      - name: Build and compile the tests
+        run: |
+          cd pdfbox
+          mvn -B -q -pl fontbox,pdfbox -am install -DskipTests 2>&1 | tail -30 | tee ../out/compile.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Run the generated tests
+        run: bash scripts/pankti/run-generated-tests.sh pdfbox ${{ inputs.runs }} runs
+
+      - name: Outcomes per method
+        if: always()
+        run: |
+          python3 analysis/count_generated_tests.py generated/tests out/invoked-methods.csv out/generated_tests > /dev/null
+          python3 analysis/test_outcomes.py runs out/invoked-methods.csv out/test_outcomes \
+            --generated out/generated_tests.csv --table3 results/day1/authors_report_vs_paper.csv
+          cp runs/runs.txt out/
+          tar -C runs -czf out/surefire-reports.tar.gz $(cd runs && ls -d run-*/)
+          gzip -f out/test_outcomes_tests.csv
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### assess (${{ matrix.source }})"; echo; echo '```'
+            cat out/integration.txt out/runs.txt out/test_outcomes.txt 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save Maven repository
+        if: always() && matrix.source == 'reproduction'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-assess-${{ github.run_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: assess-${{ matrix.source }}-${{ github.run_number }}
+          path: out/
+          retention-days: 5

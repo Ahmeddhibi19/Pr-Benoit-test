@@ -2,6 +2,7 @@
 
 Run from the repository root: python -m unittest discover -s tests
 """
+import csv
 import hashlib
 import sys
 import tempfile
@@ -93,6 +94,32 @@ class WorkloadLogTest(unittest.TestCase):
         self.assertEqual([(c, f, s) for c, f, s, _ in runs],
                          [("Encrypt", "000809.pdf", "error"), ("PDFMerger", "000810.pdf", "usage"),
                           ("OverlayPDF", "000810.pdf", "ok")])
+
+
+class TestOutcomesTest(unittest.TestCase):
+    """test_outcomes.py: passing in every run, failing in every run, flaky, not run."""
+
+    REPORT = ('<testsuite name="s">'
+              '<testcase classname="p.TestCPanktiGen" name="testM1"/>'
+              '<testcase classname="p.TestCPanktiGenPart2" name="testM2">{m2}</testcase>'
+              '<testcase classname="p.TestCPanktiGen" name="testM3">'
+              '<error type="java.lang.OutOfMemoryError" message="Java heap space"/></testcase>'
+              '{m4}</testsuite>')
+
+    def test_verdicts(self):
+        import test_outcomes
+        with tempfile.TemporaryDirectory() as d:
+            runs = Path(d) / "runs"
+            for k, (m2, m4) in enumerate([("", '<testcase classname="p.TestCPanktiGen" name="testM4"/>'),
+                                          ('<failure type="java.lang.AssertionError"/>', "")], start=1):
+                (runs / f"run-{k}").mkdir(parents=True)
+                (runs / f"run-{k}" / "TEST-p.xml").write_text(self.REPORT.format(m2=m2, m4=m4), encoding="utf-8")
+            invoked = Path(d) / "invoked.csv"
+            invoked.write_text("parent-FQN,method-name,param-list\np.C,m,\n", encoding="utf-8")
+            test_outcomes.main(["x", str(runs), str(invoked), str(Path(d) / "out")])
+            with open(Path(d) / "out_tests.csv", encoding="utf-8") as f:
+                verdicts = {r["test"]: r["verdict"] for r in csv.DictReader(f)}
+        self.assertEqual(verdicts, {"testM1": "passing", "testM2": "flaky", "testM3": "failing", "testM4": "not-run"})
 
 
 class DescartesTest(unittest.TestCase):
