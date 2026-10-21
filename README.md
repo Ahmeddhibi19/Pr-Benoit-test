@@ -36,7 +36,7 @@ The reproduction follows two tracks:
 | Instrumentation built and installed in Glowroot (dry run, no workload) | done | [`docs/instrumentation.md`](docs/instrumentation.md), [`results/day3/`](results/day3/) |
 | Workload under the instrumentation, profile metrics (Table III columns 1-3) | done | [`results/day4/`](results/day4/), [`docs/instrumentation.md`](docs/instrumentation.md) |
 | Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/day5/`](results/day5/) |
-| Test execution (5 runs) | to do | |
+| Test execution (5 separate runs, our tests and the authors') | done | [`docs/execution.md`](docs/execution.md), [`results/day6/`](results/day6/) |
 | Descartes "after", comparison with the paper | to do | |
 
 ## Results so far
@@ -54,7 +54,7 @@ The reproduction follows two tracks:
 | Maximum nesting depth | 36 (undefined) | 73 (XML element depth) | 73 (same measure) |
 | Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/day5/fig5.png`](results/day5/fig5.png)) |
 | #PANKTI_TESTS | 13,851 | 13,851; regenerated from their profiles: all 13,851 identical to the published tests | 14,679 (= #UNIQUE for each of the 47 methods) |
-| #PASSING / #FAILING | 13,614 / 237 | 2,001 / 237 executed (11,613 tests counted as passing were not executed) | not yet run |
+| #PASSING / #FAILING (5 runs, 0 flaky) | 13,614 / 237 | their 13,851 tests run here: 13,614 / 237, all 46 rows identical | 14,314 / 365 of 14,679 (38 of 46 rows identical; differences follow #UNIQUE) |
 | Well-tested | 28 / 46 | 28 / 46 | not yet run |
 
 ## Repository layout
@@ -65,6 +65,7 @@ The reproduction follows two tracks:
   descartes-before.yml PIT + Descartes on the original test suite, one job per module
   production-run.yml   PANKTI plugin for the frozen targets, Glowroot, pdfbox-app; the workload (modes dry-run, smoke, full)
   generate-tests.yml   pankti-generate on the reproduction's profiles, and on the authors' (compared with their tests)
+  assess-tests.yml     the generated tests integrated into PDFBox and run 5 times (ours and the authors')
 scripts/ci/          runner setup: JDK, Maven, disk, environment report, annotations
 scripts/pdfbox/      PDFBox checkout, build-only patch, Descartes profile and run, test summary
 scripts/pankti/      target extraction, plugin build, workload, test generation and integration (authors' tools)
@@ -101,6 +102,7 @@ gh workflow run descartes-before.yml   # one job per module, 1 PIT thread; pdfbo
 gh workflow run production-run.yml -f mode=dry-run   # plugin + Glowroot + pdfbox-app, agent check (about 5 min)
 gh workflow run production-run.yml -f mode=full      # + the authors' workload and the profile metrics (about 25 min)
 gh workflow run generate-tests.yml -f profiles_run_id=<run-id of a full production-run>   # about 15-25 min per job
+gh workflow run assess-tests.yml -f tests_run_id=<run-id of a generate-tests run>          # compile + 5 runs
 gh run download <run-id>               # outputs of a run (methods.json, checks, logs, environment report)
 ```
 
@@ -162,7 +164,9 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
   installed, and its known limitations.
 - [docs/generation.md](docs/generation.md): which pankti-generate version and why, how the tests are counted, how they
   are added to PDFBox.
-- [docs/experiments.md](docs/experiments.md): log of every experiment (question, method, result, interpretation).
+- [docs/execution.md](docs/execution.md): how the generated tests are run and their outcomes counted.
+- [docs/experiments.md](docs/experiments.md): research log of every experiment (objective, method, configuration,
+  outcome, interpretation, limitations).
 - [docs/assumptions.md](docs/assumptions.md): every simplifying assumption, with its justification, expected impact and
   validation.
 - [docs/discrepancies.md](docs/discrepancies.md): differences between the paper, the authors' artifacts and this

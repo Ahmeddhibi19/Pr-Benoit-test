@@ -1,7 +1,8 @@
 # Experiment log
 
 One entry per experiment that produced evidence used in the reproduction, including the runs that failed or were
-discarded. Every number points to a CI run or a file under `results/`. No experiment uses randomness, so there are no
+discarded. From E16 on, each entry records: objective, method, configuration, outcome, observation, interpretation,
+assumptions, limitations and next step. Every number points to a CI run or a file under `results/`. No experiment uses randomness, so there are no
 seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763, 15 GiB RAM) with AdoptOpenJDK
 11.0.8+10 and Maven 3.6.3, unless stated otherwise. The runner image and font list of each run are in its
 `env-report.txt`.
@@ -23,6 +24,9 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E13](#e13-regenerating-the-authors-tests) | 2026-10-21 | Does the generator reproduce the authors' published tests? | yes: 13,851 / 13,851 identical (with PANKTI 7afc584) |
 | [E14](#e14-generating-the-tests-from-the-reproductions-profiles) | 2026-10-21 | Tests generated from our own profiles | 14,679 tests for 47 methods, = #UNIQUE for every method |
 | [E15](#e15-integration-check) | 2026-10-21 | Do the generated tests compile and run inside PDFBox? | yes on a sample (20 / 20 pass) |
+| [E16](#e16-repeated-runs-local-check) | 2026-10-21 | Do the repeated runs and the outcome counting work? | yes on a sample (20 / 20 passing in 2 runs) |
+| [E17](#e17-execution-of-the-reproductions-tests) | 2026-10-21 | #PASSING / #FAILING / flaky of our 14,679 tests | 14,314 / 365 / 0; 38 of 46 rows equal to Table III |
+| [E18](#e18-execution-of-the-authors-published-tests) | 2026-10-21 | The authors' 13,851 tests run in our environment | 13,614 / 237 / 0: Table III exactly, 46 / 46 rows |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -181,4 +185,47 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | `scripts/pankti/integrate-tests.sh` on a fresh PDFBox 2.0.21 checkout with 3 classes generated locally from the authors' profiles (RenderingMode, PDCIDSystemInfo, XrefTrailerResolver), split with at most 5 tests per class; `mvn -pl pdfbox -am test -Dtest='Test*PanktiGen*'`. Laptop (Windows), JDK 11.0.8. |
 | Result | First attempt: compilation error, `java.lang.ref.Cleaner` not found: PDFBox's `jdkGte9` profile compiles everything with `<release>6</release>`, which overrides `testSource`/`testTarget`. Second attempt, with `<release>9</release>` on the `default-testCompile` execution only: 6 classes compile, 20 / 20 tests pass (Table III: all pass for these methods). Library classes keep version 50 (Java 6), test classes 53 (Java 9); animal-sniffer passes. |
 | Interpretation | The integration works with smaller build changes than the authors' (A18). |
+
+## E16. Repeated runs: local check
+
+| | |
+|---|---|
+| Objective | Check the repeated-run script and the outcome counting before running 14,679 tests on CI (plan task 6.2). |
+| Method | `scripts/pankti/run-generated-tests.sh` (two separate Maven invocations of `surefire:test -Dtest='Test*PanktiGen*'`) on the sample integrated in E15; `analysis/test_outcomes.py` with the paper's and the authors' counts. |
+| Configuration | Laptop (Windows), JDK 11.0.8, PDFBox surefire settings (pdfbox: `-Xmx768m`), 2 runs. |
+| Outcome | 20 tests in both runs (22 s and 4 s), all passing; per method equal to Table III and to the authors' executed tests (rows 30, 54, 68, 75). Unit test of the verdict rules (passing, failing, flaky, not run) on synthetic reports passes. |
+| Observation | Split classes (`...PanktiGenPartN`) are attributed to their target class correctly. |
+| Interpretation | The pipeline is ready for the full set. |
+| Assumptions | A19 (test-run configuration). |
+| Limitations | A sample of 20 small tests: memory and duration of the full set are unknown. |
+| Next step | E17 and E18 on CI. |
+
+## E17. Execution of the reproduction's tests
+
+| | |
+|---|---|
+| Objective | Plan task 6.2: #PASSING, #FAILING and flaky tests per method for the 14,679 tests generated from our profiles. |
+| Method | Workflow `assess-tests`, job "reproduction"; integration (A18), compilation, 5 separate runs (A19), `analysis/test_outcomes.py`, `analysis/table3_execution.py`. |
+| Configuration | Runs 39641425498 (discarded, see Outcome) and 39644913295 (result); tests of generate-tests run 39588027907; ubuntu-22.04 runner, JDK 11.0.8, PDFBox surefire settings (pdfbox `-Xmx768m`). |
+| Outcome | First run: 666 failing tests, 301 of them in the split `HorizontalMetricsTable` classes (`ConversionException`), caused by the class splitter dropping `setUpXStream()` (docs/execution.md). After the fix: all 14,679 tests executed in each of the 5 runs (about 145 s per run); **14,314 passing, 365 failing, 0 flaky** (97.51%; paper 98.29%). 38 of the 46 rows have the paper's #PASSING and #FAILING; in the 8 others (font methods, and `getColorSpace` and `getEncryption`) the number of tests differs, as #UNIQUE did (E11); the extra method `TrueTypeFont.getOS2Windows` has 114 tests, all failing. Failures: `AssertionError` in all but the `getOS2Windows` tests that throw `EOFException` or `IOException: Bad file descriptor`. (`results/day6/reproduction/`, `results/day6/table3_execution.*`) |
+| Observation | The extra failures (128) are exactly the extra tests of these 4 methods (114 + 8 + 4 + 2); where the profiles are the same, the outcomes are the same as in the paper. No test is flaky. |
+| Interpretation | The pass/fail behaviour of the generated tests is reproduced; the differences come from the profiles collected (environment, E11), not from running the tests. `getOS2Windows` returns an `OS2WindowsMetricsTable`, which does not override `equals()`, and its profiles contain an open font file (`RandomAccessFile`): the derived oracle cannot work for such objects (paper, Section V.A). |
+| Assumptions | A17-A19. |
+| Limitations | Flakiness is checked by reruns only (5 JVMs); the test order inside a run is surefire's default. |
+| Next step | Day 7: Descartes "after" with the passing tests. |
+
+
+## E18. Execution of the authors' published tests
+
+| | |
+|---|---|
+| Objective | Plan task 6.3: separate the effect of the environment from the effect of the profiles, by running the authors' own tests here. |
+| Method | Same workflow, job "authors": the 22 classes the authors published (Zenodo), with the missing `@Before` import added (A20), integrated and run like ours. |
+| Configuration | Run 39644913295 (run 39641425498 failed to compile them: the missing import). |
+| Outcome | 13,851 tests executed in each of the 5 runs (about 120 s per run): **13,614 passing, 237 failing, 0 flaky** - Table III's totals, and the paper's #PASSING and #FAILING for **all 46 methods**. Failures: `AssertionError` only. (`results/day6/authors/`) |
+| Observation | The 11,613 `getFlags` tests the authors counted as passing without executing them (discrepancies.md item 2) do pass when executed. |
+| Interpretation | The environment of this reproduction does not change the outcome of the tests; columns #PASSING and #FAILING of Table III are reproduced exactly from the authors' tests, and the differences of E17 come from the profiles. |
+| Assumptions | A20 (import repair), A18, A19. |
+| Limitations | The published classes needed a one-line repair to compile. |
+| Next step | Day 7. |
 

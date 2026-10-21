@@ -240,3 +240,15 @@ methods (`NamingTable.getName`, `PDFontDescriptor.getFlags`, `isSerif`, `isItali
 invoked here and not in the authors' run. PDFBox substitutes and caches system fonts when a PDF uses a font it does
 not embed, so these counts depend on the fonts installed: the runner has 57 font files (`env-report.txt`), the
 authors' machine is unknown. Verifying this would need a run with another font set (a sensitivity run, dropped for time). Totals differ by 1.0% (invocations), 1.9% (collected) and 6.0% (unique).
+
+## 21. The 11,613 getFlags tests that were not executed
+
+**Status: explained.** Item 2 showed that the paper's #PASSING counts 11,613 `getFlags` tests that the authors did not
+execute. Run here (assess-tests run 39644913295, after splitting the class), all of them pass, and the authors'
+published tests give exactly the paper's 13,614 passing and 237 failing tests, method by method. The paper's numbers
+are therefore right, although part of them was not measured.
+
+## 22. The published test classes do not compile as published
+
+**Status: explained (repaired, assumption A20).** 18 of the 22 classes the authors published use `@Before` without
+importing `org.junit.Before`; the other four have no `@Before`. The authors must have compiled a different copy.

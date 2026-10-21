@@ -315,3 +315,50 @@ prepare the integration of the tests into PDFBox.
 Integrate the 14,679 tests into fontbox and pdfbox on the runner and run them 5 times, each time in a separate
 Maven/JVM run. Then count passing, failing and flaky tests per method, and compare them with Table III (PASS/FAIL)
 and with the executed tests of the authors.
+
+## Day 6 - 2026-10-21: executing the generated tests
+
+**Goal of the day (plan):** run the generated tests 5 times, each in a separate JVM; #PASSING, #FAILING and flaky
+tests per method; a Track A check that separates the environment from the profiles.
+
+### Done
+
+- `scripts/pankti/run-generated-tests.sh` (5 separate Maven invocations of `surefire:test`),
+  `analysis/test_outcomes.py` (verdicts over the runs, failure types, comparison with Table III and with the tests
+  the authors executed), `analysis/table3_execution.py`, workflow `assess-tests` (our tests and the authors' published
+  tests, in the same environment).
+- Day-5 leftover: three representative generated classes in `results/day5/sample-tests/`.
+- Documentation:
+  - research log entries E16-E18 in the new format;
+  - assumptions A19 (run protocol) and A20 (repair of the published tests);
+  - new `docs/execution.md`;
+  - discrepancy items 21 and 22;
+  - README;
+  - the report reorganised into 11 sections, with a reproducibility appendix.
+
+### Results
+
+- **The authors' 13,851 published tests, run here 5 times:** 13,614 passing, 237 failing, 0 flaky. These are the
+  paper's numbers for every one of the 46 methods. The 11,613 `getFlags` tests that the authors had not executed do
+  pass.
+- **Our 14,679 tests:** 14,314 passing, 365 failing, 0 flaky (97.51%, against 98.29%).
+  - 38 of the 46 rows have the paper's values.
+  - In the other 8, the number of tests differs, as #UNIQUE does.
+  - The 128 extra failures are the extra tests of 4 methods, 114 of them from `TrueTypeFont.getOS2Windows`, which is
+    not in Table III.
+
+### Problems and decisions
+
+- **Splitter bug.** The first run (39641425498) reported 301 failures in `HorizontalMetricsTable`. The class
+  splitter dropped `setUpXStream()`, which pankti-generate writes between the tests of two target methods, so the
+  converter for `java.io.FileCleanable` was missing. Fixed and unit-tested. The run is kept as evidence and not used
+  as a result.
+- **The published classes do not compile.** 18 of the 22 classes use `@Before` without importing it. The import is
+  added only where it is missing (assumption A20).
+- **Memory.** No `OutOfMemoryError` occurred with PDFBox's 768 MB test heap, so the secondary run planned in A19 was
+  not needed.
+
+### Next (Day 7)
+
+Keep the passing, non-flaky generated tests and run Descartes "after" on fontbox and pdfbox with the same
+configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it with Table III (28 / 46).
