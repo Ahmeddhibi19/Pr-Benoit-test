@@ -1,0 +1,3 @@
+reference classes: 22; generated classes not in the reference: 0
+reference tests: 13,851; generated: 13,851
+identical test methods: 13,851; different: 0; missing: 0; extra: 0

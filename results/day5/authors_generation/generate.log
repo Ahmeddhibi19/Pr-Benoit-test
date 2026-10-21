@@ -1,0 +1,238 @@
+POM found at: /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/pom.xml
+Number of Maven modules: 11
+[InstrumentedMethod{parentFQN='org.apache.pdfbox.pdfparser.XrefTrailerResolver', methodName='getXrefType', paramList=[], returnType='org.apache.pdfbox.pdfparser.XrefTrailerResolver.XRefType', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdfparser.COSParser', methodName='getEncryption', paramList=[], returnType='org.apache.pdfbox.pdmodel.encryption.PDEncryption', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.DefaultResourceCache', methodName='getExtGState', paramList=[org.apache.pdfbox.cos.COSObject], returnType='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.PDResources', methodName='getExtGState', paramList=[org.apache.pdfbox.cos.COSName], returnType='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getAutomaticStrokeAdjustment', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getStrokingOverprintControl', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getSmoothnessTolerance', paramList=[], returnType='java.lang.Float', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getNonStrokingOverprintControl', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getOverprintMode', paramList=[], returnType='java.lang.Float', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.DefaultResourceCache', methodName='getFont', paramList=[org.apache.pdfbox.cos.COSObject], returnType='org.apache.pdfbox.pdmodel.font.PDFont', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.NamingTable', methodName='getName', paramList=[int, int, int, int], returnType='java.lang.String', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDSimpleFont', methodName='toUnicode', paramList=[int], returnType='java.lang.String', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDFontDescriptor', methodName='getFlags', paramList=[], returnType='int', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDFontDescriptor', methodName='isSymbolic', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.HorizontalMetricsTable', methodName='getAdvanceWidth', paramList=[int], returnType='int', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.TrueTypeFont', methodName='getAdvanceWidth', paramList=[int], returnType='int', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.RenderingMode', methodName='isFill', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.DefaultResourceCache', methodName='getXObject', paramList=[org.apache.pdfbox.cos.COSObject], returnType='org.apache.pdfbox.pdmodel.graphics.PDXObject', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', methodName='getMask', paramList=[], returnType='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getSoftMask', paramList=[], returnType='org.apache.pdfbox.pdmodel.graphics.state.PDSoftMask', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDTrueTypeFont', methodName='getPath', paramList=[int], returnType='java.awt.geom.GeneralPath', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.rendering.TTFGlyph2D', methodName='getPathForGID', paramList=[int, int], returnType='java.awt.geom.GeneralPath', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.rendering.TTFGlyph2D', methodName='getPathForCharacterCode', paramList=[int], returnType='java.awt.geom.GeneralPath', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.HorizontalMetricsTable', methodName='getLeftSideBearing', paramList=[int], returnType='int', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.TTFDataStream', methodName='readUnsignedByteArray', paramList=[int], returnType='int[]', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.fontbox.ttf.GlyfSimpleDescript', methodName='getFlags', paramList=[int], returnType='byte', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', methodName='getOptionalContent', paramList=[], returnType='org.apache.pdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', methodName='getInterpolate', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', methodName='getColorKeyMask', paramList=[], returnType='org.apache.pdfbox.cos.COSArray', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject', methodName='getDecode', paramList=[], returnType='org.apache.pdfbox.cos.COSArray', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.FontCache', methodName='getFont', paramList=[org.apache.pdfbox.pdmodel.font.FontInfo], returnType='org.apache.fontbox.FontBoxFont', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.PDDocumentCatalog', methodName='getViewerPreferences', paramList=[], returnType='org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDCIDFont', methodName='getCIDSystemInfo', paramList=[], returnType='org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo', methodName='getRegistry', paramList=[], returnType='java.lang.String', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo', methodName='getOrdering', paramList=[], returnType='java.lang.String', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.DefaultResourceCache', methodName='getColorSpace', paramList=[org.apache.pdfbox.cos.COSObject], returnType='org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDCIDFontType2', methodName='codeToGID', paramList=[int], returnType='int', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDCIDFontType2', methodName='getPath', paramList=[int], returnType='java.awt.geom.GeneralPath', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.color.PDICCBased', methodName='getDefaultDecode', paramList=[int], returnType='float[]', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDFontDescriptor', methodName='isFixedPitch', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDFontDescriptor', methodName='isSerif', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDFontDescriptor', methodName='isItalic', paramList=[], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.font.PDSimpleFont', methodName='hasExplicitWidth', paramList=[int], returnType='boolean', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getStrokingAlphaConstant', paramList=[], returnType='java.lang.Float', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getNonStrokingAlphaConstant', paramList=[], returnType='java.lang.Float', visibility='public'}, InstrumentedMethod{parentFQN='org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState', methodName='getAlphaSourceFlag', paramList=[], returnType='boolean', visibility='public'}]
+Number of instrumented methods: 46
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.GlyfSimpleDescript.getFlags
+Number of pairs/triples of object values: 23471
+Number of unique pairs/triples of object values: 11730
+Generated test class: org.apache.fontbox.ttf.TestGlyfSimpleDescriptPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.HorizontalMetricsTable.getAdvanceWidth
+Number of pairs/triples of object values: 275
+Number of unique pairs/triples of object values: 174
+Generated test class: org.apache.fontbox.ttf.TestHorizontalMetricsTablePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.HorizontalMetricsTable.getLeftSideBearing
+Number of pairs/triples of object values: 360
+Number of unique pairs/triples of object values: 360
+Generated test class: org.apache.fontbox.ttf.TestHorizontalMetricsTablePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.NamingTable.getName
+Number of pairs/triples of object values: 563
+Number of unique pairs/triples of object values: 273
+Generated test class: org.apache.fontbox.ttf.TestNamingTablePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.TTFDataStream.readUnsignedByteArray
+Number of pairs/triples of object values: 431
+Number of unique pairs/triples of object values: 431
+Generated test class: org.apache.fontbox.ttf.TestTTFDataStreamPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.fontbox.ttf.TrueTypeFont.getAdvanceWidth
+Number of pairs/triples of object values: 275
+Number of unique pairs/triples of object values: 174
+Generated test class: org.apache.fontbox.ttf.TestTrueTypeFontPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdfparser.COSParser.getEncryption
+Number of pairs/triples of object values: 38
+Number of unique pairs/triples of object values: 33
+Generated test class: org.apache.pdfbox.pdfparser.TestCOSParserPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdfparser.XrefTrailerResolver.getXrefType
+Number of pairs/triples of object values: 46
+Number of unique pairs/triples of object values: 17
+Generated test class: org.apache.pdfbox.pdfparser.TestXrefTrailerResolverPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.DefaultResourceCache.getExtGState
+Number of pairs/triples of object values: 24
+Number of unique pairs/triples of object values: 22
+Generated test class: org.apache.pdfbox.pdmodel.TestDefaultResourceCachePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.DefaultResourceCache.getFont
+Number of pairs/triples of object values: 29
+Number of unique pairs/triples of object values: 29
+Generated test class: org.apache.pdfbox.pdmodel.TestDefaultResourceCachePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.DefaultResourceCache.getXObject
+Number of pairs/triples of object values: 15
+Number of unique pairs/triples of object values: 15
+Generated test class: org.apache.pdfbox.pdmodel.TestDefaultResourceCachePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.DefaultResourceCache.getColorSpace
+Number of pairs/triples of object values: 25
+Number of unique pairs/triples of object values: 23
+Generated test class: org.apache.pdfbox.pdmodel.TestDefaultResourceCachePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.PDDocumentCatalog.getViewerPreferences
+Number of pairs/triples of object values: 8
+Number of unique pairs/triples of object values: 8
+Generated test class: org.apache.pdfbox.pdmodel.TestPDDocumentCatalogPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.PDResources.getExtGState
+Number of pairs/triples of object values: 19
+Number of unique pairs/triples of object values: 18
+Generated test class: org.apache.pdfbox.pdmodel.TestPDResourcesPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.FontCache.getFont
+Number of pairs/triples of object values: 115
+Number of unique pairs/triples of object values: 106
+Generated test class: org.apache.pdfbox.pdmodel.font.TestFontCachePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDCIDFont.getCIDSystemInfo
+Number of pairs/triples of object values: 3
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDCIDFontPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDCIDFontType2.codeToGID
+Number of pairs/triples of object values: 38
+Number of unique pairs/triples of object values: 7
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDCIDFontType2PanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDCIDFontType2.getPath
+Number of pairs/triples of object values: 6
+Number of unique pairs/triples of object values: 6
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDCIDFontType2PanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo.getRegistry
+Number of pairs/triples of object values: 3
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDCIDSystemInfoPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo.getOrdering
+Number of pairs/triples of object values: 12
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDCIDSystemInfoPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDFontDescriptor.getFlags
+Number of pairs/triples of object values: 227
+Number of unique pairs/triples of object values: 54
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDFontDescriptorPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDFontDescriptor.isSymbolic
+Number of pairs/triples of object values: 24
+Number of unique pairs/triples of object values: 20
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDFontDescriptorPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDFontDescriptor.isFixedPitch
+Number of pairs/triples of object values: 21
+Number of unique pairs/triples of object values: 6
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDFontDescriptorPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDFontDescriptor.isSerif
+Number of pairs/triples of object values: 21
+Number of unique pairs/triples of object values: 6
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDFontDescriptorPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDFontDescriptor.isItalic
+Number of pairs/triples of object values: 21
+Number of unique pairs/triples of object values: 6
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDFontDescriptorPanktiGen
+--------------------------------------------------------------
+matched params [int] for overloaded method org.apache.pdfbox.pdmodel.font.PDSimpleFont.toUnicode
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDSimpleFont.toUnicode
+Number of pairs/triples of object values: 37
+Number of unique pairs/triples of object values: 35
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDSimpleFontPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDSimpleFont.hasExplicitWidth
+Number of pairs/triples of object values: 144
+Number of unique pairs/triples of object values: 117
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDSimpleFontPanktiGen
+--------------------------------------------------------------
+matched params [int] for overloaded method org.apache.pdfbox.pdmodel.font.PDTrueTypeFont.getPath
+Generating test method for: org.apache.pdfbox.pdmodel.font.PDTrueTypeFont.getPath
+Number of pairs/triples of object values: 36
+Number of unique pairs/triples of object values: 36
+Generated test class: org.apache.pdfbox.pdmodel.font.TestPDTrueTypeFontPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.color.PDICCBased.getDefaultDecode
+Number of pairs/triples of object values: 16
+Number of unique pairs/triples of object values: 8
+Generated test class: org.apache.pdfbox.pdmodel.graphics.color.TestPDICCBasedPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getMask
+Number of pairs/triples of object values: 13
+Number of unique pairs/triples of object values: 13
+Generated test class: org.apache.pdfbox.pdmodel.graphics.image.TestPDImageXObjectPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getOptionalContent
+Number of pairs/triples of object values: 7
+Number of unique pairs/triples of object values: 7
+Generated test class: org.apache.pdfbox.pdmodel.graphics.image.TestPDImageXObjectPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getInterpolate
+Number of pairs/triples of object values: 8
+Number of unique pairs/triples of object values: 8
+Generated test class: org.apache.pdfbox.pdmodel.graphics.image.TestPDImageXObjectPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getColorKeyMask
+Number of pairs/triples of object values: 7
+Number of unique pairs/triples of object values: 7
+Generated test class: org.apache.pdfbox.pdmodel.graphics.image.TestPDImageXObjectPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.getDecode
+Number of pairs/triples of object values: 7
+Number of unique pairs/triples of object values: 7
+Generated test class: org.apache.pdfbox.pdmodel.graphics.image.TestPDImageXObjectPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getAutomaticStrokeAdjustment
+Number of pairs/triples of object values: 33
+Number of unique pairs/triples of object values: 4
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getStrokingOverprintControl
+Number of pairs/triples of object values: 48
+Number of unique pairs/triples of object values: 3
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getSmoothnessTolerance
+Number of pairs/triples of object values: 21
+Number of unique pairs/triples of object values: 3
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getNonStrokingOverprintControl
+Number of pairs/triples of object values: 24
+Number of unique pairs/triples of object values: 3
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getOverprintMode
+Number of pairs/triples of object values: 24
+Number of unique pairs/triples of object values: 3
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getSoftMask
+Number of pairs/triples of object values: 20
+Number of unique pairs/triples of object values: 4
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getStrokingAlphaConstant
+Number of pairs/triples of object values: 12
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getNonStrokingAlphaConstant
+Number of pairs/triples of object values: 12
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState.getAlphaSourceFlag
+Number of pairs/triples of object values: 12
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestPDExtendedGraphicsStatePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.pdmodel.graphics.state.RenderingMode.isFill
+Number of pairs/triples of object values: 30944
+Number of unique pairs/triples of object values: 1
+Generated test class: org.apache.pdfbox.pdmodel.graphics.state.TestRenderingModePanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.rendering.TTFGlyph2D.getPathForGID
+Number of pairs/triples of object values: 34
+Number of unique pairs/triples of object values: 34
+Generated test class: org.apache.pdfbox.rendering.TestTTFGlyph2DPanktiGen
+--------------------------------------------------------------
+Generating test method for: org.apache.pdfbox.rendering.TTFGlyph2D.getPathForCharacterCode
+Number of pairs/triples of object values: 34
+Number of unique pairs/triples of object values: 34
+Generated test class: org.apache.pdfbox.rendering.TestTTFGlyph2DPanktiGen
+--------------------------------------------------------------
+Number of new test cases: 13851
