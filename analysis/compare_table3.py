@@ -1,6 +1,9 @@
 """Compare the profile metrics of a workload run with Table III (columns #INVOCATIONS, #COLLECTED, #UNIQUE).
 
-usage: compare_table3.py <ours.csv> <authors.csv> <authors_invoked-methods.csv> <out_prefix>
+usage: compare_table3.py <ours.csv> <authors.csv> <authors_invoked-methods.csv> <out_prefix> [--tests <generated_tests.csv>]
+
+With --tests (output of count_generated_tests.py on this reproduction's generated tests), the #PANKTI_TESTS column
+of Table III is compared as well.
 
 <ours.csv> and <authors.csv> are outputs of profile_stats.py --fragments (this reproduction's profiles and the
 authors' replication data). The authors' invoked-methods.csv gives the parameter types of the 46 methods of
@@ -29,6 +32,10 @@ def main(argv):
         print(__doc__)
         return 2
     ours, authors = load_stats(argv[1]), load_stats(argv[2])
+    generated = {}
+    if "--tests" in argv:
+        with open(argv[argv.index("--tests") + 1], newline="", encoding="utf-8") as f:
+            generated = {(r["class"], r["method"], norm(r["params"])): r["pankti_tests"] for r in csv.DictReader(f)}
     out = Path(argv[4])
     with open(HERE / "paper" / "table3_pdfbox.csv", newline="") as f:
         paper = {r["class_method"]: r for r in csv.DictReader(f)}
@@ -51,6 +58,9 @@ def main(argv):
             row[f"ours_{c}"] = o.get(c, "")
         row["ours_threshold_hit"] = o.get("threshold_hit", "")
         row["ours_max_depth"] = o.get("max_depth", "")
+        if generated:
+            row["paper_tests"] = p.get("tests", "")
+            row["ours_tests"] = generated.get(key, "")
         rows.append(row)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(f"{out}.csv", "w", newline="", encoding="utf-8") as f:

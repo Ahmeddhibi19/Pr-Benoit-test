@@ -1,6 +1,6 @@
 # Reproduction de l'étude de cas 2 (PDFBox) de « Production Monitoring to Improve Test Suites »
 
-*Rapport de reproduction, rédigé au fil du travail. État : 20 octobre 2026 (fin du jour 4).*
+*Rapport de reproduction, rédigé au fil du travail. État : 21 octobre 2026 (fin du jour 5).*
 
 Conventions :
 - **[Publié]** : valeur ou affirmation de l'article ;
@@ -88,7 +88,9 @@ Le portable Windows sert seulement au développement : le système d'exploitatio
 4. Plugin construit avec le générateur des auteurs (`instrument.py`), installé dans Glowroot. Vérification sans charge de travail.
 5. Charge de travail : le script `run.sh` des auteurs, inchangé sauf les deux chemins propres à leur machine.
 6. Métriques des profils (`analysis/profile_stats.py --fragments`) et comparaison au tableau III (`analysis/compare_table3.py`).
-7. *(jours 5 à 7)* génération des tests, exécution, Descartes « après ».
+7. Génération des tests avec pankti-generate (`scripts/pankti/generate-tests.sh`), à partir de nos profils et, pour validation, de ceux des auteurs (`docs/generation.md`).
+8. Intégration des tests dans PDFBox (`scripts/pankti/integrate-tests.sh`).
+9. *(jours 6 et 7)* exécution des tests (5 fois), Descartes « après ».
 
 **Validation des outils de mesure.** Avant d'être appliqués à nos données, les scripts de mesure ont été validés sur les données brutes des auteurs (5,9 Go de profils XML). **[Mesuré sur les artefacts]** Ils redonnent exactement :
 - les colonnes #INVOCATIONS, #COLLECTED et #UNIQUE du tableau III pour les 46 méthodes (121 175 / 57 563 / 13 851) ;
@@ -118,10 +120,13 @@ Le portable Windows sert seulement au développement : le système d'exploitatio
    - Une empreinte calculée sur une copie Windows ne correspondait pas au fichier versionné (corrigé avant publication).
    - Un script fonctionnait avec un chemin absolu mais pas avec le chemin relatif utilisé en intégration continue ; une exécution a échoué, puis tout a été rejoué localement à l'identique avant de relancer.
 6. **Définition de la « profondeur d'imbrication ».** L'article annonce une profondeur maximale de 36 sans la définir. Sur les données brutes des auteurs, la profondeur des éléments XML atteint 73 (`COSParser.getEncryption`). Aucune autre définition essayée ne donne 36 (sans les éléments `entry` : 72 ; éléments typés seulement : 51). L'autre chiffre de l'article, « `toUnicode` imbriqué sur 13 niveaux », correspond bien à la profondeur XML moins un (14 − 1). Question laissée ouverte (section 6).
+7. **Version du générateur et retouches manuelles.** Les tests publiés par les auteurs n'ont pas été produits par la version de PANKTI utilisée pour la charge de travail (`0fddf27`). Ils contiennent des méthodes `deserializeObject()` que le générateur n'écrit qu'à partir du commit `7afc584` (12 novembre 2020), une méthode `setUpXStream()` dont l'appel est commenté dans le code du générateur, et des imports ajoutés à la main. L'hypothèse a été vérifiée en régénérant tous les tests à partir des profils des auteurs (section 6.6).
+8. **Niveau de compilation des tests.** Les tests générés utilisent des convertisseurs qui dépendent de `java.lang.ref.Cleaner` (Java 9). Sous JDK 11, un profil de PDFBox impose `<release>6</release>` à toute compilation, ce qui annulait le réglage `testSource`/`testTarget` ; la compilation échouait. Seule la compilation des tests reçoit désormais `<release>9</release>`.
+9. **Mémoire.** pankti-generate charge chaque fichier de profils (jusqu'à 210 Mo) en DOM ; la génération demande environ 12 Go et s'exécute sur l'exécuteur d'intégration continue, le portable n'ayant pas assez de mémoire libre.
 
 ## 5. Hypothèses simplificatrices et adaptations méthodologiques
 
-La liste complète, au format exigé (exigence d'origine, problème, simplification, justification, impact attendu, validation, restitution), est dans `docs/assumptions.md` (A1 à A16). Les plus importantes :
+La liste complète, au format exigé (exigence d'origine, problème, simplification, justification, impact attendu, validation, restitution), est dans `docs/assumptions.md` (A1 à A18). Les plus importantes :
 
 | # | Adaptation | Pourquoi | Impact et validation |
 |---|---|---|---|
@@ -134,6 +139,8 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 | A14 | `run.sh` des auteurs avec seulement deux chemins remplacés | chemins propres à leur machine | différence de 2 lignes, conservée avec les résultats |
 | A15 | #UNIQUE calculé sur le texte exact des fragments XML | reproduire la règle de pankti-generate sans le lancer | validé : 46 valeurs sur 46 identiques au tableau III |
 | A11 | #PASSING ne compte que les tests réellement exécutés | les artefacts montrent 11 613 tests comptés comme réussis sans avoir été exécutés | à mesurer (jour 6) |
+| A17 | Générateur pankti-generate `7afc584` avec `setUpXStream()` activé | version des tests publiés par les auteurs ; même analyseur de profils que `0fddf27` | validé : 13 851 tests sur 13 851 identiques aux tests publiés |
+| A18 | Seule la compilation des tests passe en Java 9 ; convertisseurs copiés dans chaque paquetage ; classes de plus de 500 tests découpées | ne pas modifier le bytecode de la bibliothèque mutée ; permettre d'exécuter les 11 730 tests de `getFlags` | vérifié localement : bibliothèque en Java 6 (version 50), tests en Java 9 (53), 20 tests sur 20 passent |
 
 ## 6. Résultats et comparaison
 
@@ -186,33 +193,61 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 
 **[Mesuré]** La profondeur maximale des éléments XML vaut 73 dans les données des auteurs comme dans les nôtres (36 annoncé dans l'article). Faute de définition, la même mesure est appliquée aux deux jeux de données ; elle concorde entre eux, mais pas avec la valeur publiée.
 
-## 7. Observations et réflexions
+### 6.5 Figure 5 : taille des profils
 
-- **[Interprétation]** La reproductibilité dépend des artefacts bien plus que du texte. L'article ne donne ni versions, ni configuration de Descartes, ni script de charge. Sans le dépôt d'expériences et l'archive Zenodo, ces éléments seraient des suppositions. Grâce à eux, des résultats sont reproduits à l'identique six ans plus tard.
-- **[Interprétation]** Une analyse de mutation n'est pas plus déterministe que la suite de tests qu'elle exécute. Des tests qui partagent des fichiers ou dépendent du réseau font compter comme « détectés » des mutants qui ne le sont pas. Le parallélisme amplifie cet effet au point de changer d'un tiers la sélection des cibles. Ce paramètre n'apparaît pas dans l'article.
-- **[Interprétation]** L'environnement d'exécution est une variable expérimentale à part entière : système d'exploitation, polices, fins de ligne. Quatre méthodes changent de statut Descartes entre Windows et Linux.
-- **[Interprétation]** Compter des tests non exécutés comme réussis surestime le taux de réussite (98,3 % contre 89,4 % sur les tests exécutés).
-- **[Mesuré]** Le seuil de 200 Mo est atteint très vite : deux exécutions d'une seule commande suffisent pour 11 méthodes. Il borne fortement #COLLECTED pour les méthodes appelées sur de gros objets.
-- **[Interprétation]** La charge de travail elle-même est parfaitement reproductible (mêmes commandes, mêmes erreurs). Ce qui varie, ce sont les méthodes qui dépendent de l'environnement (les polices). Une « production » n'est donc pas seulement une suite d'entrées : l'état de la machine en fait partie, et les profils collectés en dépendent.
-- **[Interprétation]** La charge de travail des auteurs est plus petite qu'annoncé : 11 des 50 appels échouent, dont tous ceux sur `000809.pdf`, déjà chiffré. Ce détail ne figure pas dans l'article. Il ne change pas les métriques de l'article, qui proviennent de cette même exécution, mais il réduit la diversité réelle des entrées observées.
+![Figure 5 reproduite](../results/day5/fig5.png)
 
-## 8. Limites et améliorations possibles
+| Tranche (Mio) | 0-10 | 10-20 | 20-30 | 30-40 | 40-50 | 50-60 |
+|---|---|---|---|---|---|---|
+| Données des auteurs (= figure 5 de l'article) | 57 458 | 71 | 3 | 23 | 5 | 3 |
+| Reproduction | 58 563 | 75 | 3 | 23 | 5 | 3 |
 
-- La machine des auteurs (polices installées, cache de polices) est inconnue. Les nombres d'invocations des méthodes liées aux polices peuvent différer.
+**[Mesuré]** Même forme que la figure de l'article ; les tranches au-delà de 20 Mio, qui correspondent aux méthodes plafonnées, sont identiques. (`results/day5/fig5.csv`)
+
+### 6.6 Génération des tests
+
+- **[Mesuré sur les artefacts]** À partir des profils des auteurs, pankti-generate `7afc584` (avec `setUpXStream()` activé) produit 13 851 tests, **tous identiques, méthode par méthode, aux 13 851 tests publiés** ; #PANKTI_TESTS = #UNIQUE pour les 46 méthodes. L'étape de génération est donc reproduite exactement. (`results/day5/authors_generation/`)
+- **[Mesuré]** À partir de nos profils : 14 679 tests pour 47 méthodes, égal à #UNIQUE pour chaque méthode (article : 13 851). Les écarts avec l'article sont ceux de #UNIQUE, concentrés sur les méthodes liées aux polices. (`results/day5/table3_partial.csv`)
+- **[Mesuré]** Intégration vérifiée localement sur un échantillon : les tests compilent et passent ; l'exécution complète (5 fois) est l'objet du jour 6.
+
+## 7. Observations et analyse
+
+- **[Mesuré]** Le seuil de 200 Mo est atteint très vite : deux exécutions d'une seule commande suffisent pour 11 méthodes. Il borne fortement #COLLECTED pour les méthodes appelées sur de gros objets, et les profils les plus volumineux (au-delà de 20 Mio) sont exactement les mêmes dans les deux exécutions.
+- **[Mesuré]** La charge de travail elle-même est parfaitement reproductible (mêmes commandes, mêmes erreurs). Ce qui varie, ce sont les méthodes liées aux polices : `NamingTable.getName` passe de 273 à 976 profils uniques.
+- **[Interprétation]** Une « production » n'est donc pas seulement une suite d'entrées : l'état de la machine (polices installées) en fait partie, et les tests générés en dépendent. Cause probable, non vérifiée faute d'une exécution avec un autre jeu de polices.
+- **[Mesuré]** La charge de travail des auteurs est plus petite qu'annoncé : 11 des 50 appels échouent, dont tous ceux sur `000809.pdf`, déjà chiffré. Ce détail ne figure pas dans l'article. Il ne change pas les métriques publiées, qui proviennent de cette même exécution, mais réduit la diversité réelle des entrées observées.
+- **[Mesuré]** Une analyse de mutation n'est pas plus déterministe que la suite de tests qu'elle exécute : avec 4 fils, des tests qui partagent des fichiers ou téléchargent des données font compter comme « détectés » des mutants qui ne le sont pas, au point de faire passer les cibles de 138 à 91.
+- **[Mesuré sur les artefacts]** Les artefacts publiés mélangent deux versions de l'outil et des retouches manuelles : instrumentation en `0fddf27`, génération en `7afc584`, imports et classes de conversion ajoutés à la main. Rien de cela n'est dit dans l'article ; les nombres publiés restent néanmoins exactement reproductibles à partir des artefacts.
+- **[Mesuré sur les artefacts]** Compter des tests non exécutés comme réussis surestime le taux de réussite (98,3 % contre 89,4 % sur les tests réellement exécutés).
+
+## 8. Réflexions et leçons apprises
+
+- **[Interprétation]** La reproductibilité dépend des artefacts bien plus que du texte. L'article ne donne ni versions, ni configuration de Descartes, ni script de charge. Sans le dépôt d'expériences et l'archive Zenodo, ces éléments seraient des suppositions ; avec eux, plusieurs résultats sont reproduits à l'identique six ans plus tard.
+- **Ce qui a fonctionné.** Valider chaque outil de mesure sur les données des auteurs avant de l'appliquer aux nôtres (comptage des profils uniques, comptage des tests, comparaison des tests). Cela a révélé un défaut de mon analyseur XML (les éléments vides) avant qu'il ne fausse un résultat, et chaque comparaison sert ensuite de test de non-régression.
+- **Ce qui a fonctionné.** Traiter chaque résultat surprenant comme un indice : `isFill` « testée » a révélé l'effet du parallélisme ; des tests publiés différents des nôtres ont révélé la version du générateur.
+- **Ce qui a moins bien fonctionné.** Plusieurs échecs d'intégration continue venaient de différences entre l'environnement local (Windows : fins de ligne, conversion des chemins) et l'exécuteur Linux. Rejouer localement l'appel exact de l'intégration continue avant de pousser a évité de les répéter.
+- **À reconsidérer.** Choisir dès le départ le même système d'exploitation pour le développement et les mesures, et figer toutes les dépendances (y compris celles des outils des auteurs).
+- **Sur la méthode de l'article.** L'oracle dérivé de la production dépend de choix d'outillage non décrits (nombre de fils de PIT, version du générateur, convertisseurs XStream) et de l'environnement (polices). Ces choix influencent fortement les nombres publiés ; un article de ce type gagnerait à les documenter explicitement.
+
+## 9. Limites et menaces à la validité
+
+- La machine des auteurs (polices installées, cache de polices) est inconnue. Les nombres d'invocations des méthodes liées aux polices diffèrent ; la cause n'est pas vérifiée.
 - Le module `examples` n'est plus couvert après l'exclusion des tests au certificat expiré. C'est sans effet sur les cibles.
 - La définition de la profondeur d'imbrication n'est pas documentée ; la valeur 36 n'est pas reproduite.
-- Contraintes de calendrier : pas d'analyses de sensibilité (charge de travail corrigée pour `000809`, exécution sous Windows), ni des chiffres de couverture du tableau II.
-- **Pistes :**
-  - rendre les tests de PDFBox sûrs en parallèle (répertoires temporaires distincts) et revérifier Descartes avec plusieurs fils ;
-  - figer les dépendances de pankti-extract ;
-  - comparer avec la version de PANKTI corrigée pour l'appariement des profils (`326a753`).
+- La génération utilise une version du générateur postérieure à l'instrumentation, comme les auteurs ; le nombre de tests n'en dépend pas (même analyseur), mais leur forme oui.
+- Contraintes de calendrier : pas d'analyses de sensibilité (charge de travail corrigée pour `000809`, exécution sous Windows, autre jeu de polices), ni des chiffres de couverture du tableau II.
 
-## 9. Conclusion
+## 10. Conclusion et travaux futurs
 
 *(à rédiger en fin de projet)* À ce stade :
-- les cibles (138) sont reproduites exactement ;
-- la classification Descartes est quasi identique à celle des auteurs ;
-- l'outillage de mesure est validé sur les données des auteurs ;
-- la charge de travail complète redonne les colonnes 1 à 3 du tableau III à quelques pour cent près, avec les mêmes 46 cibles effectives, les mêmes 19 méthodes plafonnées et `isFill` à l'identique ; les écarts se concentrent sur les méthodes liées aux polices.
+- les cibles (138) sont reproduites exactement ; la classification Descartes est quasi identique à celle des auteurs ;
+- l'outillage de mesure et l'étape de génération sont validés sur les données des auteurs (13 851 tests sur 13 851 identiques) ;
+- la charge de travail redonne les colonnes 1 à 4 du tableau III à quelques pour cent près (mêmes 46 cibles, mêmes 19 méthodes plafonnées, `isFill` à l'identique, figure 5 de même forme) ; les écarts se concentrent sur les méthodes liées aux polices.
 
-Les étapes restantes sont la génération et l'exécution des tests, puis l'évaluation finale par Descartes.
+Restent l'exécution des tests et l'évaluation finale par Descartes (statut « bien testée »).
+
+**Pistes :**
+- rendre les tests de PDFBox sûrs en parallèle (répertoires temporaires distincts) et revérifier Descartes avec plusieurs fils ;
+- figer les dépendances de pankti-extract ;
+- mesurer l'effet des polices par une exécution avec un autre jeu de polices ;
+- comparer avec la version de PANKTI corrigée pour l'appariement des profils (`326a753`).

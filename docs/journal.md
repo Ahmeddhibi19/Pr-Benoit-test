@@ -264,3 +264,54 @@ Add the `smoke` and `full` modes to `production-run`:
   number of generated tests equals #UNIQUE.
 - Prepare the integration of the generated tests into fontbox and pdfbox (XStream test dependency, compiler level 9,
   animal-sniffer).
+
+## Day 5 - 2026-10-21: Figure 5, test generation, integration
+
+**Goal of the day (plan):** Figure 5 and the size facts; generate the tests and check #PANKTI_TESTS = #UNIQUE;
+prepare the integration of the tests into PDFBox.
+
+### Done
+
+- `analysis/figure5.py` -> `results/day5/fig5.{png,csv}`.
+- pankti-generate:
+  - built at `7afc584` with `setUpXStream()` enabled (`scripts/pankti/build-generator.sh`);
+  - run by `scripts/pankti/generate-tests.sh`;
+  - tests counted by `analysis/count_generated_tests.py` and compared by `analysis/compare_generated_tests.py`;
+  - workflow `generate-tests`.
+- Integration: `scripts/pankti/integrate-tests.sh` and `scripts/pankti/split_test_classes.py`.
+- `results/day5/table3_partial.csv`: Table III columns 1-4 for the paper, the authors' data and this reproduction.
+- Documentation:
+  - new `docs/generation.md`;
+  - E12-E15 in `docs/experiments.md`, A17-A18 in `docs/assumptions.md`;
+  - README and report.
+
+### Results
+
+- **Figure 5:** same shape as the paper's. The bins from 20 MiB up are identical to the authors' data.
+- **Which generator the authors used:** their published tests have `deserializeObject()` helpers that only
+  pankti-generate `7afc584` (2020-11-12) writes, and a `setUpXStream()` method that is commented out in its sources.
+  Generated from the authors' own profiles with that version (with the method enabled), all 13,851 tests are
+  identical to the published ones.
+- **Our own tests:** generated from our profiles, 14,679 tests for 47 methods, equal to #UNIQUE for every method.
+- **Integration:** a local sample compiles and its 20 tests pass.
+
+### Problems and decisions
+
+- **Generator version.** The instrumentation (`0fddf27`, at the time of the workload run) and the generation
+  (`7afc584`, the version of the published tests) use different PANKTI commits. The profile parser is the same in
+  both, so the number of tests does not depend on the choice. The authors also edited the published tests by hand
+  (converter imports and classes).
+- **Compilation level.** PDFBox's `jdkGte9` profile compiles everything with `<release>6</release>`, so the
+  `testSource`/`testTarget` setting had no effect and the converters (`java.lang.ref.Cleaner`) did not compile. Only
+  the test compilation now gets `<release>9</release>`; the library stays at Java 6.
+- **Large class.** The `getFlags` test class (11,730 tests, 90 MB) is split into classes of at most 500 tests.
+- **Download path.** The first generation run failed on the reproduction side: one downloaded artifact is not put in a
+  sub-folder. Fixed.
+- **Memory.** The generation needs about 12 GB (DOM parsing of profile files up to 210 MB). It runs on CI, since the
+  laptop has too little free memory.
+
+### Next (Day 6)
+
+Integrate the 14,679 tests into fontbox and pdfbox on the runner and run them 5 times, each time in a separate
+Maven/JVM run. Then count passing, failing and flaky tests per method, and compare them with Table III (PASS/FAIL)
+and with the executed tests of the authors.

@@ -19,6 +19,10 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E9](#e9-profile-metrics-on-the-authors-data) | 2026-10-20 | Do the metric scripts reproduce Table III from the authors' raw profiles? | yes for all 46 methods; depth 36 not reproduced |
 | [E10](#e10-smoke-test-of-the-instrumentation) | 2026-10-20 | Does the instrumentation record profiles on CI? | yes; isFill as in the paper; counts cumulative |
 | [E11](#e11-full-workload) | 2026-10-20 | Columns 1-3 of Table III with our own run | 46/46 effective targets, isFill exact, totals within 1-6%; differences on font methods |
+| [E12](#e12-figure-5) | 2026-10-21 | Figure 5 | same shape; bins from 20 MiB identical |
+| [E13](#e13-regenerating-the-authors-tests) | 2026-10-21 | Does the generator reproduce the authors' published tests? | yes: 13,851 / 13,851 identical (with PANKTI 7afc584) |
+| [E14](#e14-generating-the-tests-from-the-reproductions-profiles) | 2026-10-21 | Tests generated from our own profiles | 14,679 tests for 47 methods, = #UNIQUE for every method |
+| [E15](#e15-integration-check) | 2026-10-21 | Do the generated tests compile and run inside PDFBox? | yes on a sample (20 / 20 pass) |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -138,4 +142,43 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Result | Workload: 50 / 50 commands with the same outcome as the authors' (39 ok, 9 errors on `000809.pdf`, 2 PDFMerger usage messages); 687 s (the authors' log spans about 16 min). Profiles: 47 methods invoked, all 46 of Table III plus `TrueTypeFont.getOS2Windows` (342 invocations). Totals: 122,384 invocations (paper 121,175), 58,672 collected (57,563), 14,679 unique (13,851); collected/invocations 47.9% (47.5%), unique/collected 25.0% (24.0%). 19 methods hit the threshold (19). Smallest profile 158 B, largest 54.7 MiB, 5.30 GiB in total (paper 5.5 GB). Maximum XML depth 73, the same as the authors' data. **isFill: 30,944 / 30,944 / 1 unique, 158 B each: exact match.** Per method, 41 of 46 invocation counts, 40 collected counts and 38 unique counts are identical to Table III. (`results/day4/full/`, `results/day4/table3_comparison.*`) |
 | Differences | `NamingTable.getName` (650 -> 1,457 invocations, 273 -> 976 unique), `PDFontDescriptor.getFlags` (227 -> 257), `isSerif`/`isItalic`/`isFixedPitch` (21 -> 31), `FontCache.getFont` (106 -> 103 unique), `DefaultResourceCache.getColorSpace` (25 -> 29 collected), `COSParser.getEncryption` (33 -> 35 unique), and the extra `TrueTypeFont.getOS2Windows`. |
 | Interpretation | The workload behaves exactly as the authors' did. All non-font methods match and the font methods do not, which points to the fonts installed on the machine (PDFBox matches and caches system fonts); the authors' font set is unknown (risk R3, assumption A5). This cause is probable, not verified. |
+
+## E12. Figure 5
+
+| | |
+|---|---|
+| Objective | Plan task 5.1: the distribution of profile sizes (paper, Figure 5: 10 MB bins, logarithmic count axis). |
+| Method | `analysis/figure5.py` on the size files of the authors' data (the data behind the paper's figure) and of run 39444526027. 10 MiB bins, since the paper uses binary units (discrepancies.md, item 1b). |
+| Result | Authors / reproduction: 57,458 / 58,563 profiles below 10 MiB, 71 / 75 in 10-20 MiB, then 3, 23, 5, 3 in both for 20-30, 30-40, 40-50 and 50-60 MiB. Smallest 158 B in both, largest 57,385,679 B / 57,385,628 B. (`results/day5/fig5.png`, `fig5.csv`) |
+| Interpretation | Same shape as the paper's figure; the large profiles (above 20 MiB, all from methods capped by the threshold) are identical in number, the small ones differ with the font methods (E11). |
+
+## E13. Regenerating the authors' tests
+
+| | |
+|---|---|
+| Objective | Validate the generation step on its own: from the authors' profiles, does pankti-generate produce the tests they published? |
+| Method | Workflow `generate-tests` (run 39581267651, job "authors"): Zenodo profiles, pankti-generate at `7afc584` with `setUpXStream()` enabled (A17), 12 GB heap; `analysis/count_generated_tests.py`, `analysis/compare_generated_tests.py` against the 22 published classes. |
+| Hypothesis | The published tests come from `7afc584` (their `deserializeObject()` helpers); a 3-class local run already matched. |
+| Result | 22 classes, 13,851 tests, 4,464 resource files (as published), 564 s. #PANKTI_TESTS = #UNIQUE for all 46 methods. Test by test: 13,851 identical, 0 different, 0 missing, 0 extra. (`results/day5/authors_generation/`) |
+| Failures | The other job of the same run (reproduction) failed: the profile archive was looked for in a sub-folder (single artifacts are downloaded directly into the path). Fixed. |
+| Interpretation | The generation step is reproduced exactly. The published tests were made with a later generator than the instrumentation and edited by hand (imports, converter classes). |
+
+## E14. Generating the tests from the reproduction's profiles
+
+| | |
+|---|---|
+| Objective | Plan task 5.2: generate the differential unit tests from this reproduction's profiles (production-run 39444526027). |
+| Method | Workflow `generate-tests`, run 39588027907 (job "reproduction"): the profile archive of run 39444526027, pankti-generate `7afc584` with `setUpXStream()` (A17), 12 GB heap. |
+| Expected | #PANKTI_TESTS = #UNIQUE for every method (14,679 from E11); paper: 13,851. |
+| Result | 22 test classes, 14,679 tests for 47 methods, #PANKTI_TESTS = #UNIQUE for all 47; 5,414 resource files (4.9 GB); no method skipped, no exception in the log; 455 s. The tests and resources are archived as artifact `generated-tests-2` (391 MB compressed, kept 5 days) and copied locally. (`results/day5/reproduction_generation/`, `results/day5/table3_partial.csv`) |
+| Interpretation | Column #PANKTI_TESTS of Table III follows #UNIQUE exactly, as in the authors' run; the differences with the paper are those of #UNIQUE (E11). |
+
+## E15. Integration check
+
+| | |
+|---|---|
+| Objective | Plan task 5.3: prepare and test the integration of the generated tests into PDFBox before running the whole set (Day 6). |
+| Method | `scripts/pankti/integrate-tests.sh` on a fresh PDFBox 2.0.21 checkout with 3 classes generated locally from the authors' profiles (RenderingMode, PDCIDSystemInfo, XrefTrailerResolver), split with at most 5 tests per class; `mvn -pl pdfbox -am test -Dtest='Test*PanktiGen*'`. Laptop (Windows), JDK 11.0.8. |
+| Result | First attempt: compilation error, `java.lang.ref.Cleaner` not found: PDFBox's `jdkGte9` profile compiles everything with `<release>6</release>`, which overrides `testSource`/`testTarget`. Second attempt, with `<release>9</release>` on the `default-testCompile` execution only: 6 classes compile, 20 / 20 tests pass (Table III: all pass for these methods). Library classes keep version 50 (Java 6), test classes 53 (Java 9); animal-sniffer passes. |
+| Interpretation | The integration works with smaller build changes than the authors' (A18). |
 

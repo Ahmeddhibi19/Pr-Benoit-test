@@ -23,6 +23,8 @@ filled in once it is known. Related observations (differences between the paper 
 | A14 | [The workload script](#a14-the-workload-script) | in use |
 | A15 | [How #UNIQUE is computed](#a15-how-unique-is-computed) | validated on the authors' data |
 | A16 | [Nesting depth](#a16-nesting-depth) | open (the paper's value is not reproduced) |
+| A17 | [Generator version](#a17-generator-version) | validated (13,851 / 13,851 tests identical) |
+| A18 | [Integration of the generated tests](#a18-integration-of-the-generated-tests) | validated locally |
 
 ## A1. Build-only adjustments of PDFBox 2.0.21
 
@@ -215,3 +217,27 @@ filled in once it is known. Related observations (differences between the paper 
 | Expected impact | The absolute value is not comparable with the paper's 36. |
 | Validation | Not possible without the authors' definition. |
 | Reporting | Results (as an unreproduced number) and limitations. |
+
+## A17. Generator version
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Generate one differential unit test per unique object profile with pankti-generate. |
+| Problem | The tests the authors published were not produced by the PANKTI commit of their workload run (`0fddf27`): they contain `deserializeObject()` helpers that pankti-generate only writes from `7afc584` (2020-11-12), and 18 of 22 classes have a `setUpXStream()` method whose call is commented out in the generator. |
+| Simplification | pankti-generate at `7afc584` with the line that adds `setUpXStream()` enabled (`scripts/pankti/build-generator.sh`, one-line diff saved with each run). The instrumentation stays at `0fddf27`. |
+| Justification | `7afc584` is the only change to pankti-generate between the workload run and the authors' last "after" Descartes run; its profile parser is identical to `0fddf27`'s, so the set of tests (#UNIQUE) does not depend on the choice. The setup method registers converters needed to deserialise `Inflater` and `Cleaner` fields. |
+| Expected impact | Four classes get a `setUpXStream()` method that the published ones do not have; it only registers converters. |
+| Validation | Generated from the authors' own profiles (generate-tests run 39581267651), the 13,851 tests are identical, method by method, to the 13,851 tests the authors published (`results/day5/authors_generation/`). |
+| Reporting | Implementation; observations (the published artifacts mix two tool versions and manual edits). |
+
+## A18. Integration of the generated tests
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Add the generated tests to the PDFBox test suite; the authors' README: compile with source/target 9 (because of `java.lang.ref.Cleaner`), disable animal-sniffer. |
+| Problem | Compiling the whole build for Java 9 also changes the bytecode of the library under test, and PDFBox's `jdkGte9` profile forces `<release>6</release>` on every compilation. One generated class (`GlyfSimpleDescript.getFlags`) has 11,730 tests in a 90 MB source file. |
+| Simplification | `scripts/pankti/integrate-tests.sh`: only the test compilation (`default-testCompile`) gets `<release>9</release>`; the library stays at release 6 and animal-sniffer stays enabled. PANKTI's three converters are copied into every test package instead of being imported by hand. Classes with more than 500 tests are split into parts without changing any test (`scripts/pankti/split_test_classes.py`). XStream 1.4.12 is a test dependency of fontbox and pdfbox. |
+| Justification | The code that Descartes mutates is compiled exactly as in the original build (class file version 50), while the tests can use the Java 9 API (version 53). Splitting keeps every test and lets all of them be compiled and executed (the authors executed 117 of the 11,730 getFlags tests). |
+| Expected impact | None on the library; test classes have different names (`...PanktiGenPartN`) for the split classes. |
+| Validation | Local check: 3 classes generated from the authors' profiles, split into 6, compile and their 20 tests pass; library class version 50, test class version 53, animal-sniffer passes. The full test set is compiled and run on Day 6. |
+| Reporting | Implementation; limitations. |

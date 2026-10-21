@@ -1,0 +1,4 @@
+461c461
+<             // generatedClass.addMethod(generateSetupMethod());
+---
+>             generatedClass.addMethod(generateSetupMethod());

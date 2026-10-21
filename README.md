@@ -35,7 +35,8 @@ The reproduction follows two tracks:
 | Target list frozen (138 methods) | done | [`results/targets.csv`](results/targets.csv) |
 | Instrumentation built and installed in Glowroot (dry run, no workload) | done | [`docs/instrumentation.md`](docs/instrumentation.md), [`results/day3/`](results/day3/) |
 | Workload under the instrumentation, profile metrics (Table III columns 1-3) | done | [`results/day4/`](results/day4/), [`docs/instrumentation.md`](docs/instrumentation.md) |
-| Test generation and execution | to do | |
+| Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/day5/`](results/day5/) |
+| Test execution (5 runs) | to do | |
 | Descartes "after", comparison with the paper | to do | |
 
 ## Results so far
@@ -51,6 +52,8 @@ The reproduction follows two tracks:
 | Methods hitting the 200 MB threshold | 19 | 19 | 19 |
 | Profile sizes | 158 B to about 55 MB, 5.5 GB | 158 B to 54.7 MiB, 5.49 GiB | 158 B to 54.7 MiB, 5.30 GiB |
 | Maximum nesting depth | 36 (undefined) | 73 (XML element depth) | 73 (same measure) |
+| Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/day5/fig5.png`](results/day5/fig5.png)) |
+| #PANKTI_TESTS | 13,851 | 13,851; regenerated from their profiles: all 13,851 identical to the published tests | 14,679 (= #UNIQUE for each of the 47 methods) |
 | #PASSING / #FAILING | 13,614 / 237 | 2,001 / 237 executed (11,613 tests counted as passing were not executed) | not yet run |
 | Well-tested | 28 / 46 | 28 / 46 | not yet run |
 
@@ -61,9 +64,10 @@ The reproduction follows two tracks:
   env-check.yml        toolchain + PDFBox 2.0.21 build and test suite
   descartes-before.yml PIT + Descartes on the original test suite, one job per module
   production-run.yml   PANKTI plugin for the frozen targets, Glowroot, pdfbox-app; the workload (modes dry-run, smoke, full)
+  generate-tests.yml   pankti-generate on the reproduction's profiles, and on the authors' (compared with their tests)
 scripts/ci/          runner setup: JDK, Maven, disk, environment report, annotations
 scripts/pdfbox/      PDFBox checkout, build-only patch, Descartes profile and run, test summary
-scripts/pankti/      target extraction and plugin build with the authors' tools
+scripts/pankti/      target extraction, plugin build, workload, test generation and integration (authors' tools)
 scripts/glowroot/    Glowroot installation and agent check
 setup/               local setup (portable toolchain, download of the authors' artifacts)
 analysis/            analysis scripts; analysis/paper/ holds Table III as printed in the paper
@@ -96,6 +100,7 @@ gh workflow run env-check.yml          # about 10 min
 gh workflow run descartes-before.yml   # one job per module, 1 PIT thread; pdfbox is the longest (about 70 min)
 gh workflow run production-run.yml -f mode=dry-run   # plugin + Glowroot + pdfbox-app, agent check (about 5 min)
 gh workflow run production-run.yml -f mode=full      # + the authors' workload and the profile metrics (about 25 min)
+gh workflow run generate-tests.yml -f profiles_run_id=<run-id of a full production-run>   # about 15-25 min per job
 gh run download <run-id>               # outputs of a run (methods.json, checks, logs, environment report)
 ```
 
@@ -155,6 +160,8 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
   the authors'.
 - [docs/instrumentation.md](docs/instrumentation.md): what PANKTI's instrumentation records, how it is built and
   installed, and its known limitations.
+- [docs/generation.md](docs/generation.md): which pankti-generate version and why, how the tests are counted, how they
+  are added to PDFBox.
 - [docs/experiments.md](docs/experiments.md): log of every experiment (question, method, result, interpretation).
 - [docs/assumptions.md](docs/assumptions.md): every simplifying assumption, with its justification, expected impact and
   validation.

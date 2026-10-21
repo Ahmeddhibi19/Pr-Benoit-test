@@ -1,0 +1,3 @@
+test classes: 22; tests: 14,679; target methods with tests: 47
+tests not attributed to a target: 0
+#PANKTI_TESTS = #UNIQUE for 47 of 47 methods (total 14,679 vs 14,679)
