@@ -122,6 +122,28 @@ class TestOutcomesTest(unittest.TestCase):
         self.assertEqual(verdicts, {"testM1": "passing", "testM2": "flaky", "testM3": "failing", "testM4": "not-run"})
 
 
+class SplitTest(unittest.TestCase):
+    """split_test_classes.py keeps every test unchanged and the members found between tests in every part."""
+
+    def test_split_keeps_setup_between_tests(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts" / "pankti"))
+        import split_test_classes
+        test = "    @Test\n    public void test{n}() throws Exception {{\n        Assert.assertTrue(true);\n    }}\n"
+        setup = "    @Before\n    public void setUpXStream() {\n        xStream.registerConverter(null);\n    }\n"
+        source = ("package p;\npublic class TestCPanktiGen {\n\n" + "\n".join(test.format(n=f"A{i}") for i in range(3))
+                  + "\n" + setup + "\n" + "\n".join(test.format(n=f"B{i}") for i in range(2)) + "}\n")
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "TestCPanktiGen.java"
+            f.write_text(source, encoding="utf-8")
+            self.assertEqual(split_test_classes.split(f, 2), 3)
+            parts = sorted(Path(d).glob("TestCPanktiGenPart*.java"))
+            texts = [p.read_text(encoding="utf-8") for p in parts]
+        self.assertEqual(len(parts), 3)
+        self.assertTrue(all("setUpXStream" in t for t in texts))
+        self.assertEqual(sum(t.count("@Test") for t in texts), 5)
+        self.assertTrue(all(f"public class {p.stem} {{" in t for p, t in zip(parts, texts)))
+
+
 class DescartesTest(unittest.TestCase):
     def test_descriptor(self):
         self.assertEqual(param_descriptor("(ILjava/lang/String;)V"), "ILjava/lang/String;")

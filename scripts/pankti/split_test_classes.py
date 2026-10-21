@@ -21,12 +21,16 @@ def split(path, limit):
     if len(tests) <= limit:
         return 0
     head, tail = text[:tests[0].start()], text[tests[-1].end():]
+    # Members between two tests (pankti-generate writes setUpXStream() after the tests of the first target method
+    # of a class) are kept in every part, so that each part is a complete class.
+    members = [text[a.end():b.start()].strip("\n") for a, b in zip(tests, tests[1:])]
+    members = "".join(m + "\n\n" for m in members if m.strip())
     name = path.stem
     parts = 0
     for start in range(0, len(tests), limit):
         parts += 1
         part = f"{name}Part{parts}"
-        body = "\n".join(m.group(0) for m in tests[start:start + limit])
+        body = members + "\n".join(m.group(0) for m in tests[start:start + limit])
         new_head = head.replace(f"public class {name} {{", f"public class {part} {{", 1)
         assert new_head != head, f"class declaration not found in {path}"
         (path.parent / f"{part}.java").write_text(new_head + body + tail, encoding="utf-8", newline="\n")

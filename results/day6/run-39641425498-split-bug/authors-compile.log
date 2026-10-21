@@ -1,0 +1,30 @@
+  location: class TestNamingTablePanktiGen
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestHorizontalMetricsTablePanktiGenPart1.java:[20,5] error: cannot find symbol
+  symbol:   class Before
+  location: class TestHorizontalMetricsTablePanktiGenPart1
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.6.0:testCompile (default-testCompile) on project fontbox: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestTrueTypeFontPanktiGen.java:[20,5] error: cannot find symbol
+[ERROR]   symbol:   class Before
+[ERROR]   location: class TestTrueTypeFontPanktiGen
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestHorizontalMetricsTablePanktiGenPart2.java:[20,5] error: cannot find symbol
+[ERROR]   symbol:   class Before
+[ERROR]   location: class TestHorizontalMetricsTablePanktiGenPart2
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestTTFDataStreamPanktiGen.java:[21,5] error: cannot find symbol
+[ERROR]   symbol:   class Before
+[ERROR]   location: class TestTTFDataStreamPanktiGen
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestNamingTablePanktiGen.java:[20,5] error: cannot find symbol
+[ERROR]   symbol:   class Before
+[ERROR]   location: class TestNamingTablePanktiGen
+[ERROR] /home/runner/work/Pr-Benoit-test/Pr-Benoit-test/pdfbox/fontbox/src/test/java/org/apache/fontbox/ttf/TestHorizontalMetricsTablePanktiGenPart1.java:[20,5] error: cannot find symbol
+[ERROR]   symbol:   class Before
+[ERROR]   location: class TestHorizontalMetricsTablePanktiGenPart1
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :fontbox

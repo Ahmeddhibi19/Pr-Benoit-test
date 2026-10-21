@@ -66,6 +66,13 @@ cp -r "$gen/tests" "$work/tests"
   dest="$root/$module/src/test/java/$(dirname "$f")"
   mkdir -p "$dest"
   cp "$work/tests/$f" "$dest/"
+  # The classes the authors published use @Before without importing it (they do not compile as published); the
+  # import is added to such classes only. Classes written by pankti-generate have it already.
+  target="$dest/$(basename "$f")"
+  if grep -q '@Before' "$target" && ! grep -q -E '^import org\.junit\.(Before|\*);' "$target"; then
+    sed -i '0,/^package .*;/s//&\nimport org.junit.Before;/' "$target"
+    echo "added the missing import org.junit.Before to $(basename "$f")"
+  fi
   package=$(dirname "${f#./}" | tr / .)
   for c in CleanerImplConverter FileCleanableConverter InflaterConverter; do
     [ -f "$dest/$c.java" ] || sed "1s/^package .*;/package $package;/" "$conv/$c.java" > "$dest/$c.java"
