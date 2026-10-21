@@ -1,0 +1,153 @@
+name: generate-tests
+
+# Differential unit tests from object profiles with pankti-generate (see docs/generation.md).
+#   reproduction: the profiles collected by a production-run (mode full) of this repository
+#   authors:      the authors' profiles (Zenodo record 4298605); the generated classes are compared with the
+#                 classes the authors published, to check the generation step on its own
+on:
+  workflow_dispatch:
+    inputs:
+      profiles_run_id:
+        description: production-run (mode full) whose object profiles are used
+        default: '39444526027'
+      generator_commit:
+        description: PANKTI commit of pankti-generate
+        default: 7afc58492f35a1cdb419b30872814e5f2b4d7f42
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  generate:
+    name: generate (${{ matrix.source }})
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        source: [reproduction, authors]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Restore Maven repository
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-generate-${{ github.run_id }}
+          restore-keys: |
+            m2-generate-
+            m2-production-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh > out/env-report.txt
+
+      - name: Build pankti-generate
+        run: |
+          git clone --quiet https://github.com/ASSERT-KTH/pankti.git pankti
+          git -C pankti checkout --quiet "${{ inputs.generator_commit }}"
+          bash scripts/pankti/build-generator.sh pankti out/generator
+
+      - name: Checkout PDFBox 2.0.21
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+
+      - name: Download the reproduction's object profiles
+        if: matrix.source == 'reproduction'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: object-profiles-*
+          run-id: ${{ inputs.profiles_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: profiles-archive
+
+      - name: Unpack the reproduction's object profiles
+        if: matrix.source == 'reproduction'
+        run: |
+          mkdir -p profiles
+          zstd -dc profiles-archive/*/pankti-object-data.tar.zst | tar -x -C profiles
+          mv profiles/pankti-object-data profiles/data
+          echo "profiles from production-run ${{ inputs.profiles_run_id }}" | tee out/profiles-source.txt
+
+      - name: Fetch the authors' object profiles and generated tests
+        if: matrix.source == 'authors'
+        run: |
+          curl -fsSL --retry 5 -o pankti-data.zip "https://zenodo.org/records/4298605/files/pankti-data.zip?download=1"
+          echo "9c902f3e2342338192197034413d70c0  pankti-data.zip" | md5sum -c -
+          python3 setup/extract_zip.py extract pankti-data.zip extracted pankti-data/pdfbox/pankti-collected-object-profiles/
+          python3 setup/extract_zip.py extract pankti-data.zip extracted pankti-data/pdfbox/pankti-generated-junit-tests/ --exclude-suffix .xml
+          rm pankti-data.zip
+          mkdir -p profiles
+          mv extracted/pankti-data/pdfbox/pankti-collected-object-profiles profiles/data
+          echo "profiles from Zenodo record 4298605 (pdfbox/pankti-collected-object-profiles)" | tee out/profiles-source.txt
+
+      - name: Unique profiles per method
+        run: python3 analysis/profile_stats.py profiles/data out/profile_stats --fragments | tail -4
+
+      - name: Generate the tests
+        run: |
+          HEAP=12g bash scripts/pankti/generate-tests.sh out/generator/pankti-generate.jar pdfbox profiles/data generated
+          cp generated/generate-info.txt generated/generate.log out/
+
+      - name: Count the generated tests
+        run: >-
+          python3 analysis/count_generated_tests.py generated/tests profiles/data/invoked-methods.csv
+          out/generated_tests --unique out/profile_stats.csv
+
+      - name: Compare with the authors' published tests
+        if: matrix.source == 'authors'
+        run: >-
+          python3 analysis/compare_generated_tests.py generated/tests
+          extracted/pankti-data/pdfbox/pankti-generated-junit-tests/tests out/published_vs_generated
+
+      - name: Archive the generated tests
+        if: matrix.source == 'reproduction'
+        run: |
+          mkdir -p tests-archive
+          tar -C generated -cf - tests resources | zstd -q -T0 -10 -o tests-archive/generated-tests.tar.zst
+          ls -l tests-archive | tee out/tests-archive.txt
+
+      - name: Upload the generated tests
+        if: matrix.source == 'reproduction'
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-tests-${{ github.run_number }}
+          path: tests-archive/
+          retention-days: 5
+          compression-level: 0
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### generate (${{ matrix.source }})"; echo; echo '```'
+            cat out/generate-info.txt out/generated_tests.txt out/published_vs_generated.txt 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save Maven repository
+        if: always() && matrix.source == 'reproduction'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-generate-${{ github.run_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: generate-${{ matrix.source }}-${{ github.run_number }}
+          path: out/
+          retention-days: 5
