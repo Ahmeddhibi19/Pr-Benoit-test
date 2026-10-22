@@ -1,0 +1,147 @@
+name: descartes-after
+
+# Descartes after adding the passing generated tests (PANKTI_STATUS), with the configuration of descartes-before
+# (1 thread), restricted to the classes that declare the effective targets (see docs/descartes.md).
+#   none:         no generated test, to check that the restriction gives the same classification as the full run
+#   reproduction: the passing tests generated from this repository's profiles
+#   authors:      the passing tests the authors published
+on:
+  workflow_dispatch:
+    inputs:
+      tests_run_id:
+        description: generate-tests run whose generated tests are used (source reproduction)
+        default: '39588027907'
+      sources:
+        description: JSON list of test sources (none, reproduction, authors)
+        default: '["none", "reproduction", "authors"]'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  descartes:
+    name: descartes-after (${{ matrix.source }}, ${{ matrix.module }})
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        source: ${{ fromJSON(inputs.sources) }}
+        module: [fontbox, pdfbox]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        run: bash scripts/ci/free-disk.sh
+
+      - name: Install fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-liberation
+
+      - name: Install JDK 11.0.8
+        run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
+
+      - name: Install Maven 3.6.3
+        run: bash scripts/ci/install-maven.sh "$RUNNER_TEMP"
+
+      - name: Restore Maven repository
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-descartes-after-${{ github.run_id }}
+          restore-keys: |
+            m2-descartes-after-
+            m2-assess-
+            m2-pdfbox-2.0.21-
+
+      - name: Environment report
+        run: |
+          mkdir -p out
+          bash scripts/ci/env-report.sh > out/env-report.txt
+
+      - name: Checkout PDFBox 2.0.21 and PANKTI
+        run: |
+          bash scripts/pdfbox/checkout.sh pdfbox | tee out/pdfbox-commit.txt
+          bash scripts/pdfbox/patch-build.sh pdfbox
+          bash scripts/pdfbox/add-descartes-profile.sh pdfbox
+          git clone --quiet https://github.com/ASSERT-KTH/pankti.git pankti
+          git -C pankti checkout --quiet 7afc58492f35a1cdb419b30872814e5f2b4d7f42
+
+      - name: Download the reproduction's generated tests
+        if: matrix.source == 'reproduction'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: generated-tests-*
+          run-id: ${{ inputs.tests_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: tests-archive
+
+      - name: Keep the reproduction's passing tests
+        if: matrix.source == 'reproduction'
+        run: |
+          mkdir -p generated
+          archive=$(find tests-archive -name generated-tests.tar.zst | head -1)
+          zstd -dc "$archive" | tar -x -C generated
+          python3 scripts/pankti/keep_passing_tests.py generated/tests results/day6/reproduction/test_outcomes_tests.csv.gz \
+            | tee out/kept-tests.txt
+
+      - name: Keep the authors' passing tests
+        if: matrix.source == 'authors'
+        run: |
+          curl -fsSL --retry 5 -o pankti-data.zip "https://zenodo.org/records/4298605/files/pankti-data.zip?download=1"
+          echo "9c902f3e2342338192197034413d70c0  pankti-data.zip" | md5sum -c -
+          python3 setup/extract_zip.py extract pankti-data.zip extracted pankti-data/pdfbox/pankti-generated-junit-tests/
+          rm pankti-data.zip
+          mkdir -p generated
+          mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/tests generated/tests
+          mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/resource-files generated/resources
+          python3 scripts/pankti/keep_passing_tests.py generated/tests results/day6/authors/test_outcomes_tests.csv.gz \
+            | tee out/kept-tests.txt
+
+      - name: Integrate the tests
+        if: matrix.source != 'none'
+        run: |
+          bash scripts/pankti/integrate-tests.sh pdfbox generated \
+            pankti/pankti-instrument/src/main/java/se/kth/castor/pankti/instrument/converters | tee out/integration.txt
+
+      - name: Classes of the effective targets
+        run: |
+          python3 - "${{ matrix.module }}" > target-classes.txt <<'EOF'
+          import csv, sys
+          module = sys.argv[1]
+          rows = csv.DictReader(open("results/day4/full/profiles/invoked-methods.csv", encoding="utf-8"))
+          classes = sorted({r["parent-FQN"] for r in rows})
+          print(",".join(c for c in classes if c.startswith("org.apache.fontbox") == (module == "fontbox")))
+          EOF
+          tr ',' '\n' < target-classes.txt | tee out/target-classes.txt
+
+      - name: Run Descartes
+        run: TARGET_CLASSES=$(cat target-classes.txt) bash scripts/pdfbox/run-descartes.sh pdfbox ${{ matrix.module }} out 1
+
+      - name: Summarise
+        if: always()
+        run: |
+          gzip -f out/*.log || true
+          if [ -f out/methods.json ]; then
+            python3 analysis/summarize_descartes_reports.py out | tee out/summary.csv
+            { echo "### ${{ matrix.source }} / ${{ matrix.module }}"; echo; echo '```'; cat out/summary.csv out/timing.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error title=${{ matrix.source }}/${{ matrix.module }}::no methods.json produced"
+          fi
+
+      - name: Save Maven repository
+        if: always() && matrix.source == 'reproduction' && matrix.module == 'pdfbox'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.m2/repository
+          key: m2-descartes-after-${{ github.run_id }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: descartes-after-${{ matrix.source }}-${{ matrix.module }}
+          path: out/
+          retention-days: 5

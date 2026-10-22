@@ -19,6 +19,12 @@ case "$module" in
   pdfbox|preflight|tools|examples) target="org.apache.pdfbox.*" ;;
   *) echo "unknown module: $module" >&2; exit 2 ;;
 esac
+# The tests are always all the tests of the module's package. pitest-maven defaults targetTests to targetClasses,
+# which is the same thing for the whole package but would select no test once the classes are restricted.
+tests="$target"
+# TARGET_CLASSES (comma-separated class names) restricts the analysis to some classes of the module, e.g. the
+# classes that declare the effective targets for the "after" run (docs/descartes.md).
+target="${TARGET_CLASSES:-$target}"
 
 mkdir -p "$out"
 out=$(cd "$out" && pwd)
@@ -32,7 +38,7 @@ echo "install_seconds=$SECONDS" > "$out/timing.txt"
 
 SECONDS=0
 set +e
-mvn -B -e "${extra[@]}" -Pdescartes -Ddescartes.threads="$threads" -DtargetClasses="$target" -pl "$module" \
+mvn -B -e "${extra[@]}" -Pdescartes -Ddescartes.threads="$threads" -DtargetClasses="$target" -DtargetTests="$tests" -pl "$module" \
   test-compile org.pitest:pitest-maven:mutationCoverage 2>&1 | tee "$out/descartes.log" | grep -E 'BUILD|ERROR|Generated|Ran|>> ' | tail -20
 rc=${PIPESTATUS[0]}
 set -e
@@ -41,6 +47,7 @@ set -e
   echo "descartes_exit_code=$rc"
   echo "module=$module"
   echo "target_classes=$target"
+  echo "target_tests=$tests"
   echo "threads=$threads"
 } >> "$out/timing.txt"
 

@@ -144,6 +144,34 @@ class SplitTest(unittest.TestCase):
         self.assertTrue(all(f"public class {p.stem} {{" in t for p, t in zip(parts, texts)))
 
 
+class KeepPassingTest(unittest.TestCase):
+    """keep_passing_tests.py removes every test that did not pass in all runs, and classes left without tests."""
+
+    def test_keep_passing(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts" / "pankti"))
+        import keep_passing_tests
+        test = "    @Test\n    public void {n}() throws Exception {{\n        Assert.assertTrue(true);\n    }}\n\n"
+        with tempfile.TemporaryDirectory() as d:
+            pkg = Path(d) / "tests" / "p"
+            pkg.mkdir(parents=True)
+            (pkg / "TestCPanktiGen.java").write_text(
+                "package p;\npublic class TestCPanktiGen {\n\n" + test.format(n="testM1") + test.format(n="testM2")
+                + "    @Before\n    public void setUpXStream() {\n    }\n}\n", encoding="utf-8")
+            (pkg / "TestDPanktiGen.java").write_text(
+                "package p;\npublic class TestDPanktiGen {\n\n" + test.format(n="testN1") + "}\n", encoding="utf-8")
+            outcomes = Path(d) / "outcomes.csv"
+            outcomes.write_text("test_class,test,class,method,params,verdict\n"
+                                "p.TestCPanktiGenPart1,testM1,p.C,m,,passing\n"
+                                "p.TestCPanktiGenPart2,testM2,p.C,m,,failing\n"
+                                "p.TestDPanktiGen,testN1,p.D,n,,flaky\n", encoding="utf-8")
+            self.assertEqual(keep_passing_tests.main(["x", str(Path(d) / "tests"), str(outcomes)]), 0)
+            kept = (pkg / "TestCPanktiGen.java").read_text(encoding="utf-8")
+            self.assertIn("testM1", kept)
+            self.assertNotIn("testM2", kept)
+            self.assertIn("setUpXStream", kept)
+            self.assertFalse((pkg / "TestDPanktiGen.java").exists())
+
+
 class DescartesTest(unittest.TestCase):
     def test_descriptor(self):
         self.assertEqual(param_descriptor("(ILjava/lang/String;)V"), "ILjava/lang/String;")
