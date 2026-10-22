@@ -1,0 +1,37 @@
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.pdmodel.font.FileSystemFontProvider loadDiskCache
+WARNING: New fonts found, font cache will be re-built
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.pdmodel.font.FileSystemFontProvider <init>
+WARNING: Building on-disk font cache, this may take a while
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.pdmodel.font.FileSystemFontProvider <init>
+WARNING: Finished building on-disk font cache, found 57 fonts
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Symbol
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font ZapfDingbats
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.contentstream.PDFStreamEngine operatorException
+SEVERE: Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed
+Oct 22, 2026 9:39:08 AM org.apache.pdfbox.contentstream.PDFStreamEngine operatorException
+SEVERE: Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed
+Oct 22, 2026 9:39:09 AM org.apache.pdfbox.contentstream.PDFStreamEngine operatorException
+SEVERE: Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed
+Oct 22, 2026 9:39:09 AM org.apache.pdfbox.contentstream.PDFStreamEngine operatorException
+SEVERE: Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed
+Oct 22, 2026 9:39:11 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Symbol
+Oct 22, 2026 9:39:11 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font ZapfDingbats
+Oct 22, 2026 9:39:12 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSerif' for 'TimesNewRomanPSMT'
+Oct 22, 2026 9:39:12 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSans' for 'TrebuchetMS'
+Oct 22, 2026 9:39:12 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSans-Bold' for 'TrebuchetMS-Bold'
+Oct 22, 2026 9:39:12 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSans-Bold' for 'ArialNarrow-Bold'
+Oct 22, 2026 9:39:12 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSerif-Italic' for 'TimesNewRomanPS-ItalicMT'
+Oct 22, 2026 9:39:13 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSans-Bold' for 'Arial-Black'
+Oct 22, 2026 9:39:13 AM org.apache.pdfbox.pdmodel.font.PDTrueTypeFont <init>
+WARNING: Using fallback font 'LiberationSans-Bold' for 'Arial-Black'
+-rw-r--r-- 1 runner runner 7274 Oct 22 09:39 /home/runner/.pdfbox.cache

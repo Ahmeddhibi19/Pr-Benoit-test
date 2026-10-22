@@ -1,0 +1,33 @@
+quantity,paper,authors,ours,verdict,source
+Table III #INVOCATIONS: rows equal to the paper,46 rows,46 / 46,41 / 46,,day4/table3_comparison.csv
+Table III #INVOCATIONS: total of the 46 rows,"121,175","121,175","122,042",ours +0.7%,day4/table3_comparison.csv
+Table III #COLLECTED: rows equal to the paper,46 rows,46 / 46,40 / 46,,day4/table3_comparison.csv
+Table III #COLLECTED: total of the 46 rows,"57,563","57,563","58,330",ours +1.3%,day4/table3_comparison.csv
+Table III #UNIQUE: rows equal to the paper,46 rows,46 / 46,38 / 46,,day4/table3_comparison.csv
+Table III #UNIQUE: total of the 46 rows,"13,851","13,851","14,565",ours +5.2%,day4/table3_comparison.csv
+Table III #PANKTI_TESTS: rows equal to the paper,46 rows,46 / 46,38 / 46,,day6/table3_execution.csv
+Table III #PANKTI_TESTS: total of the 46 rows,"13,851","13,851","14,565",ours +5.2%,day6/table3_execution.csv
+Table III #PASSING: rows equal to the paper,46 rows,46 / 46,40 / 46,,day6/table3_execution.csv
+Table III #PASSING: total of the 46 rows,"13,614","13,614","14,314",ours +5.1%,day6/table3_execution.csv
+Table III #FAILING: rows equal to the paper,46 rows,46 / 46,43 / 46,,day6/table3_execution.csv
+Table III #FAILING: total of the 46 rows,237,237,251,ours +5.9%,day6/table3_execution.csv
+Table III PANKTI_STATUS: rows equal to the paper,46 rows,46 / 46,46 / 46,,day7/table3_status.csv
+well-tested targets (PANKTI_STATUS),28 / 46 (60.9%),28 / 46,28 / 46,"exact (27 / 46 robust, discrepancies.md 23)",day7/table3_status.csv
+collected / invocations (46 rows of Table III),47.5%,47.50%,47.80%,same order of magnitude,computed from table3_rows.csv
+unique / collected (46 rows of Table III),24%,24.06%,24.97%,same order of magnitude,computed from table3_rows.csv
+passing / tests (46 rows of Table III),98.2% (98.29%),98.29%,98.28%,same order of magnitude,computed from table3_rows.csv
+#EFF_TARGET,46,46,"47 (46 in common, Jaccard 0.979)",set agreement; extra: TrueTypeFont.getOS2Windows,day4/table3_comparison.txt
+#TARGET,138,138,138,exact (137 methods in common),day2/targets_authors_reports.txt day2/targets_own_reports.txt
+smallest profile (bytes),158,158,158,exact,day1/authors_profile_stats.txt day4/full/profile_stats.txt
+largest profile,nearly 55 MB,54.7 MiB,54.7 MiB,exact (binary units),day1/authors_profile_stats.txt day4/full/profile_stats.txt
+profiles on disk,5.5 GB,5.49 GiB,5.30 GiB,close (-3.5%),day1/authors_profile_stats.txt day4/full/profile_stats.txt
+methods hitting the 200 MB threshold,19,19,19,exact,day1/authors_profile_stats.txt day4/full/profile_stats.txt
+maximum nesting depth,36,73,73,differs: 36 not reproduced; the paper does not define it,day4/full/profile_stats.txt
+"Figure 5, profiles per 10 MiB bin",histogram,57458 / 71 / 3 / 23 / 5 / 3,58563 / 75 / 3 / 23 / 5 / 3,same shape; bins above 20 MiB identical,day5/fig5.csv
+isFill: invocations / collected / unique / tests,"30,944 / 30,944 / 1 / 1","30,944 / 30,944 / 1 / 1","30,944 / 30,944 / 1 / 1",exact,day4/table3_comparison.txt
+isFill: status after,well-tested,partially-tested (their report and their test run here),partially-tested,"exact: mutant false detected, true not",day7/pankti_status_reproduction.csv
+"all 46 targets pseudo-tested before (plan A.6, exact)",46 / 46,46 / 46,46 / 46,exact,day2/targets_authors_reports.txt
+"V.A: failing tests of methods returning a primitive, primitive array, wrapper or enum",0,0,0,exact,day8/failure_analysis_reproduction.txt day8/prediction_check_reproduction.txt
+"V.B: PDFBox targets with passing tests that stay pseudo-tested, all null-only",12 (15 with other subjects),12,12,exact,day8/prediction_check_authors.txt day8/prediction_check_reproduction.txt
+prediction check (plan A.6): mutant outcomes predicted from the observed values,-,82 / 82,82 / 82,all predicted,day8/prediction_check_authors.txt day8/prediction_check_reproduction.txt
+sensitivity run with a pre-built font cache: #EFF_TARGET / INV / COLL / UNIQ,"46 / 121,175 / 57,563 / 13,851",-,"46 / 121,300 / 57,677 / 13,852","targets exact, totals within 0.2% (38 rows identical)",day8/sensitivity/warm-cache/profile_stats.txt day8/sensitivity/warm-cache/table3_comparison.txt

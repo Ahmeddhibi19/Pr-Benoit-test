@@ -1,0 +1,20 @@
+#INVOCATIONS / #UNIQUE per run; rows where a run differs from the paper
+row method                                               paper          main    warm-cache   dejavu-only
+ 32 GlyfSimpleDescript.getFlags                    23471/11730   23471/11730   23471/11730    20340/8330
+ 36 NamingTable.getName                                650/273      1457/976       715/260       741/403
+ 38 HorizontalMetricsTable.getLeftSideBearing          431/360       431/360       431/360       357/267
+ 39 TTFDataStream.readUnsignedByteArray                431/431       431/431       431/431       357/308
+ 40 HorizontalMetricsTable.getAdvanceWidth             275/174       275/174       275/174        275/34
+ 41 TrueTypeFont.getAdvanceWidth                       275/174       275/174       275/174        275/37
+ 42 PDSimpleFont.hasExplicitWidth                      274/117       274/117       274/117        274/52
+ 43 PDFontDescriptor.getFlags                           227/54        257/56        257/56        509/73
+ 44 FontCache.getFont                                  115/106       115/103       115/104             -
+ 45 DefaultResourceCache.getColorSpace                   72/23         72/27         72/27         72/27
+ 53 COSParser.getEncryption                              46/33         46/35         46/37         46/35
+ 63 PDFontDescriptor.isFixedPitch                         21/6          31/8          31/8        115/25
+ 64 PDFontDescriptor.isItalic                             21/6          31/8          31/8        115/25
+ 65 PDFontDescriptor.isSerif                              21/6          31/8          31/8        115/25
+  - TrueTypeFont.getOS2Windows                               -       342/114             -        132/44
+main: Table III rows with the paper's #INVOCATIONS and #UNIQUE: 38 / 46
+warm-cache: Table III rows with the paper's #INVOCATIONS and #UNIQUE: 38 / 46
+dejavu-only: Table III rows with the paper's #INVOCATIONS and #UNIQUE: 32 / 46

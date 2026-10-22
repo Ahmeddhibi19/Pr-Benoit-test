@@ -1,0 +1,25 @@
+targets: 47; mutants: 82; mutant outcome predicted correctly: 82 / 82
+targets whose detected mutants are predicted exactly: 47 / 47; same classification: 47 / 47
+
+Section V.B: targets with passing tests that stay pseudo-tested: 12; of which only the null mutant and only null observed: 12
+  row 37 DefaultResourceCache.getFont: 5 passing tests (null 5); mutants: null
+  row 44 FontCache.getFont: 83 passing tests (null 83); mutants: null
+  row 45 DefaultResourceCache.getColorSpace: 4 passing tests (null 4); mutants: null
+  row 46 DefaultResourceCache.getXObject: 13 passing tests (null 13); mutants: null
+  row 48 PDImageXObject.getMask: 13 passing tests (null 13); mutants: null
+  row 50 DefaultResourceCache.getExtGState: 4 passing tests (null 4); mutants: null
+  row 53 COSParser.getEncryption: 13 passing tests (null 13); mutants: null
+  row 55 PDImageXObject.getColorKeyMask: 7 passing tests (null 7); mutants: null
+  row 56 PDImageXObject.getDecode: 7 passing tests (null 7); mutants: null
+  row 58 PDImageXObject.getOptionalContent: 7 passing tests (null 7); mutants: null
+  row 66 PDExtendedGraphicsState.getSoftMask: 4 passing tests (null 4); mutants: null
+  row 72 PDDocumentCatalog.getViewerPreferences: 6 passing tests (null 6); mutants: null
+
+status after, by return type (well-tested = tested or partially-tested):
+  array: well-tested 2
+  enum: well-tested 1
+  object: pseudo-tested 19
+  primitive: well-tested 17
+  wrapper or String: well-tested 8
+  object return types, the returned class declares equals(): no 14, not in PDFBox 4, yes 1
+    org.apache.pdfbox.pdmodel.font.PDFont

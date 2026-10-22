@@ -76,7 +76,7 @@ is not), and the paper counts it as well-tested.
 ## 5. #TARGET: 138 (paper) vs 129 instrumented (README)
 
 **Status: explained (138 reproduced exactly; 129 most likely an earlier iteration).**
-`scripts/pankti/extract-targets.sh` builds pankti-extract at `0fddf27`, applies it to PDFBox 2.0.21 (3,588 methods kept
+`scripts/pankti/extract-targets.sh` builds pankti-extract at `0fddf27`, applies it to PDFBox 2.0.21 (3,588 rows, 3,587 distinct methods, kept
 out of 9,021) and runs the authors' `find-pseudo-tested.py` on their six "before" reports. Result: **138 targets**, the
 paper's #TARGET, including all 46 effective targets (`results/day2/targets_authors_reports.{csv,txt}`). Per module:
 pdfbox 117, xmpbox 12, fontbox 8, preflight 1, examples 0, tools 0.
@@ -231,7 +231,7 @@ All 9 errors concern `000809.pdf`: `Encrypt` fails ("Document is already encrypt
 
 ## 20. Workload metrics of the reproduction vs Table III
 
-**Status: probable cause identified (installed fonts), not verified.** Run 39444526027 (`results/day4/table3_comparison.*`): the 46 effective targets
+**Status: explained in part (font cache state and font set, §27).** Run 39444526027 (`results/day4/table3_comparison.*`): the 46 effective targets
 of Table III are all invoked, `RenderingMode.isFill` matches exactly (30,944 invocations, 1 unique profile of 158 B),
 and 41 / 40 / 38 of the 46 rows have the paper's #INVOCATIONS / #COLLECTED / #UNIQUE. The differing rows are font
 methods (`NamingTable.getName`, `PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`,
@@ -275,3 +275,30 @@ well-tested status after the generated tests is therefore not robust evidence of
 tests, run here, 28 of the 46 targets are well-tested (17 tested, 11 partially tested), each with the status of
 Table III (`results/day7/table3_status.csv`). The reproduction's extra tests (8 methods with a different #UNIQUE) do
 not change any status. With the caveat of §23, 27 / 46 targets are improved robustly.
+
+## 25. Causes of the failing tests (Section V.A)
+
+**Status: explained, with a different mechanism for 9 rows.** Every failing test of both test sets fails because
+the returned class compares by identity (`equals` not overridden) or because a cache lookup keyed by identity
+returns `null` after deserialisation; a test passes exactly when it observed `null` ([failures.md](failures.md)).
+The paper attributes rows 37, 44, 45, 46 and 50 to `SoftReference` caches "not available" in the test, but the
+deserialised caches are complete: the lookup fails because `COSObject` and `FontInfo` keys compare by identity
+(run-time check on three tests, `results/day8/cache_lookup_check.txt`). It attributes rows 33, 34, 35 and 53 to
+transient fields, but `GeneralPath` and `PDEncryption` do not override `equals`, which is enough to make every test
+with a non-null value fail. Row 74 (one failing test) is not discussed in the paper; it fails by identity as well.
+
+## 26. Targets with passing tests that stay pseudo-tested (Section V.B)
+
+**Status: reproduced.** 12 PDFBox targets keep passing tests and stay pseudo-tested, with both test sets; each has
+only null observations and a single `null` mutant, as the paper explains (`results/day8/prediction_check_*.txt`).
+With Broadleaf (2) and Jicofo (1) from Table III this gives the paper's 15.
+
+## 27. Font methods: the authors' font cache and fonts
+
+**Status: explained in part (experiment E22).** The 8 rows of Table III whose #UNIQUE differs (item 20) are font
+methods. A run with the PDFBox font cache built before the workload gives exactly the paper's 46 effective targets
+(`getOS2Windows` is only called while the cache is built) and brings `NamingTable.getName` from 1,457 to 715
+invocations (paper 650); the totals become 121,300 / 57,677 / 13,852. The authors' execution log confirms that their
+run did not build the cache, and shows the same fallback fonts as ours except for Symbol and ZapfDingbats, which
+their machine had. The main results keep the cold cache (documented in A24 and E22); the remaining differences are
+consistent with the missing Symbol and ZapfDingbats fonts (not tested).

@@ -29,6 +29,9 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E18](#e18-execution-of-the-authors-published-tests) | 2026-10-21 | The authors' 13,851 tests run in our environment | 13,614 / 237 / 0: Table III exactly, 46 / 46 rows |
 | [E19](#e19-descartes-after-local-check) | 2026-10-22 | Does the "after" Descartes run work, and does isFill behave as in the paper? | yes, after a fix (no test was selected at first) |
 | [E20](#e20-descartes-after-restriction-check-and-pankti_status) | 2026-10-22 | PANKTI_STATUS of the effective targets | 28 / 46 with our tests and with the authors', 46 / 46 statuses of Table III |
+| [E21](#e21-why-generated-tests-fail) | 2026-10-22 | Why do generated tests fail (V.A)? | identity `equals` or identity-keyed lookup; a test passes iff it observed null |
+| [E22](#e22-font-sensitivity-runs) | 2026-10-22 | Do the font methods depend on the fonts or the font cache? | yes: with a pre-built font cache, 46 / 46 targets and #UNIQUE 13,852 (paper 13,851) |
+| [E23](#e23-null-only-check-and-prediction-check) | 2026-10-22 | V.B null-only check; can the final status be predicted from the observed values? | 12 null-only targets; 82 / 82 mutants predicted |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -258,3 +261,45 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Assumptions | A21 (restriction, validated), A22 (passing tests only), A3 (1 thread). |
 | Limitations | One control run: other unstable kills may exist that this run did not reveal. Descartes "after" analyses 22 classes, not whole modules (the authors analysed whole modules). |
 | Next step | Day 8: failure analysis (Section V.A categories) and the methods that stay pseudo-tested despite passing tests (Section V.B). |
+
+## E21. Why generated tests fail
+
+| | |
+|---|---|
+| Objective | Plan task 8.2: classify the failing tests into the paper's causes (Section V.A), plus any new cause. |
+| Method | `analysis/failure_analysis.py` on both test sets (sources of the tests, Day 6 verdicts and failure messages); `equals`/`hashCode` declarations of the returned classes and cache keys read in the PDFBox 2.0.21 sources; `analysis/java/CacheLookupCheck.java` on three failing tests of the authors (`DefaultResourceCache.getFont1`, `getColorSpace10`, `getXObject6`). |
+| Configuration | Laptop, Python 3.11; the run-time check with JDK 11.0.8, pdfbox/fontbox 2.0.21 and XStream 1.4.12 (the test dependency). |
+| Outcome | Authors' tests: 237 failures = 151 identity `equals` + 86 lookups returning `null`; ours: 365 = 265 + 98 + 2 exceptions (`getOS2Windows`). In all 13 / 14 methods with failures, every passing test observed `null` and no failing test did. Run-time check: the deserialised caches hold all their entries (3, 4, 7) with live `SoftReference`s; the parameter is not one of the keys and the call returns `null`; with the cache's own key it returns the expected object. |
+| Observation | The paper's "cache not available" (5 rows) and "transient fields" (4 rows) are not what makes these tests fail: the cache is present but keyed by identity, and the returned classes have no `equals`. |
+| Interpretation | With PANKTI's `assertEquals` oracle, a test of a method returning such an object can only pass if production returned `null`. The failures are deterministic and environment-independent. |
+| Assumptions | A23. |
+| Limitations | No field-by-field comparison: transient fields may differ too. Run-time check on three tests only. |
+| Next step | E23. |
+
+## E22. Font sensitivity runs
+
+| | |
+|---|---|
+| Objective | Plan task 8.3 (P2): test whether the font-method differences of Table III (#UNIQUE differs in 8 rows) depend on the environment. |
+| Method | Two runs of `production-run.yml` in mode full, each changing one factor (A24): run 39756523874, font cache built before the workload (`font_cache=warm`); run 39756528629, DejaVu fonts only (`font_set=dejavu-only`). Compared with the main run 39444526027 and Table III by `analysis/compare_table3.py`. Prediction written before the runs: if the font cache build drives `NamingTable.getName`, its invocations fall in both runs, and the non-font targets do not change. |
+| Configuration | As the main run (ubuntu-22.04, JDK 11.0.8, PANKTI `0fddf27`, Glowroot 0.13.6). |
+| Outcome | Both runs successful, 50 / 50 command outcomes as the authors'. **Warm font cache** (57 fonts, cache built before the workload): 46 effective targets, exactly the paper's (Jaccard 1.0; `getOS2Windows` is no longer invoked); totals 121,300 / 57,677 / 13,852 (paper 121,175 / 57,563 / 13,851); `NamingTable.getName` 715 invocations and 260 unique profiles (paper 650 / 273; cold cache 1,457 / 976). **DejaVu only** (22 fonts): `getName` 741 / 403, and 13 rows differ, among them the glyph and metrics methods (e.g. `GlyfSimpleDescript.getFlags` 20,340 / 8,330 instead of 23,471 / 11,730), #UNIQUE 10,043; `FontCache.getFont` is not invoked. Rows with the paper's #INVOCATIONS and #UNIQUE: cold 38, warm 38, DejaVu 32 of 46 (`results/day8/sensitivity/`). |
+| Observation | The prediction holds: `getName` invocations fall in both runs, and the non-font rows do not change (except two rows whose collected profiles depend on what was stored before the 200 MB threshold). The authors' execution log has no "Building on-disk font cache" message, which our cold-cache run prints at its first command, and the same six TrueType fallback choices as the warm-cache run (`LiberationSerif` for `TimesNewRomanPSMT`, ...). It has no fallback for the standard fonts Symbol and ZapfDingbats, which our runs replace by LiberationSans five times each. |
+| Interpretation | The authors ran the workload with a PDFBox font cache already built, on a machine with the Liberation fonts and fonts for Symbol and ZapfDingbats. Building the cache during the workload explains `getOS2Windows` and most of the `getName` difference; the remaining differences (`PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`, part of `getName`) are consistent with the missing Symbol / ZapfDingbats fonts, not tested. The near-exact #UNIQUE total of the warm run comes partly from differences that cancel out (38 rows identical). |
+| Assumptions | A24. |
+| Limitations | One run per variant; the font set of the authors' machine is inferred from their log, not known. |
+| Next step | Future work: a run with a pre-built cache and fonts for Symbol and ZapfDingbats. The main results (Days 4-7) keep the cold cache, as documented; the conclusions do not depend on it (the final status is reproduced with both test sets). |
+
+## E23. Null-only check and prediction check
+
+| | |
+|---|---|
+| Objective | Plan tasks 8.2 (null-only check of Section V.B) and 8.1 (prediction check of plan A.6): predict each target's status from the values its passing tests observed. |
+| Method | `analysis/prediction_check.py`: for every mutant of every target in the "after" reports of Day 7, predicted detected if one passing test of the target observed a value different from the mutant's default value (`generated_tests.mutant_killed`); compared with Descartes. Return types from `invoked-methods.csv`, `equals` declarations from the PDFBox sources. |
+| Configuration | Laptop, Python 3.11; both test sets. |
+| Outcome | 82 / 82 mutants and 47 / 47 classifications predicted, for both test sets. 12 PDFBox targets keep passing tests and stay pseudo-tested; all have only `null` observations and only the `null` mutant (paper: 15 over three subjects, 12 in PDFBox). All 28 well-tested targets return a primitive, `String`, wrapper, array or enum; all 19 pseudo-tested targets return another object, with `equals` by identity. |
+| Observation | Descartes' verdict after the generated tests is a function of the observed values: no other test kills a mutant that the target's own tests leave alive. |
+| Interpretation | The paper's 28 / 46 is determined by the return types of the targets and the values observed for them; V.B is confirmed exactly. |
+| Assumptions | A23, A10 (well-tested = tested or partially tested). |
+| Limitations | The rule is checked on this case study only. |
+| Next step | Report. |

@@ -209,6 +209,56 @@ class PanktiStatusTest(unittest.TestCase):
                       "well-tested after and not in the control run: 1", text)
 
 
+class GeneratedTestsTest(unittest.TestCase):
+    """generated_tests.py reads the observed value of each generated test; mutant_killed applies the equals rule."""
+
+    BODY = ('        {decl}\n        Assert.assertEquals({expected}, receivingObject.m());\n')
+
+    def value(self, expected, decl=""):
+        import generated_tests
+        return generated_tests.test_value(self.BODY.format(expected=expected, decl=decl))
+
+    def test_literals(self):
+        self.assertEqual(self.value("null"), ("null", None))
+        self.assertEqual(self.value("true"), ("bool", True))
+        self.assertEqual(self.value("32"), ("num", 32.0))
+        self.assertEqual(self.value("(byte) 1"), ("num", 1.0))
+
+    def test_xml_values(self):
+        decl = ('String returnedObjectStr = \n        "<string>A\\"b</string>";\n'
+                '        java.lang.String expectedObject = deserializeObject(returnedObjectStr);')
+        self.assertEqual(self.value("expectedObject", decl), ("str", 'A"b'))
+        enum = ('String returnedObjectStr = \n        "<p.C_-E>TABLE</p.C_-E>";\n'
+                '        p.C.E expectedObject = deserializeObject(returnedObjectStr);')
+        self.assertEqual(self.value("expectedObject", enum), ("enum", "TABLE"))
+        big = ('File fileReturned = new File("x");\n'
+               '        java.awt.geom.GeneralPath expectedObject = deserializeObject(fileReturned);')
+        self.assertEqual(self.value("expectedObject", big), ("object", "java.awt.geom.GeneralPath"))
+
+    def test_mutant_killed(self):
+        from generated_tests import mutant_killed
+        self.assertTrue(mutant_killed(("bool", True), "false"))
+        self.assertFalse(mutant_killed(("bool", True), "true"))       # isFill: partially tested
+        self.assertFalse(mutant_killed(("null", None), "null"))       # Section V.B
+        self.assertTrue(mutant_killed(("null", None), '""'))
+        self.assertTrue(mutant_killed(("str", "Italic"), '"A"'))
+        self.assertFalse(mutant_killed(("num", 0.0), "(byte)0"))
+        self.assertTrue(mutant_killed(("object", "p.C"), "null"))
+        self.assertTrue(mutant_killed(("array", None), "empty"))
+        self.assertFalse(mutant_killed(("array", 0), "empty"))
+
+
+class FailureCategoryTest(unittest.TestCase):
+    def test_categories(self):
+        from failure_analysis import category
+        a = "java.lang.AssertionError"
+        self.assertEqual(category(a, "expected:<p.C@1a2b> but was:<p.C@3c4d>"), "identity-equals")
+        self.assertEqual(category(a, "expected: p.C<X-0> but was: p.C<X-0>"), "identity-equals")
+        self.assertEqual(category(a, "expected:<PDTrueTypeFont Arial> but was:<null>"), "returns-null")
+        self.assertEqual(category("java.io.EOFException", ""), "exception")
+        self.assertEqual(category(a, "expected:<1> but was:<2>"), "other")
+
+
 class DescartesTest(unittest.TestCase):
     def test_descriptor(self):
         self.assertEqual(param_descriptor("(ILjava/lang/String;)V"), "ILjava/lang/String;")

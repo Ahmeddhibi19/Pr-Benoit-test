@@ -1,0 +1,16 @@
+#EFF_TARGET: ours 46, paper 46; in both 45, Jaccard 0.957
+  only in the paper: 1
+    org.apache.pdfbox.pdmodel.font.FontCache.getFont(org.apache.pdfbox.pdmodel.font.FontInfo)
+  only in this run: 1
+    org.apache.fontbox.ttf.TrueTypeFont.getOS2Windows()  [132 invocations]
+
+totals                                 paper      ours
+  invocations                        121,175   118,568
+  collected                           57,563    54,556
+  unique                              13,851    10,043
+  collected / invocations              47.5%     46.0%
+  unique / collected                   24.0%     18.4%
+  methods with collected < inv.           19        21
+
+Table III methods invoked here: 45 / 46; identical values: invocations 37, collected 33, unique 32
+isFill: 30944 invocations, 30944 collected, 1 unique, profiles of 158-158 bytes (paper: 30,944 / 30,944 / 1 / 158 bytes) -> EXACT MATCH

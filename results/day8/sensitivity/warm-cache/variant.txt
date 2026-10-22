@@ -1,0 +1,1 @@
+font_set=liberation font_cache=warm

@@ -114,3 +114,20 @@ Results (run 39444526027, `results/day4/full/`): see [experiments.md](experiment
 | Smallest / largest profile, total | 158 B / about 55 MB / 5.5 GB | 158 B / 54.7 MiB / 5.30 GiB |
 | isFill | 30,944 / 30,944 / 1, 158 B | identical |
 | Rows identical to Table III (INV / COLL / UNIQ) | | 41 / 40 / 38 of 46; the others are font methods |
+
+## Environment sensitivity of the font methods
+
+Experiment E22 (`results/day8/sensitivity/`, `analysis/sensitivity_table.py`) reruns the full workload twice, each
+time changing one factor through the inputs of `production-run.yml`:
+
+| Run | Fonts | Font cache | Effective targets | #INVOCATIONS / #COLLECTED / #UNIQUE | `getName` (inv. / unique) | Rows as the paper |
+|---|---|---|---|---|---|---|
+| paper | ? | ? | 46 | 121,175 / 57,563 / 13,851 | 650 / 273 | |
+| main (39444526027) | 57 | deleted | 47 | 122,384 / 58,672 / 14,679 | 1,457 / 976 | 38 / 46 |
+| warm cache (39756523874) | 57 | built before | 46 | 121,300 / 57,677 / 13,852 | 715 / 260 | 38 / 46 |
+| DejaVu only (39756528629) | 22 | deleted | 46 (45 of the paper's) | 118,568 / 54,556 / 10,043 | 741 / 403 | 32 / 46 |
+
+When the cache does not exist, the first PDFBox command scans every system font, reading its naming table
+(`NamingTable.getName`) and its OS/2 table (`TrueTypeFont.getOS2Windows`). The authors' log shows no cache build:
+their run started with a cache. The font set changes many more targets (glyph and metrics methods) when the
+Liberation fonts are missing.

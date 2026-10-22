@@ -1,0 +1,14 @@
+#EFF_TARGET: ours 46, paper 46; in both 46, Jaccard 1.000
+  only in the paper: 0
+  only in this run: 0
+
+totals                                 paper      ours
+  invocations                        121,175   121,300
+  collected                           57,563    57,677
+  unique                              13,851    13,852
+  collected / invocations              47.5%     47.5%
+  unique / collected                   24.0%     24.0%
+  methods with collected < inv.           19        19
+
+Table III methods invoked here: 46 / 46; identical values: invocations 41, collected 40, unique 38
+isFill: 30944 invocations, 30944 collected, 1 unique, profiles of 158-158 bytes (paper: 30,944 / 30,944 / 1 / 158 bytes) -> EXACT MATCH

@@ -109,7 +109,8 @@ finders (discrepancies.md §15); on Linux the four methods match.
 ## Targets
 
 `scripts/pankti/extract-targets.sh` applies the authors' tools to PDFBox 2.0.21: pankti-extract (commit `0fddf27`)
-keeps 3,588 public, non-static, non-abstract, non-void, non-deprecated, non-empty methods of classes, and the authors'
+keeps 3,588 public, non-static, non-abstract, non-void, non-deprecated, non-empty methods of classes (3,587 distinct:
+one row, `PlainTextFormatter$Builder.textAlign(int)`, appears twice; `count_targets.py` reports 3,587), and the authors'
 `find-pseudo-tested.py` keeps those that a Descartes report classifies as pseudo-tested.
 
 | Descartes reports used | #TARGET | Effective targets included | Output |

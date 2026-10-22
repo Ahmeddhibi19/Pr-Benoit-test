@@ -1,0 +1,27 @@
+# analysis/java/CacheLookupCheck.java on three failing tests of the authors' published tests
+# (resource files of Zenodo record 4298605, pankti-generated-junit-tests/resource-files/); JDK 11.0.8,
+# pdfbox/fontbox 2.0.21, XStream 1.4.12. JDK warnings about illegal reflective access removed.
+
+## test getFont1 (DefaultResourceCache.getFont1-receiving.xml, -params.xml)
+method: getFont
+cache entries: 3, still referencing an object: 3
+parameter: object 17 0; parameter is a key of the cache (identity): false
+call with the deserialised parameter: null
+cache key with the same object number: true
+call with that key: PDTrueTypeFont BJEDFM+ArialMT
+
+## test getColorSpace10 (DefaultResourceCache.getColorSpace10-receiving.xml, -params.xml)
+method: getColorSpace
+cache entries: 4, still referencing an object: 4
+parameter: object 34 0; parameter is a key of the cache (identity): false
+call with the deserialised parameter: null
+cache key with the same object number: true
+call with that key: ICCBased{numberOfComponents: 3}
+
+## test getXObject6 (DefaultResourceCache.getXObject6-receiving.xml, -params.xml)
+method: getXObject
+cache entries: 7, still referencing an object: 7
+parameter: object 22 0; parameter is a key of the cache (identity): false
+call with the deserialised parameter: null
+cache key with the same object number: true
+call with that key: org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject@6b7906b3

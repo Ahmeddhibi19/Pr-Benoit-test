@@ -1,0 +1,64 @@
+Table III #INVOCATIONS: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 41 / 46
+Table III #INVOCATIONS: total of the 46 rows
+    paper: 121,175 | authors: 121,175 | ours: 122,042 | ours +0.7%
+Table III #COLLECTED: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 40 / 46
+Table III #COLLECTED: total of the 46 rows
+    paper: 57,563 | authors: 57,563 | ours: 58,330 | ours +1.3%
+Table III #UNIQUE: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 38 / 46
+Table III #UNIQUE: total of the 46 rows
+    paper: 13,851 | authors: 13,851 | ours: 14,565 | ours +5.2%
+Table III #PANKTI_TESTS: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 38 / 46
+Table III #PANKTI_TESTS: total of the 46 rows
+    paper: 13,851 | authors: 13,851 | ours: 14,565 | ours +5.2%
+Table III #PASSING: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 40 / 46
+Table III #PASSING: total of the 46 rows
+    paper: 13,614 | authors: 13,614 | ours: 14,314 | ours +5.1%
+Table III #FAILING: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 43 / 46
+Table III #FAILING: total of the 46 rows
+    paper: 237 | authors: 237 | ours: 251 | ours +5.9%
+Table III PANKTI_STATUS: rows equal to the paper
+    paper: 46 rows | authors: 46 / 46 | ours: 46 / 46
+well-tested targets (PANKTI_STATUS)
+    paper: 28 / 46 (60.9%) | authors: 28 / 46 | ours: 28 / 46 | exact (27 / 46 robust, discrepancies.md 23)
+collected / invocations (46 rows of Table III)
+    paper: 47.5% | authors: 47.50% | ours: 47.80% | same order of magnitude
+unique / collected (46 rows of Table III)
+    paper: 24% | authors: 24.06% | ours: 24.97% | same order of magnitude
+passing / tests (46 rows of Table III)
+    paper: 98.2% (98.29%) | authors: 98.29% | ours: 98.28% | same order of magnitude
+#EFF_TARGET
+    paper: 46 | authors: 46 | ours: 47 (46 in common, Jaccard 0.979) | set agreement; extra: TrueTypeFont.getOS2Windows
+#TARGET
+    paper: 138 | authors: 138 | ours: 138 | exact (137 methods in common)
+smallest profile (bytes)
+    paper: 158 | authors: 158 | ours: 158 | exact
+largest profile
+    paper: nearly 55 MB | authors: 54.7 MiB | ours: 54.7 MiB | exact (binary units)
+profiles on disk
+    paper: 5.5 GB | authors: 5.49 GiB | ours: 5.30 GiB | close (-3.5%)
+methods hitting the 200 MB threshold
+    paper: 19 | authors: 19 | ours: 19 | exact
+maximum nesting depth
+    paper: 36 | authors: 73 | ours: 73 | differs: 36 not reproduced; the paper does not define it
+Figure 5, profiles per 10 MiB bin
+    paper: histogram | authors: 57458 / 71 / 3 / 23 / 5 / 3 | ours: 58563 / 75 / 3 / 23 / 5 / 3 | same shape; bins above 20 MiB identical
+isFill: invocations / collected / unique / tests
+    paper: 30,944 / 30,944 / 1 / 1 | authors: 30,944 / 30,944 / 1 / 1 | ours: 30,944 / 30,944 / 1 / 1 | exact
+isFill: status after
+    paper: well-tested | authors: partially-tested (their report and their test run here) | ours: partially-tested | exact: mutant false detected, true not
+all 46 targets pseudo-tested before (plan A.6, exact)
+    paper: 46 / 46 | authors: 46 / 46 | ours: 46 / 46 | exact
+V.A: failing tests of methods returning a primitive, primitive array, wrapper or enum
+    paper: 0 | authors: 0 | ours: 0 | exact
+V.B: PDFBox targets with passing tests that stay pseudo-tested, all null-only
+    paper: 12 (15 with other subjects) | authors: 12 | ours: 12 | exact
+prediction check (plan A.6): mutant outcomes predicted from the observed values
+    paper: - | authors: 82 / 82 | ours: 82 / 82 | all predicted
+sensitivity run with a pre-built font cache: #EFF_TARGET / INV / COLL / UNIQ
+    paper: 46 / 121,175 / 57,563 / 13,851 | authors: - | ours: 46 / 121,300 / 57,677 / 13,852 | targets exact, totals within 0.2% (38 rows identical)

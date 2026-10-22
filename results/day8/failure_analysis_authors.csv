@@ -1,0 +1,14 @@
+row,class,method,params,tests,passing,failing,passing_observed_null,passing_observed_non_null,failing_observed_null,failing_observed_non_null,identity-equals,returns-null,exception,other,returned_type,paper_cause
+33,org.apache.pdfbox.rendering.TTFGlyph2D,getPathForCharacterCode,int,34,0,34,0,0,0,34,34,0,0,0,java.awt.geom.GeneralPath,transient fields
+34,org.apache.pdfbox.rendering.TTFGlyph2D,getPathForGID,"int,int",34,0,34,0,0,0,34,34,0,0,0,java.awt.geom.GeneralPath,transient fields
+35,org.apache.pdfbox.pdmodel.font.PDTrueTypeFont,getPath,int,36,0,36,0,0,0,36,36,0,0,0,java.awt.geom.GeneralPath,transient fields
+37,org.apache.pdfbox.pdmodel.DefaultResourceCache,getFont,org.apache.pdfbox.cos.COSObject,29,5,24,5,0,0,24,0,24,0,0,org.apache.pdfbox.pdmodel.font.PDFont,SoftReference cache not available
+44,org.apache.pdfbox.pdmodel.font.FontCache,getFont,org.apache.pdfbox.pdmodel.font.FontInfo,106,83,23,83,0,0,23,0,23,0,0,org.apache.fontbox.FontBoxFont,SoftReference cache not available
+45,org.apache.pdfbox.pdmodel.DefaultResourceCache,getColorSpace,org.apache.pdfbox.cos.COSObject,23,4,19,4,0,0,19,0,19,0,0,org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace,SoftReference cache not available
+46,org.apache.pdfbox.pdmodel.DefaultResourceCache,getXObject,org.apache.pdfbox.cos.COSObject,15,13,2,13,0,0,2,0,2,0,0,org.apache.pdfbox.pdmodel.graphics.PDXObject,SoftReference cache not available
+50,org.apache.pdfbox.pdmodel.DefaultResourceCache,getExtGState,org.apache.pdfbox.cos.COSObject,22,4,18,4,0,0,18,0,18,0,0,org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState,SoftReference cache not available
+51,org.apache.pdfbox.pdmodel.PDResources,getExtGState,org.apache.pdfbox.cos.COSName,18,0,18,0,0,0,18,18,0,0,0,org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState,equals not overridden
+53,org.apache.pdfbox.pdfparser.COSParser,getEncryption,,33,13,20,13,0,0,20,20,0,0,0,org.apache.pdfbox.pdmodel.encryption.PDEncryption,transient fields
+72,org.apache.pdfbox.pdmodel.PDDocumentCatalog,getViewerPreferences,,8,6,2,6,0,0,2,2,0,0,0,org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences,equals not overridden
+73,org.apache.pdfbox.pdmodel.font.PDCIDFontType2,getPath,int,6,0,6,0,0,0,6,6,0,0,0,java.awt.geom.GeneralPath,equals not overridden; transient fields
+74,org.apache.pdfbox.pdmodel.font.PDCIDFont,getCIDSystemInfo,,1,0,1,0,0,0,1,1,0,0,0,org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo,

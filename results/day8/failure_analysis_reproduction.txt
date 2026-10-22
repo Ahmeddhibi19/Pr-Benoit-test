@@ -1,0 +1,19 @@
+methods with failing tests: 14; their tests: 482, passing 117, failing 365
+failing tests by category: identity-equals 265, returns-null 98, exception 2, other 0
+in these methods, passing tests that observed null: 117, non-null: 0; failing tests that observed null: 0, non-null: 365
+
+row  method                                   tests pass fail  pass(null/non-null) fail(null/non-null)  categories  | returned type | paper's cause
+ 33  TTFGlyph2D.getPathForCharacterCode          34    0   34     0/0                  0/34             identity-equals=34 | java.awt.geom.GeneralPath | transient fields
+ 34  TTFGlyph2D.getPathForGID                    34    0   34     0/0                  0/34             identity-equals=34 | java.awt.geom.GeneralPath | transient fields
+ 35  PDTrueTypeFont.getPath                      36    0   36     0/0                  0/36             identity-equals=36 | java.awt.geom.GeneralPath | transient fields
+ 37  DefaultResourceCache.getFont                29    5   24     5/0                  0/24             returns-null=24 | org.apache.pdfbox.pdmodel.font.PDFont | SoftReference cache not available
+ 44  FontCache.getFont                          103   72   31    72/0                  0/31             returns-null=31 | org.apache.fontbox.FontBoxFont | SoftReference cache not available
+ 45  DefaultResourceCache.getColorSpace          27    4   23     4/0                  0/23             returns-null=23 | org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace | SoftReference cache not available
+ 46  DefaultResourceCache.getXObject             15   13    2    13/0                  0/2              returns-null=2 | org.apache.pdfbox.pdmodel.graphics.PDXObject | SoftReference cache not available
+ 50  DefaultResourceCache.getExtGState           22    4   18     4/0                  0/18             returns-null=18 | org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState | SoftReference cache not available
+ 51  PDResources.getExtGState                    18    0   18     0/0                  0/18             identity-equals=18 | org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState | equals not overridden
+ 53  COSParser.getEncryption                     35   13   22    13/0                  0/22             identity-equals=22 | org.apache.pdfbox.pdmodel.encryption.PDEncryption | transient fields
+ 72  PDDocumentCatalog.getViewerPreferences       8    6    2     6/0                  0/2              identity-equals=2 | org.apache.pdfbox.pdmodel.interactive.viewerpreferences.PDViewerPreferences | equals not overridden
+ 73  PDCIDFontType2.getPath                       6    0    6     0/0                  0/6              identity-equals=6 | java.awt.geom.GeneralPath | equals not overridden; transient fields
+ 74  PDCIDFont.getCIDSystemInfo                   1    0    1     0/0                  0/1              identity-equals=1 | org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo | -
+     TrueTypeFont.getOS2Windows                 114    0  114     0/0                  0/114            identity-equals=112 exception=2 | org.apache.fontbox.ttf.OS2WindowsMetricsTable | -

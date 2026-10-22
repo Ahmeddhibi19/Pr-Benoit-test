@@ -18,6 +18,11 @@ The numbers to reproduce are #TARGET = 138, #EFF_TARGET = 46, the PDFBox rows of
 about the collected profiles (5.5 GB, 158 B to about 55 MB, 19 methods hitting the 200 MB threshold, nesting depth 36),
 Figure 5 and the `isFill` example.
 
+The full comparison, one line per published number with its source file, is in
+[`results/comparison/comparison.txt`](results/comparison/comparison.txt); row by row in
+[`results/comparison/table3_rows.csv`](results/comparison/table3_rows.csv) and
+[`results/comparison/table3_rows.png`](results/comparison/table3_rows.png).
+
 The reproduction follows two tracks:
 - **Track A** checks the paper against the authors' published artifacts (tool repository, experiment repository,
   replication data on Zenodo).
@@ -38,8 +43,10 @@ The reproduction follows two tracks:
 | Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/day5/`](results/day5/) |
 | Test execution (5 separate runs, our tests and the authors') | done | [`docs/execution.md`](docs/execution.md), [`results/day6/`](results/day6/) |
 | Descartes "after" (PANKTI_STATUS), our tests and the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/day7/`](results/day7/) |
+| Why tests fail (V.A), null-only check (V.B), prediction check | done | [`docs/failures.md`](docs/failures.md), [`results/day8/`](results/day8/) |
+| Three-way comparison: paper, authors' artifacts, reproduction | done | [`results/comparison/`](results/comparison/) |
 
-## Results so far
+## Results
 
 | Quantity | Paper | Authors' artifacts | This reproduction |
 |---|---|---|---|
@@ -47,7 +54,7 @@ The reproduction follows two tracks:
 | Targets invoked by the workload (#EFF_TARGET) | 46 | 46 | 47: all 46, plus one font method |
 | Pseudo-tested methods found by Descartes | not given | 644 (6 modules) | 613; same classification as the authors for 6,276 of 6,373 methods (fontbox, xmpbox, preflight, tools: all; pdfbox: 4,421 / 4,438; examples differs by design, A2). All 46 effective targets pseudo-tested. Requires 1 PIT thread: with 4, #TARGET drops to 91 ([`docs/descartes.md`](docs/descartes.md)) |
 | pdfbox-app jar used for the workload | not given | self-built, 9,890,400 bytes | built from tag 2.0.21: same content as the authors' jar (all 5,644 class files identical) |
-| #INVOCATIONS / #COLLECTED / #UNIQUE | 121,175 / 57,563 / 13,851 | identical | 122,384 / 58,672 / 14,679; 41 / 40 / 38 of the 46 rows identical, the others are font methods |
+| #INVOCATIONS / #COLLECTED / #UNIQUE | 121,175 / 57,563 / 13,851 | identical | 122,384 / 58,672 / 14,679; 41 / 40 / 38 of the 46 rows identical, the others are font methods. With the PDFBox font cache built before the workload, as the authors' log shows they had: 121,300 / 57,677 / 13,852 and exactly the 46 targets ([`docs/instrumentation.md`](docs/instrumentation.md)) |
 | `RenderingMode.isFill` | 30,944 invocations, 1 unique, 158 B; partially tested after (mutant `false` detected, `true` not) | identical | identical |
 | Methods hitting the 200 MB threshold | 19 | 19 | 19 |
 | Profile sizes | 158 B to about 55 MB, 5.5 GB | 158 B to 54.7 MiB, 5.49 GiB | 158 B to 54.7 MiB, 5.30 GiB |
@@ -55,6 +62,8 @@ The reproduction follows two tracks:
 | Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/day5/fig5.png`](results/day5/fig5.png)) |
 | #PANKTI_TESTS | 13,851 | 13,851; regenerated from their profiles: all 13,851 identical to the published tests | 14,679 (= #UNIQUE for each of the 47 methods) |
 | #PASSING / #FAILING (5 runs, 0 flaky) | 13,614 / 237 | their 13,851 tests run here: 13,614 / 237, all 46 rows identical | 14,314 / 365 of 14,679 (38 of 46 rows identical; differences follow #UNIQUE) |
+| Why generated tests fail (V.A) | 4 causes from a sample | their 237 failing tests run here: 151 `equals` by identity, 86 cache lookups returning `null` | 365: 265 / 98 / 2 exceptions. A test passes exactly when production returned `null`; the caches are not missing but keyed by identity ([`docs/failures.md`](docs/failures.md)) |
+| Targets with passing tests that stay pseudo-tested (V.B) | 15 (12 in PDFBox), null-only | 12, all null-only | 12, all null-only |
 | Well-tested after the generated tests (PANKTI_STATUS) | 28 / 46 | 28 / 46 in their reports; their passing tests run here: 28 / 46, all 46 statuses identical | **28 / 46** (17 tested, 11 partially tested), all 46 statuses identical to Table III. One of the 28 (`getXrefType`) is already tested in a run without generated tests: its "before" status is unstable ([`docs/descartes.md`](docs/descartes.md)) |
 
 ## Repository layout
@@ -73,7 +82,7 @@ scripts/pankti/      target extraction, plugin build, workload, test generation 
 scripts/glowroot/    Glowroot installation and agent check
 setup/               local setup (portable toolchain, download of the authors' artifacts)
 analysis/            analysis scripts; analysis/paper/ holds Table III as printed in the paper
-results/             outputs of the runs and of the analyses, one folder per stage
+results/             outputs of the runs and of the analyses, one folder per stage; results/comparison/ sums them up
 report/              the research report (French)
 tests/               unit tests of the analysis scripts (python -m unittest discover -s tests)
 docs/                methodology notes, assumptions, discrepancies, environment, artifacts, work journal
@@ -102,6 +111,8 @@ gh workflow run env-check.yml          # about 10 min
 gh workflow run descartes-before.yml   # one job per module, 1 PIT thread; pdfbox is the longest (about 70 min)
 gh workflow run production-run.yml -f mode=dry-run   # plugin + Glowroot + pdfbox-app, agent check (about 5 min)
 gh workflow run production-run.yml -f mode=full      # + the authors' workload and the profile metrics (about 25 min)
+gh workflow run production-run.yml -f mode=full -f font_cache=warm       # sensitivity: font cache built first
+gh workflow run production-run.yml -f mode=full -f font_set=dejavu-only  # sensitivity: DejaVu fonts only
 gh workflow run generate-tests.yml -f profiles_run_id=<run-id of a full production-run>   # about 15-25 min per job
 gh workflow run assess-tests.yml -f tests_run_id=<run-id of a generate-tests run>          # compile + 5 runs
 gh workflow run descartes-after.yml -f tests_run_id=<run-id of a generate-tests run>       # about 25 min (pdfbox)
@@ -145,6 +156,17 @@ python analysis/pankti_status.py results/day2/descartes_before results/day7/auth
        results/day7/pankti_status_authors --table3 $T --control results/day7/none
 python analysis/mutant_tests.py org.apache.pdfbox.pdmodel.graphics.state.RenderingMode isFill \
        results/day7/reproduction/pdfbox.mutations.json.gz
+
+# Why tests fail (V.A), null-only and prediction checks (V.B), on the authors' published tests ($G) and on ours
+# (the generated-tests artifact of a generate-tests run, unpacked to $O); --sources: a PDFBox 2.0.21 checkout
+G=/c/w/data/pankti-data-v1/pankti-data/pdfbox/pankti-generated-junit-tests/tests; T3=analysis/paper/table3_pdfbox.csv
+python analysis/failure_analysis.py $G results/day6/authors/test_outcomes_tests.csv.gz $I \
+       results/day8/failure_analysis_authors --table3 $T3
+python analysis/prediction_check.py $G results/day6/authors/test_outcomes_tests.csv.gz results/day7/authors $I \
+       results/day8/prediction_check_authors --table3 $T3 --sources /c/w/work/pdfbox
+# the same with $O and results/day6/reproduction, results/day7/reproduction
+python analysis/comparison.py results results/comparison
+python analysis/figure_table3.py results/comparison/table3_rows.csv results/comparison/table3_rows.png
 ```
 
 Descartes on one module, locally (the fontbox module takes about one minute):
@@ -177,6 +199,8 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
 - [docs/generation.md](docs/generation.md): which pankti-generate version and why, how the tests are counted, how they
   are added to PDFBox.
 - [docs/execution.md](docs/execution.md): how the generated tests are run and their outcomes counted.
+- [docs/failures.md](docs/failures.md): why generated tests fail, when they improve the test suite, and how the
+  final status follows from the observed values.
 - [docs/experiments.md](docs/experiments.md): research log of every experiment (objective, method, configuration,
   outcome, interpretation, limitations).
 - [docs/assumptions.md](docs/assumptions.md): every simplifying assumption, with its justification, expected impact and

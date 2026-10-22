@@ -398,3 +398,40 @@ configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it 
 
 Analyse the failing tests (categories of Section V.A) and the targets that stay pseudo-tested although they have
 passing tests (Section V.B); collect the final comparison in `results/comparison/`.
+
+## Day 8 - 2026-10-22: comparison and failure analysis
+
+### Done
+
+- `analysis/generated_tests.py`: reads the value each generated test asserts (literal, XStream XML or resource
+  file); `mutant_killed` applies the `equals` rule to Descartes' default values.
+- `analysis/failure_analysis.py` (Section V.A) and `analysis/prediction_check.py` (Section V.B and the prediction
+  check of plan A.6), on both test sets; `analysis/java/CacheLookupCheck.java` (run-time check of the cache lookups).
+- `analysis/comparison.py` and `analysis/figure_table3.py`: `results/comparison/` holds one line per published number
+  (paper / authors' artifacts / reproduction, with the source file of each value) and Table III row by row.
+- `production-run.yml`: options `font_set` and `font_cache` for the sensitivity runs (defaults unchanged).
+- Unit tests: 16. Docs: [failures.md](failures.md), assumptions A23-A24, experiments E21-E23, discrepancies 25-26;
+  the report has the 14 sections of the outline.
+
+### Results
+
+- **Failing tests:** 237 (authors) / 365 (ours) = `equals` by identity + cache lookups returning `null` (+2
+  exceptions here). In every method with failures, a test passes exactly when production returned `null`.
+- **The caches are not missing:** they are deserialised with all their entries, but keyed by identity
+  (`COSObject`, `FontInfo`), so the deserialised parameter never finds its entry. This corrects the paper's
+  explanation of rows 37, 44, 45, 46, 50; for rows 33, 34, 35, 53, `equals` by identity is enough to explain the
+  failures attributed to transient fields.
+- **V.B:** 12 PDFBox targets with null-only passing tests and a single `null` mutant, as in the paper.
+- **Font sensitivity (E22, runs 39756523874 and 39756528629):** with the PDFBox font cache built before the
+  workload, the effective targets are exactly the paper's 46 and the totals 121,300 / 57,677 / 13,852 (paper
+  121,175 / 57,563 / 13,851); with DejaVu fonts only, 13 rows change. The authors' log shows no font-cache build:
+  their run started with a cache.
+- **Prediction check:** 82 / 82 mutants and 47 / 47 statuses predicted from the observed values. The 28 well-tested
+  targets all return value types; the 19 others return objects compared by identity.
+
+### Problems and decisions
+
+- The paper's analysis is manual, on a sample: replaced by an automatic classification of every failing test,
+  checked in the code and at run time (A23).
+- `extracted-methods-pdfbox.csv` has 3,588 rows but 3,587 distinct methods (one duplicate row); the docs said 3,588
+  and the result files 3,587. Both are now stated.

@@ -29,6 +29,8 @@ filled in once it is known. Related observations (differences between the paper 
 | A20 | [Running the authors' published tests](#a20-running-the-authors-published-tests) | in use |
 | A21 | [Descartes "after": analysed classes](#a21-descartes-after-analysed-classes) | validated (460 / 465 methods; the 5 others come from unstable tests) |
 | A22 | [Which generated tests are added](#a22-which-generated-tests-are-added) | in use |
+| A23 | [Failure causes classified from the evidence of every test](#a23-failure-causes-classified-from-the-evidence-of-every-test) | in use |
+| A24 | [Font sensitivity runs](#a24-font-sensitivity-runs) | in use |
 
 ## A1. Build-only adjustments of PDFBox 2.0.21
 
@@ -293,3 +295,27 @@ filled in once it is known. Related observations (differences between the paper 
 | Expected impact | None found: removing a failing test cannot make a method better tested. |
 | Validation | The filter keeps exactly the passing counts of Day 6 for both test sets. |
 | Reporting | Methodology. |
+
+## A23. Failure causes classified from the evidence of every test
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Section V.A: the authors "manually analyze a random sample" of the failing tests and give four causes, with the rows of Table III for each. |
+| Problem | The sample and the analysis procedure are not published, so the manual analysis cannot be repeated. |
+| Simplification | Every failing test (237 of the authors' tests, 365 of ours) is classified automatically from its JUnit message and its observed value (`analysis/failure_analysis.py`). The mechanisms found are then checked in the PDFBox sources (`equals`/`hashCode` declarations) and, for the cache lookups, by deserialising three tests at run time (`analysis/java/CacheLookupCheck.java`). |
+| Justification | Covers all failures instead of a sample, and is repeatable. The categories come from the evidence (the message shows two identity hash codes, or `null`), not from the paper's list. |
+| Expected impact | A category says how the assertion fails, not every reason why the objects differ: when `equals` is by identity, a field-by-field difference (e.g. transient fields) is not detected. |
+| Validation | No failing test is left in "other"; the rule "a test passes exactly when it observed null" holds for every test of the 13 / 14 methods with failures. |
+| Reporting | Methodology; [failures.md](failures.md). |
+
+## A24. Font sensitivity runs
+
+| Item | Explanation |
+|---|---|
+| Original requirement | Plan task 8.3 (optional): one sensitivity run on the environment. The paper does not describe the fonts or the font cache of the authors' machine. |
+| Problem | 8 of the 46 rows differ in #UNIQUE, all of them font methods, and the cause is unknown. PDFBox reads the naming table of every system font (`NamingTable.getName`) when it builds its font cache, so both the installed fonts and the state of the cache (`~/.pdfbox.cache`) can change these counts. |
+| Simplification | Two extra runs of the full workload, each changing one factor (inputs of `production-run.yml`): (A) font cache built beforehand by PDFToImage on copies of the five PDFs, without the agent; (B) all font files except DejaVu removed (23 fonts instead of 57). |
+| Justification | One factor per run; the defaults stay those of the main run, which remains the reference. |
+| Expected impact | None on the main results; these runs only test the explanation. |
+| Validation | Each run records its font list (`env-report.txt`) and its variant (`variant.txt`). Runs 39756523874 (warm cache: PDFBox reports "found 57 fonts" while priming, `font-cache-priming.log`) and 39756528629 (22 DejaVu fonts); results in E22. |
+| Reporting | Methodology; experiment E22. |
