@@ -4,6 +4,8 @@
 #          XML parses, and that the invocation count is cumulative over JVM launches (count after run 2 = 2 x run 1).
 #   full:  the authors' run.sh (50 JVM launches), with only its two machine-specific paths replaced.
 # Before running: the profile directory is emptied and the PDFBox font cache (~/.pdfbox.cache) is deleted.
+# With FONT_CACHE=warm (sensitivity run), the font cache is then rebuilt by PDFToImage on a copy of each workload PDF,
+# without the agent, so that the workload starts with a cache instead of scanning the system fonts.
 # Usage: run-workload.sh <smoke|full> <glowroot.jar> <pdfbox-app.jar> <workload_dir> <out_dir>
 #   <workload_dir>/execution comes from get-workload.sh. PANKTI writes to /tmp/pankti-object-data (hard-coded).
 set -uo pipefail
@@ -19,7 +21,16 @@ profiles=/tmp/pankti-object-data
 isfill=org.apache.pdfbox.pdmodel.graphics.state.RenderingMode.isFill
 
 rm -rf "$profiles" "$HOME/.pdfbox.cache"
-{ echo "== before"; date -u +%FT%TZ; df -h / | tail -1; } > "$out/run-info.txt"
+if [ "${FONT_CACHE:-cold}" = warm ]; then
+  prime=$(mktemp -d)
+  cp "$exec_dir"/workload/*.pdf "$prime/"
+  for pdf in "$prime"/*.pdf; do
+    java -jar "$app_jar" PDFToImage "$pdf" >> "$out/font-cache-priming.log" 2>&1
+  done
+  rm -rf "$prime"
+  ls -l "$HOME/.pdfbox.cache" >> "$out/font-cache-priming.log" 2>&1
+fi
+{ echo "== before"; date -u +%FT%TZ; df -h / | tail -1; echo "font_cache=${FONT_CACHE:-cold}"; } > "$out/run-info.txt"
 cd "$exec_dir"
 SECONDS=0
 ok=1

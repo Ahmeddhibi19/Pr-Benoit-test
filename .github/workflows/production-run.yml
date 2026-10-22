@@ -14,6 +14,16 @@ on:
       pankti_commit:
         description: PANKTI commit
         default: 0fddf273a8a6acbaba51a318fcc7fc6e5b84058f
+      font_set:
+        description: fonts on the runner (sensitivity run, docs/experiments.md E22) - liberation (default) adds fonts-liberation; dejavu-only removes every font file except DejaVu
+        type: choice
+        options: [liberation, dejavu-only]
+        default: liberation
+      font_cache:
+        description: PDFBox font cache before the workload - cold (default, deleted) or warm (built by one run without the agent)
+        type: choice
+        options: [cold, warm]
+        default: cold
 
 jobs:
   production-run:
@@ -28,9 +38,17 @@ jobs:
         run: bash scripts/ci/free-disk.sh
 
       - name: Install fonts
+        if: inputs.font_set == 'liberation'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q fonts-liberation
+
+      - name: Keep only the DejaVu fonts
+        if: inputs.font_set == 'dejavu-only'
+        run: |
+          sudo find /usr/share/fonts -type f \( -name '*.ttf' -o -name '*.otf' -o -name '*.ttc' -o -name '*.pfb' \) \
+            ! -path '*dejavu*' -delete
+          fc-cache -f > /dev/null
 
       - name: Install JDK 11.0.8
         run: bash scripts/ci/install-jdk.sh "$RUNNER_TEMP"
@@ -80,7 +98,10 @@ jobs:
 
       - name: Run the workload
         if: inputs.mode != 'dry-run'
+        env:
+          FONT_CACHE: ${{ inputs.font_cache }}
         run: >-
+          echo "font_set=${{ inputs.font_set }} font_cache=${{ inputs.font_cache }}" > out/variant.txt &&
           bash scripts/pankti/run-workload.sh ${{ inputs.mode }} "$GLOWROOT_DIR/glowroot/glowroot.jar"
           out/app/pdfbox-app-2.0.21.jar workload out/workload
 
@@ -105,7 +126,7 @@ jobs:
         run: |
           {
             echo "### production-run (${{ inputs.mode }})"; echo; echo '```'
-            cat out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt out/workload/smoke-checks.txt                 out/workload/run-info.txt out/workload/profile_stats.txt out/workload/workload_commands.txt 2>/dev/null || true
+            cat out/variant.txt out/plugin/checks.txt out/app/app-jar.txt out/agent/agent-checks.txt out/workload/smoke-checks.txt                 out/workload/run-info.txt out/workload/profile_stats.txt out/workload/workload_commands.txt 2>/dev/null || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
