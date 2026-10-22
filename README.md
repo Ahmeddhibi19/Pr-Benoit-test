@@ -37,7 +37,7 @@ The reproduction follows two tracks:
 | Workload under the instrumentation, profile metrics (Table III columns 1-3) | done | [`results/day4/`](results/day4/), [`docs/instrumentation.md`](docs/instrumentation.md) |
 | Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/day5/`](results/day5/) |
 | Test execution (5 separate runs, our tests and the authors') | done | [`docs/execution.md`](docs/execution.md), [`results/day6/`](results/day6/) |
-| Descartes "after", comparison with the paper | to do | |
+| Descartes "after" (PANKTI_STATUS), our tests and the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/day7/`](results/day7/) |
 
 ## Results so far
 
@@ -48,14 +48,14 @@ The reproduction follows two tracks:
 | Pseudo-tested methods found by Descartes | not given | 644 (6 modules) | 613; same classification as the authors for 6,276 of 6,373 methods (fontbox, xmpbox, preflight, tools: all; pdfbox: 4,421 / 4,438; examples differs by design, A2). All 46 effective targets pseudo-tested. Requires 1 PIT thread: with 4, #TARGET drops to 91 ([`docs/descartes.md`](docs/descartes.md)) |
 | pdfbox-app jar used for the workload | not given | self-built, 9,890,400 bytes | built from tag 2.0.21: same content as the authors' jar (all 5,644 class files identical) |
 | #INVOCATIONS / #COLLECTED / #UNIQUE | 121,175 / 57,563 / 13,851 | identical | 122,384 / 58,672 / 14,679; 41 / 40 / 38 of the 46 rows identical, the others are font methods |
-| `RenderingMode.isFill` | 30,944 invocations, 1 unique, 158 B | identical | identical |
+| `RenderingMode.isFill` | 30,944 invocations, 1 unique, 158 B; partially tested after (mutant `false` detected, `true` not) | identical | identical |
 | Methods hitting the 200 MB threshold | 19 | 19 | 19 |
 | Profile sizes | 158 B to about 55 MB, 5.5 GB | 158 B to 54.7 MiB, 5.49 GiB | 158 B to 54.7 MiB, 5.30 GiB |
 | Maximum nesting depth | 36 (undefined) | 73 (XML element depth) | 73 (same measure) |
 | Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/day5/fig5.png`](results/day5/fig5.png)) |
 | #PANKTI_TESTS | 13,851 | 13,851; regenerated from their profiles: all 13,851 identical to the published tests | 14,679 (= #UNIQUE for each of the 47 methods) |
 | #PASSING / #FAILING (5 runs, 0 flaky) | 13,614 / 237 | their 13,851 tests run here: 13,614 / 237, all 46 rows identical | 14,314 / 365 of 14,679 (38 of 46 rows identical; differences follow #UNIQUE) |
-| Well-tested | 28 / 46 | 28 / 46 | not yet run |
+| Well-tested after the generated tests (PANKTI_STATUS) | 28 / 46 | 28 / 46 in their reports; their passing tests run here: 28 / 46, all 46 statuses identical | **28 / 46** (17 tested, 11 partially tested), all 46 statuses identical to Table III. One of the 28 (`getXrefType`) is already tested in a run without generated tests: its "before" status is unstable ([`docs/descartes.md`](docs/descartes.md)) |
 
 ## Repository layout
 
@@ -66,6 +66,7 @@ The reproduction follows two tracks:
   production-run.yml   PANKTI plugin for the frozen targets, Glowroot, pdfbox-app; the workload (modes dry-run, smoke, full)
   generate-tests.yml   pankti-generate on the reproduction's profiles, and on the authors' (compared with their tests)
   assess-tests.yml     the generated tests integrated into PDFBox and run 5 times (ours and the authors')
+  descartes-after.yml  Descartes with the passing generated tests added (ours, the authors', none as a control)
 scripts/ci/          runner setup: JDK, Maven, disk, environment report, annotations
 scripts/pdfbox/      PDFBox checkout, build-only patch, Descartes profile and run, test summary
 scripts/pankti/      target extraction, plugin build, workload, test generation and integration (authors' tools)
@@ -103,6 +104,7 @@ gh workflow run production-run.yml -f mode=dry-run   # plugin + Glowroot + pdfbo
 gh workflow run production-run.yml -f mode=full      # + the authors' workload and the profile metrics (about 25 min)
 gh workflow run generate-tests.yml -f profiles_run_id=<run-id of a full production-run>   # about 15-25 min per job
 gh workflow run assess-tests.yml -f tests_run_id=<run-id of a generate-tests run>          # compile + 5 runs
+gh workflow run descartes-after.yml -f tests_run_id=<run-id of a generate-tests run>       # about 25 min (pdfbox)
 gh run download <run-id>               # outputs of a run (methods.json, checks, logs, environment report)
 ```
 
@@ -132,7 +134,17 @@ bash scripts/pankti/extract-targets.sh /c/w/src/pankti /c/w/work/pdfbox $E/desca
 python analysis/count_targets.py /c/w/work/targets $E/descartes/before $P/invoked-methods.csv results/day2/targets_authors_reports
 
 # the same comparison with the reproduction's own reports, stored compressed in results/day2/descartes_before/
-python analysis/compare_descartes_runs.py results/day2/descartes_before $E/descartes/before results/day2/descartes_before_vs_authors \n       --labels reproduction authors --table3 $P/invoked-methods.csv
+python analysis/compare_descartes_runs.py results/day2/descartes_before $E/descartes/before results/day2/descartes_before_vs_authors \
+       --labels reproduction authors --table3 $P/invoked-methods.csv
+
+# PANKTI_STATUS (Table III, last column) from the "before" reports and the "after" runs of descartes-after.yml
+I=results/day4/full/profiles/invoked-methods.csv; T=results/day1/authors_report_vs_paper.csv
+python analysis/pankti_status.py results/day2/descartes_before results/day7/reproduction $I \
+       results/day7/pankti_status_reproduction --table3 $T --control results/day7/none
+python analysis/pankti_status.py results/day2/descartes_before results/day7/authors $P/invoked-methods.csv \
+       results/day7/pankti_status_authors --table3 $T --control results/day7/none
+python analysis/mutant_tests.py org.apache.pdfbox.pdmodel.graphics.state.RenderingMode isFill \
+       results/day7/reproduction/pdfbox.mutations.json.gz
 ```
 
 Descartes on one module, locally (the fontbox module takes about one minute):
@@ -183,5 +195,8 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
   from the Descartes runs. This only affects the `examples` module, which contains no target (A2).
 - All measured runs execute on Linux (GitHub Actions) with the authors' JDK; the Windows laptop is used for development
   only (A5).
+- The Descartes "after" runs mutate only the 22 classes that declare the effective targets, with all the tests of
+  the module (A21); a control run without generated tests gives the full run's classification for 460 of the 465
+  methods of these classes.
 
 See [docs/assumptions.md](docs/assumptions.md) for the full list.

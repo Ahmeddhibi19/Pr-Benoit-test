@@ -1,0 +1,8 @@
+Table III methods: 46
+  paper: well-tested 28 / 46
+  authors' tests, run here: well-tested 28 / 46
+  this reproduction: well-tested 28 / 46
+  same status as the paper (authors' tests, run here): 46 / 46
+  same status as the paper (this reproduction): 46 / 46
+  same Descartes classification after, authors' tests vs ours: 46 / 46
+  not in Table III: TrueTypeFont.getOS2Windows: pseudo-tested

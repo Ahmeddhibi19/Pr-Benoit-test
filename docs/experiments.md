@@ -27,6 +27,8 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E16](#e16-repeated-runs-local-check) | 2026-10-21 | Do the repeated runs and the outcome counting work? | yes on a sample (20 / 20 passing in 2 runs) |
 | [E17](#e17-execution-of-the-reproductions-tests) | 2026-10-21 | #PASSING / #FAILING / flaky of our 14,679 tests | 14,314 / 365 / 0; 38 of 46 rows equal to Table III |
 | [E18](#e18-execution-of-the-authors-published-tests) | 2026-10-21 | The authors' 13,851 tests run in our environment | 13,614 / 237 / 0: Table III exactly, 46 / 46 rows |
+| [E19](#e19-descartes-after-local-check) | 2026-10-22 | Does the "after" Descartes run work, and does isFill behave as in the paper? | yes, after a fix (no test was selected at first) |
+| [E20](#e20-descartes-after-restriction-check-and-pankti_status) | 2026-10-22 | PANKTI_STATUS of the effective targets | 28 / 46 with our tests and with the authors', 46 / 46 statuses of Table III |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -229,3 +231,30 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Limitations | The published classes needed a one-line repair to compile. |
 | Next step | Day 7. |
 
+## E19. Descartes "after": local check
+
+| | |
+|---|---|
+| Objective | Plan tasks 7.1-7.4, before using CI: check the "after" pipeline on a small sample. |
+| Method | The sample of E15 (generated tests of `RenderingMode`, `PDCIDSystemInfo`, `XrefTrailerResolver`, all passing) in the pdfbox module, `scripts/pdfbox/run-descartes.sh` restricted to these 3 classes; `scripts/pankti/keep_passing_tests.py` on the full test sets; `analysis/pankti_status.py` on the authors' own reports. |
+| Configuration | Laptop (Windows), JDK 11.0.8, PIT 1.4.10 + Descartes 1.2.6, 1 thread. |
+| Outcome | First attempt: every method "not covered" after 19 s - with restricted `targetClasses`, pitest-maven also restricts `targetTests` by default and ran no test. With `targetTests` set to the module's package: 153 s; `RenderingMode.isFill` becomes partially tested (mutant `false` detected, `true` not), `getRegistry`, `getOrdering` and `getXrefType` become tested - the statuses of Table III. The filter keeps exactly 14,314 of our tests and 13,614 of the authors'. On the authors' own before/after reports, `pankti_status.py` gives 28 / 46 well-tested (17 tested, 11 partially tested), the status of Table III for all 46 methods. |
+| Observation | The isFill example of the paper is reproduced: one observed value (`true`) kills only the mutant that returns the other value. |
+| Interpretation | The pipeline is ready; the restriction needs the explicit test selection (A21). |
+| Assumptions | A21, A22. |
+| Limitations | 3 classes on Windows; the CI run validates the restriction itself. |
+| Next step | E20 on CI. |
+
+## E20. Descartes "after": restriction check and PANKTI_STATUS
+
+| | |
+|---|---|
+| Objective | Plan tasks 7.2-7.4: classify the effective targets after the passing generated tests are added (Table III, PANKTI_STATUS) and check the paper's examples. |
+| Method | Workflow descartes-after, run 39747040848: sources none (control), reproduction (14,314 passing tests) and authors (13,614 passing published tests), modules fontbox and pdfbox, mutation restricted to the 22 classes of the effective targets. `analysis/pankti_status.py` (with `--control`), `analysis/table3_status.py`, `analysis/compare_descartes_runs.py`, `analysis/mutant_tests.py`. |
+| Configuration | GitHub Actions ubuntu-22.04, JDK 11.0.8, Maven 3.6.3, PIT 1.4.10 + Descartes 1.2.6, 21 operators, 1 thread; tests filtered with the Day 6 verdicts. 6 jobs, all successful; pdfbox 16-21 min, fontbox under 1 min. |
+| Outcome | Well-tested: 28 / 46 (17 tested, 11 partially tested) with our tests and with the authors' tests, the status of Table III for all 46 methods in both cases; `getOS2Windows` stays pseudo-tested. Both test sets give the same classification for all 465 analysed methods. Control: 460 / 465 methods as in the full "before" run; `getXrefType` is tested without any generated test. `isFill`: partially tested (`false` killed, `true` not); `getName`: tested (`null`, `"A"`, `""` killed). |
+| Observation | The `getXrefType` `null` mutant survived 183 tests in the full "before" run and was killed by the 53rd test, `testOCGConsumption`, in the control run: the same test passes or fails on the same mutant depending on the run. The authors' published "after" reports agree with ours on all 46 targets. |
+| Interpretation | PANKTI_STATUS is reproduced exactly, with the authors' tests and with ours, although our tests differ for 8 methods: the extra tests do not change any status. One of the 28 targets (`getXrefType`) owes its "pseudo-tested before" status to an unstable test; counting only targets that are pseudo-tested in both runs without generated tests, 27 / 46 are improved by PANKTI. |
+| Assumptions | A21 (restriction, validated), A22 (passing tests only), A3 (1 thread). |
+| Limitations | One control run: other unstable kills may exist that this run did not reveal. Descartes "after" analyses 22 classes, not whole modules (the authors analysed whole modules). |
+| Next step | Day 8: failure analysis (Section V.A categories) and the methods that stay pseudo-tested despite passing tests (Section V.B). |

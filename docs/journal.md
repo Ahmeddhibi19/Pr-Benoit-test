@@ -362,3 +362,39 @@ tests per method; a Track A check that separates the environment from the profil
 
 Keep the passing, non-flaky generated tests and run Descartes "after" on fontbox and pdfbox with the same
 configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it with Table III (28 / 46).
+
+## Day 7 - 2026-10-22: Descartes "after" and PANKTI_STATUS
+
+### Done
+
+- `scripts/pankti/keep_passing_tests.py`: keeps the tests that passed in all five runs of Day 6 (14,314 of ours,
+  13,614 of the authors'), with a unit test.
+- `scripts/pdfbox/run-descartes.sh`: `TARGET_CLASSES` restricts the mutated classes; the tests are always given
+  explicitly (pitest-maven otherwise restricts them too and selects none, found in a local check, E19).
+- Workflow `descartes-after.yml`: sources none / reproduction / authors x modules fontbox / pdfbox. Run [39747040848](https://github.com/Ahmeddhibi19/Pr-Benoit-test/actions/runs/39747040848), 6
+  jobs successful.
+- `analysis/pankti_status.py` (with a control run), `analysis/table3_status.py`, `analysis/mutant_tests.py`; unit
+  tests (12 in total).
+- Results in `results/day7/`; docs: descartes.md, assumptions A21-A22, experiments E19-E20, discrepancies §23-24.
+
+### Results
+
+- **PANKTI_STATUS: 28 / 46 well-tested (17 tested, 11 partially tested) with our tests and with the authors' tests,
+  the status of Table III for all 46 methods.** The two test sets give the same classification for all 465 analysed
+  methods; `getOS2Windows` stays pseudo-tested.
+- `isFill` partially tested (`false` killed, `true` not); `getName` tested (`null`, `"A"`, `""` killed), as in the
+  paper.
+- Restriction check: 460 / 465 methods as in the full "before" run.
+
+### Problems and decisions
+
+- **Unstable kill on a target.** The control run makes `getXrefType` tested without generated tests: its `null`
+  mutant is killed by `testOCGConsumption` in one run and not in the other. Reported as a caveat (27 / 46 robust),
+  not hidden and not corrected.
+- **Restriction.** Mutating only the 22 target classes shortens the pdfbox run from 68 to 16-21 minutes; validated
+  by the control run (A21).
+
+### Next (Day 8)
+
+Analyse the failing tests (categories of Section V.A) and the targets that stay pseudo-tested although they have
+passing tests (Section V.B); collect the final comparison in `results/comparison/`.

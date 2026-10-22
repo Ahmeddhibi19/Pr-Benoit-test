@@ -1,6 +1,6 @@
 # Reproduction de l'étude de cas 2 (PDFBox) de « Production Monitoring to Improve Test Suites »
 
-*Rapport de reproduction, rédigé au fil du travail. État : 21 octobre 2026 (fin du jour 6).*
+*Rapport de reproduction, rédigé au fil du travail. État : 22 octobre 2026 (fin du jour 7).*
 
 Conventions :
 - **[Publié]** : valeur ou affirmation de l'article ;
@@ -71,6 +71,7 @@ L'article ne précise pas : la version de PANKTI, celles de Descartes et de PIT,
 | `production-run` | plugin PANKTI, Glowroot, `pdfbox-app`, puis la charge de travail (modes `dry-run`, `smoke`, `full`) |
 | `generate-tests` | génération des tests (pankti-generate) à partir de nos profils et de ceux des auteurs |
 | `assess-tests` | intégration des tests dans PDFBox et exécution répétée (5 fois) |
+| `descartes-after` | Descartes après ajout des tests générés qui réussissent (les nôtres, ceux des auteurs, aucun pour le contrôle) |
 
 Des scripts Python dans `analysis/` calculent les métriques à partir des sorties brutes. Ils ont des tests unitaires (`tests/`).
 
@@ -84,7 +85,7 @@ Des scripts Python dans `analysis/` calculent les métriques à partir des sorti
 7. Génération des tests avec pankti-generate (`scripts/pankti/generate-tests.sh`), à partir de nos profils et, pour validation, de ceux des auteurs (`docs/generation.md`).
 8. Intégration des tests dans PDFBox (`scripts/pankti/integrate-tests.sh`).
 9. Exécution des tests générés 5 fois, chaque fois dans une nouvelle JVM (`scripts/pankti/run-generated-tests.sh`), et décompte par méthode (`analysis/test_outcomes.py`).
-10. *(jour 7)* Descartes « après » et statut final des cibles.
+10. Descartes « après » sur fontbox et pdfbox, avec les seuls tests qui réussissent aux 5 exécutions (`scripts/pankti/keep_passing_tests.py`), puis statut final des cibles (`analysis/pankti_status.py`, `analysis/table3_status.py`). Une exécution de contrôle sans test généré sert de témoin.
 
 **Validation des outils de mesure.** Avant d'être appliqués à nos données, les scripts de mesure ont été validés sur les données brutes des auteurs (5,9 Go de profils XML). **[Mesuré sur les artefacts]** Ils redonnent exactement :
 - les colonnes #INVOCATIONS, #COLLECTED et #UNIQUE du tableau III pour les 46 méthodes (121 175 / 57 563 / 13 851) ;
@@ -107,7 +108,8 @@ Configuration des étapes :
 - Descartes : un seul fil d'exécution, opérateurs et délais par défaut, classes cibles par module ;
 - charge de travail : `run.sh` des auteurs, cache de polices vide, 50 lancements de JVM ;
 - génération : tas de 12 Go ;
-- exécution des tests : réglages surefire de PDFBox (`-Xmx768m` pour le module pdfbox), 5 exécutions séparées.
+- exécution des tests : réglages surefire de PDFBox (`-Xmx768m` pour le module pdfbox), 5 exécutions séparées ;
+- Descartes « après » : même configuration que « avant », mutation limitée aux 22 classes qui déclarent les cibles effectives, avec tous les tests du module.
 
 Le portable Windows sert seulement au développement : le système d'exploitation influence les résultats (section 8).
 
@@ -137,10 +139,12 @@ Le portable Windows sert seulement au développement : le système d'exploitatio
 9. **Mémoire.** pankti-generate charge chaque fichier de profils (jusqu'à 210 Mo) en DOM ; la génération demande environ 12 Go et s'exécute sur l'exécuteur d'intégration continue, le portable n'ayant pas assez de mémoire libre.
 10. **Découpage des classes de tests.** La première exécution a donné 301 échecs inattendus dans `HorizontalMetricsTable`. Cause : mon script de découpage des grandes classes supprimait la méthode `setUpXStream()`, que le générateur place entre les tests de deux méthodes cibles ; sans elle, le convertisseur nécessaire à la désérialisation d'un descripteur de fichier n'était pas enregistré. Corrigé, avec un test unitaire ; le résultat erroné est conservé comme trace (`results/day6/run-39641425498-split-bug/`).
 11. **Tests publiés non compilables.** 18 des 22 classes publiées par les auteurs utilisent `@Before` sans l'importer ; l'import manquant a été ajouté à ces classes seulement (hypothèse A20).
+12. **Sélection des tests par PIT.** Pour limiter Descartes « après » aux classes des cibles, j'ai restreint `targetClasses`. Un essai local a montré que toutes les méthodes devenaient « non couvertes » : pitest-maven restreint aussi, par défaut, les tests à ce même motif, et n'exécutait donc aucun test. Les tests sont désormais toujours désignés explicitement (`targetTests`).
+13. **Un test instable sur une cible.** L'exécution de contrôle sans test généré a rendu `XrefTrailerResolver.getXrefType` « testée ». Le mutant `null` est tué par `TestOptionalContentGroups.testOCGConsumption` dans une exécution et pas dans l'autre. Ce test relit un fichier PDF laissé dans `target/test-output` et ne le régénère que s'il est absent ; le résultat dépend donc des fichiers écrits auparavant (section 7.8).
 
 ## 6. Hypothèses simplificatrices et adaptations méthodologiques
 
-La liste complète, au format exigé (exigence d'origine, problème, simplification, justification, impact attendu, validation, restitution), est dans `docs/assumptions.md` (A1 à A20). Les plus importantes :
+La liste complète, au format exigé (exigence d'origine, problème, simplification, justification, impact attendu, validation, restitution), est dans `docs/assumptions.md` (A1 à A22). Les plus importantes :
 
 | # | Adaptation | Pourquoi | Impact et validation |
 |---|---|---|---|
@@ -157,6 +161,8 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 | A20 | Import `org.junit.Before` ajouté aux classes publiées qui l'utilisent sans l'importer | les tests publiés ne compilent pas tels quels | réparation journalisée classe par classe |
 | A17 | Générateur pankti-generate `7afc584` avec `setUpXStream()` activé | version des tests publiés par les auteurs ; même analyseur de profils que `0fddf27` | validé : 13 851 tests sur 13 851 identiques aux tests publiés |
 | A18 | Seule la compilation des tests passe en Java 9 ; convertisseurs copiés dans chaque paquetage ; classes de plus de 500 tests découpées | ne pas modifier le bytecode de la bibliothèque mutée ; permettre d'exécuter les 11 730 tests de `getFlags` | vérifié localement : bibliothèque en Java 6 (version 50), tests en Java 9 (53), 20 tests sur 20 passent |
+| A21 | Descartes « après » limité aux 22 classes des cibles effectives, avec tous les tests du module | durée (68 min pour pdfbox entier, sans les tests générés) ; l'article ne dit pas ce que les auteurs ont analysé | contrôle sans test généré : 460 méthodes sur 465 classées comme dans l'exécution complète ; les 5 autres viennent d'un test instable |
+| A22 | Seuls les tests qui réussissent aux 5 exécutions sont ajoutés | PIT exige une suite verte ; section II.F de l'article | 14 314 de nos tests, 13 614 de ceux des auteurs, comme au jour 6 |
 
 ## 7. Résultats et comparaison
 
@@ -245,7 +251,25 @@ Chaque test est exécuté 5 fois, chaque fois dans une nouvelle JVM, avec les r�
 
 ### 7.8 Statut final des cibles
 
-*(jour 7 : Descartes « après »)*
+Descartes est relancé (même configuration, 1 fil) avec les tests générés qui réussissent aux 5 exécutions. Trois sources de tests, chacune sur fontbox et pdfbox (exécution 39747040848) : aucun test généré (contrôle), nos 14 314 tests, les 13 614 tests publiés par les auteurs.
+
+| Cibles « bien testées » (testées + partiellement testées) | Nombre | Statut identique au tableau III |
+|---|---|---|
+| **[Publié]** Tableau III | 28 / 46 (17 + 11) | |
+| **[Mesuré]** Tests des auteurs, exécutés ici | 28 / 46 (17 + 11) | 46 / 46 |
+| **[Mesuré]** Tests de la reproduction | **28 / 46 (17 + 11)** | **46 / 46** |
+| **[Mesuré]** Contrôle, sans test généré | 1 / 46 | 19 / 46 |
+
+- **[Mesuré]** Le statut final est reproduit exactement, avec nos tests comme avec ceux des auteurs. Les deux jeux de tests donnent la même classification pour les 465 méthodes analysées, bien que nos tests diffèrent pour 8 méthodes : les tests en plus ne changent aucun statut. La 47e cible, `getOS2Windows`, n'a aucun test qui réussit et reste pseudo-testée. (`results/day7/table3_status.csv`)
+- **[Mesuré]** Exemples de l'article :
+  - `RenderingMode.isFill` est **partiellement testée** : la seule valeur observée est `true`, donc le test généré tue le mutant `false` mais pas le mutant `true` ;
+  - `NamingTable.getName` est **testée** : les mutants `null`, `"A"` et `""` sont tous tués (section II.C de l'article).
+- **[Mesuré]** Les rapports « après » publiés par les auteurs portent sur les modules entiers ; sur les 465 méthodes analysées ici, ils concordent pour 460, dont les 46 cibles. Les 5 autres ne sont pas des cibles.
+- **[Mesuré]** Validation de la restriction aux 22 classes : le contrôle donne la classification de l'exécution complète « avant » pour 460 des 465 méthodes. Les 5 écarts ne viennent pas de la restriction (les tests sont les mêmes) mais d'un test instable, `testOCGConsumption`, et d'un dépassement de délai.
+- **[Mesuré]** L'un de ces écarts touche une cible : le mutant `null` de `XrefTrailerResolver.getXrefType` survit aux 183 tests qui la couvrent dans l'exécution complète « avant », mais est tué par le 53e d'entre eux dans le contrôle.
+- **[Interprétation]** Le statut « pseudo-testée avant » de `getXrefType` n'est donc pas stable. En ne comptant que les cibles pseudo-testées dans les deux exécutions sans test généré, **27 des 46 cibles** sont améliorées de façon robuste par les tests de PANKTI ; le nombre publié (28) reste exact pour la configuration de l'article.
+
+(`results/day7/`, `docs/descartes.md`, `docs/discrepancies.md` §23-24)
 
 ## 8. Observations et réflexions
 
@@ -258,6 +282,8 @@ Chaque test est exécuté 5 fois, chaque fois dans une nouvelle JVM, avec les r�
 - **[Mesuré]** Une analyse de mutation n'est pas plus déterministe que la suite de tests qu'elle exécute : avec 4 fils, des tests qui partagent des fichiers ou téléchargent des données font compter comme « détectés » des mutants qui ne le sont pas, au point de faire passer les cibles de 138 à 91.
 - **[Mesuré sur les artefacts]** Les artefacts publiés mélangent deux versions de l'outil et des retouches manuelles : instrumentation en `0fddf27`, génération en `7afc584`, imports et classes de conversion ajoutés à la main. Rien de cela n'est dit dans l'article ; les nombres publiés restent néanmoins exactement reproductibles à partir des artefacts.
 - **[Mesuré sur les artefacts]** Compter des tests non exécutés comme réussis surestime le taux de réussite (98,3 % contre 89,4 % sur les tests réellement exécutés).
+- **[Mesuré]** Le résultat final de l'article (28 / 46) est robuste à la variation des profils : nos 828 tests supplémentaires (dont 114 pour la cible en plus, `getOS2Windows`) ne changent aucun statut. Un seul profil distinct par méthode suffit souvent : `isFill` est améliorée par un unique test.
+- **[Mesuré]** Le critère « bien testée » dépend de la stabilité de la suite de tests existante. Un test qui relit un fichier laissé par une exécution précédente peut faire passer une cible de « pseudo-testée » à « testée » sans aucun nouveau test (`getXrefType`).
 
 ### 8.2 Réflexions et leçons apprises
 
@@ -275,15 +301,18 @@ Chaque test est exécuté 5 fois, chaque fois dans une nouvelle JVM, avec les r�
 - La définition de la profondeur d'imbrication n'est pas documentée ; la valeur 36 n'est pas reproduite.
 - La génération utilise une version du générateur postérieure à l'instrumentation, comme les auteurs ; le nombre de tests n'en dépend pas (même analyseur), mais leur forme oui.
 - Contraintes de calendrier : pas d'analyses de sensibilité (charge de travail corrigée pour `000809`, exécution sous Windows, autre jeu de polices), ni des chiffres de couverture du tableau II.
+- Descartes « après » n'analyse que les 22 classes des cibles, et une seule exécution de contrôle a été faite : d'autres tests instables peuvent exister sans s'être manifestés.
 
 ## 10. Conclusion et travaux futurs
 
 *(à rédiger en fin de projet)* À ce stade :
 - les cibles (138) sont reproduites exactement ; la classification Descartes est quasi identique à celle des auteurs ;
 - l'outillage de mesure et l'étape de génération sont validés sur les données des auteurs (13 851 tests sur 13 851 identiques) ;
-- la charge de travail redonne les colonnes 1 à 4 du tableau III à quelques pour cent près (mêmes 46 cibles, mêmes 19 méthodes plafonnées, `isFill` à l'identique, figure 5 de même forme) ; les écarts se concentrent sur les méthodes liées aux polices.
+- la charge de travail redonne les colonnes 1 à 4 du tableau III à quelques pour cent près (mêmes 46 cibles, mêmes 19 méthodes plafonnées, `isFill` à l'identique, figure 5 de même forme) ; les écarts se concentrent sur les méthodes liées aux polices ;
+- l'exécution des tests publiés redonne exactement #PASSING et #FAILING ; nos tests réussissent à 97,5 % ;
+- le statut final est reproduit exactement : 28 cibles sur 46 deviennent bien testées, avec nos tests comme avec ceux des auteurs, et `isFill` est partiellement testée comme dans l'article. Une de ces 28 cibles dépend d'un test instable de PDFBox.
 
-Restent l'exécution des tests et l'évaluation finale par Descartes (statut « bien testée »).
+Restent l'analyse des échecs (catégories de la section V.A) et des cibles qui restent pseudo-testées malgré des tests qui réussissent (section V.B).
 
 **Pistes :**
 - rendre les tests de PDFBox sûrs en parallèle (répertoires temporaires distincts) et revérifier Descartes avec plusieurs fils ;
@@ -316,7 +345,8 @@ Restent l'exécution des tests et l'évaluation finale par Descartes (statut « 
 | Instrumentation (vérification) | `production-run` (`dry-run`) | 39431056888 |
 | Charge de travail | `production-run` (`smoke`, `full`) | 39442198598, 39444526027 |
 | Génération | `generate-tests` | 39581267651 (auteurs), 39588027907 (reproduction) |
-| Exécution des tests | `assess-tests` | 39641425498 |
+| Exécution des tests | `assess-tests` | 39644913295 (39641425498 : exécution erronée, conservée comme trace) |
+| Descartes « après » | `descartes-after` | 39747040848 |
 
 **Commandes.** Le README du dépôt donne les commandes pour reconstruire l'environnement local (`setup/`), lancer chaque flux (`gh workflow run …`) et refaire chaque analyse à partir des résultats enregistrés dans `results/`. Tests unitaires des scripts d'analyse : `python -m unittest discover -s tests`.
 

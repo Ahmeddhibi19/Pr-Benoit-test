@@ -172,6 +172,43 @@ class KeepPassingTest(unittest.TestCase):
             self.assertFalse((pkg / "TestDPanktiGen.java").exists())
 
 
+class PanktiStatusTest(unittest.TestCase):
+    """pankti_status.py: status after the generated tests, and targets already well-tested in the control run."""
+
+    @staticmethod
+    def report(path, classes):
+        methods = [{"name": m, "description": "()Z", "class": "C", "package": "p", "classification": c,
+                    "detected": [], "not-detected": [], "mutations": ["true", "false"]} for m, c in classes.items()]
+        path.write_text('{"methods": %s}' % __import__("json").dumps(methods), encoding="utf-8")
+        return str(path)
+
+    def test_control(self):
+        import pankti_status
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            before = self.report(d / "before.json", {"a": "pseudo-tested", "b": "pseudo-tested", "c": "pseudo-tested"})
+            after = self.report(d / "after.json", {"a": "partially-tested", "b": "tested", "c": "pseudo-tested"})
+            control = self.report(d / "control.json", {"a": "pseudo-tested", "b": "tested", "c": "pseudo-tested"})
+            invoked = d / "invoked.csv"
+            invoked.write_text("parent-FQN,method-name,param-list,param-signature\np.C,a,,\np.C,b,,\np.C,c,,\n",
+                               encoding="utf-8")
+            table3 = d / "table3.csv"
+            table3.write_text("row,fqn,class_method,param_signature,paper_status\n1,p.C,C_a,,well-tested\n"
+                              "2,p.C,C_b,,well-tested\n3,p.C,C_c,,pseudo-tested\n", encoding="utf-8")
+            pankti_status.main(["x", before, after, str(invoked), str(d / "out"), "--table3", str(table3),
+                                "--control", control])
+            with open(d / "out.csv", encoding="utf-8") as f:
+                rows = {r["method"]: r for r in csv.DictReader(f)}
+            text = (d / "out.txt").read_text(encoding="utf-8")
+        self.assertEqual([rows[m]["pankti_status"] for m in "abc"], ["well-tested", "well-tested", "pseudo-tested"])
+        self.assertEqual(rows["b"]["control"], "tested")
+        self.assertIn("28 / 46", text)
+        self.assertIn("2 / 3 (paper", text)
+        self.assertIn("same status as Table III: 3 / 3", text)
+        self.assertIn("well-tested in the control run without generated tests: 1; "
+                      "well-tested after and not in the control run: 1", text)
+
+
 class DescartesTest(unittest.TestCase):
     def test_descriptor(self):
         self.assertEqual(param_descriptor("(ILjava/lang/String;)V"), "ILjava/lang/String;")

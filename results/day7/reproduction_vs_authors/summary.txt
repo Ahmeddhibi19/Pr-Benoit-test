@@ -1,0 +1,48 @@
+reproduction: 2 report(s), 465 methods, mutators per report: [21]
+authors: 2 report(s), 465 methods, mutators per report: [21]
+
+classification    reproduction   authors
+tested                   202       202
+partially-tested          35        35
+pseudo-tested             78        78
+not-covered              150       150
+absent                     0         0
+
+same classification: 465 / 465 methods (100.00%)
+pseudo-tested: 78 in both, 0 only in reproduction, 0 only in authors; Jaccard index 1.0000
+
+differences (A -> B: count):
+
+mutant statuses:
+  reproduction: KILLED 316, NO_COVERAGE 200, SURVIVED 133, TIMED_OUT 2
+  authors: KILLED 317, NO_COVERAGE 200, SURVIVED 133, TIMED_OUT 1
+
+Table III effective targets pseudo-tested: reproduction 18 / 46, authors 18 / 46
+  RenderingMode_isFill(): reproduction partially-tested, authors partially-tested
+  PDSimpleFont_toUnicode(I): reproduction tested, authors tested
+  GlyfSimpleDescript_getFlags(I): reproduction tested, authors tested
+  NamingTable_getName(IIII): reproduction tested, authors tested
+  HorizontalMetricsTable_getLeftSideBearing(I): reproduction tested, authors tested
+  TTFDataStream_readUnsignedByteArray(I): reproduction tested, authors tested
+  HorizontalMetricsTable_getAdvanceWidth(I): reproduction tested, authors tested
+  TrueTypeFont_getAdvanceWidth(I): reproduction tested, authors tested
+  PDSimpleFont_hasExplicitWidth(I): reproduction partially-tested, authors partially-tested
+  PDFontDescriptor_getFlags(): reproduction tested, authors tested
+  PDImageXObject_getInterpolate(): reproduction partially-tested, authors partially-tested
+  PDCIDFontType2_codeToGID(I): reproduction tested, authors tested
+  PDExtendedGraphicsState_getStrokingOverprintControl(): reproduction partially-tested, authors partially-tested
+  XrefTrailerResolver_getXrefType(): reproduction tested, authors tested
+  PDExtendedGraphicsState_getAutomaticStrokeAdjustment(): reproduction tested, authors tested
+  PDExtendedGraphicsState_getNonStrokingOverprintControl(): reproduction partially-tested, authors partially-tested
+  PDExtendedGraphicsState_getOverprintMode(): reproduction partially-tested, authors partially-tested
+  PDFontDescriptor_isSymbolic(): reproduction partially-tested, authors partially-tested
+  PDExtendedGraphicsState_getSmoothnessTolerance(): reproduction tested, authors tested
+  PDFontDescriptor_isFixedPitch(): reproduction partially-tested, authors partially-tested
+  PDFontDescriptor_isItalic(): reproduction tested, authors tested
+  PDFontDescriptor_isSerif(): reproduction tested, authors tested
+  PDICCBased_getDefaultDecode(I): reproduction tested, authors tested
+  PDCIDSystemInfo_getOrdering(): reproduction tested, authors tested
+  PDExtendedGraphicsState_getAlphaSourceFlag(): reproduction partially-tested, authors partially-tested
+  PDExtendedGraphicsState_getNonStrokingAlphaConstant(): reproduction partially-tested, authors partially-tested
+  PDExtendedGraphicsState_getStrokingAlphaConstant(): reproduction partially-tested, authors partially-tested
+  PDCIDSystemInfo_getRegistry(): reproduction tested, authors tested

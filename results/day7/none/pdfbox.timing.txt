@@ -1,0 +1,8 @@
+install_seconds=30
+descartes_seconds=1260
+descartes_exit_code=0
+module=pdfbox
+target_classes=org.apache.pdfbox.pdfparser.COSParser,org.apache.pdfbox.pdfparser.XrefTrailerResolver,org.apache.pdfbox.pdmodel.DefaultResourceCache,org.apache.pdfbox.pdmodel.PDDocumentCatalog,org.apache.pdfbox.pdmodel.PDResources,org.apache.pdfbox.pdmodel.font.FontCache,org.apache.pdfbox.pdmodel.font.PDCIDFont,org.apache.pdfbox.pdmodel.font.PDCIDFontType2,org.apache.pdfbox.pdmodel.font.PDCIDSystemInfo,org.apache.pdfbox.pdmodel.font.PDFontDescriptor,org.apache.pdfbox.pdmodel.font.PDSimpleFont,org.apache.pdfbox.pdmodel.font.PDTrueTypeFont,org.apache.pdfbox.pdmodel.graphics.color.PDICCBased,org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject,org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState,org.apache.pdfbox.pdmodel.graphics.state.RenderingMode,org.apache.pdfbox.rendering.TTFGlyph2D
+target_tests=org.apache.pdfbox.*
+threads=1
+report_dir=202610220823

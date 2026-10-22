@@ -1,0 +1,2 @@
+report,methods,tested,partially-tested,pseudo-tested,not-covered,n_mutators
+methods.json,62,40,1,3,18,21

@@ -1,0 +1,7 @@
+effective targets: 47 (of which in Table III: 46)
+pseudo-tested before: 47 / 47
+well-tested after (tested or partially-tested), Table III methods: 28 / 46 (paper: 28 / 46); strictly tested: 17; partially tested: 11
+same status as Table III: 46 / 46
+well-tested in the control run without generated tests: 1; well-tested after and not in the control run: 27
+  row 54 XrefTrailerResolver.getXrefType: before pseudo-tested, control tested, after tested
+  not in Table III: TrueTypeFont.getOS2Windows: before pseudo-tested, after pseudo-tested

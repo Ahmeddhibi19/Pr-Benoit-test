@@ -1,0 +1,8 @@
+install_seconds=19
+descartes_seconds=52
+descartes_exit_code=0
+module=fontbox
+target_classes=org.apache.fontbox.ttf.GlyfSimpleDescript,org.apache.fontbox.ttf.HorizontalMetricsTable,org.apache.fontbox.ttf.NamingTable,org.apache.fontbox.ttf.TTFDataStream,org.apache.fontbox.ttf.TrueTypeFont
+target_tests=org.apache.fontbox.*
+threads=1
+report_dir=202610220831

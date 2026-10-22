@@ -120,3 +120,52 @@ keeps 3,588 public, non-static, non-abstract, non-void, non-deprecated, non-empt
 The two lists share 137 methods (Jaccard index 0.986): `PDFontDescriptor.getFontFile()` is a target only with the
 authors' reports, `PDAnnotation.isNoRotate()` only with the reproduction's. The list instrumented from Day 3 on is
 the one from the authors' reports (`results/day2/instrumentation-candidates-pdfbox.csv`, assumption A8).
+
+## "After" run: PANKTI_STATUS
+
+Workflow `.github/workflows/descartes-after.yml`, run [39747040848](https://github.com/Ahmeddhibi19/Pr-Benoit-test/actions/runs/39747040848) (2026-10-22). Same configuration as "before" (PIT 1.4.10,
+Descartes 1.2.6, 21 operators, 1 thread). Three sources of tests, each on fontbox and pdfbox:
+
+| Source | Tests added | fontbox: tested / partially / pseudo / not covered | pdfbox: tested / partially / pseudo / not covered | pdfbox time |
+|---|---|---|---|---|
+| none (control) | 0 | 34 / 1 / 9 / 18 | 150 / 23 / 98 / 132 | 21 min |
+| reproduction | 14,314 passing tests of 14,679 (Day 6) | 40 / 1 / 3 / 18 | 162 / 34 / 75 / 132 | 18 min |
+| authors | 13,614 passing published tests of 13,851 | 40 / 1 / 3 / 18 | 162 / 34 / 75 / 132 | 16 min |
+
+Only the tests that passed in all five runs of Day 6 are added (`scripts/pankti/keep_passing_tests.py`, assumption
+A22): PIT needs a green suite. Mutation is restricted to the 22 classes that declare the effective targets (5 in
+fontbox, 17 in pdfbox; 465 methods), with all the tests of the module (A21).
+
+**Restriction check.** The control run (no generated test) is compared with the full "before" run on the 465
+methods (`results/day7/restriction_check/`): fontbox 62 / 62 identical, pdfbox 398 / 403. The 5 differences are not
+caused by the restriction but by unstable tests of PDFBox (discrepancies.md §23): 4 come from mutants killed by
+`TestOptionalContentGroups.testOCGConsumption` in the control run and not in the full run, 1 from a mutant that timed
+out in the full run. One of the five is an effective target: `XrefTrailerResolver.getXrefType`.
+
+**PANKTI_STATUS** (`analysis/pankti_status.py`, `analysis/table3_status.py`, outputs `results/day7/`):
+
+| | Well-tested (tested + partially tested) | Same status as Table III |
+|---|---|---|
+| Paper, Table III | 28 / 46 (17 + 11) | |
+| Authors' passing tests, run here | **28 / 46 (17 + 11)** | 46 / 46 |
+| Reproduction's passing tests | **28 / 46 (17 + 11)** | 46 / 46 |
+| Control run, no generated test | 1 / 46 (`getXrefType`) | 19 / 46 |
+
+The 47th target of the reproduction, `TrueTypeFont.getOS2Windows`, has no passing test and stays pseudo-tested.
+With our tests and with the authors', the Descartes classification is the same for all 465 analysed methods
+(`results/day7/reproduction_vs_authors/`). The authors' own "after" reports (Zenodo) analyse the whole modules; on the
+465 methods analysed here they agree on 460, including all 46 targets. The 5 other methods are not targets and differ
+through the same unstable tests (`TestOptionalContentGroups`, `TestPublicKeyEncryption`, `TestTextStripper`;
+`results/day7/reproduction_vs_authors_published/`).
+
+**Examples of the paper** (`analysis/mutant_tests.py`, `results/day7/examples_mutants.txt`):
+- `RenderingMode.isFill` is partially tested: the single observed value is `true`, so the generated test kills the
+  `false` mutant and not the `true` mutant. This is the paper's example (Section IV.C).
+- `NamingTable.getName` is tested: the mutants `null`, `"A"` and `""` are all killed (Section II.C). Most observed
+  calls return `null`: the first test that kills the `null` mutant is the 112th that PIT runs (91st with the authors'
+  tests).
+- `XrefTrailerResolver.getXrefType`: the `null` mutant survived all 183 covering tests in the full "before" run and
+  was killed by the 53rd of them (`testOCGConsumption`) in the control run. With the generated tests, the first
+  test PIT runs (a generated one) kills it. The target is well-tested after in every run, but its "before" status is
+  not stable, so it should not be counted as an improvement due to PANKTI without this caveat: the robust count is
+  27 / 46 targets that are pseudo-tested in both runs without generated tests and well-tested with them.
