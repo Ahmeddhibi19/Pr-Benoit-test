@@ -462,3 +462,19 @@ passing tests (Section V.B); collect the final comparison in `results/comparison
 - No broken link or anchor in the README, `results/README.md`, the docs and the report.
 - Every number of 100 or more and every percentage of the report is found in a result file, or is a ratio of
   numbers given next to it.
+
+## Day 10 - 2026-10-25: fresh-clone check, report PDF, delivery
+
+### Done
+
+- Fresh clone of the public repository; levels 1 and 2 of the README run as written in a new Python environment
+  (experiment E24): every analysis reproduces the committed results.
+- Fixes found by that check: the Windows clone option (`core.longpaths`) and the JDK / Maven prerequisite of level 2
+  are now in the README; `check_paper_table3.py` and `compare_authors_report.py` write LF line endings.
+- `report/build_pdf.py` builds `report/rapport.pdf` from the Markdown (python-markdown, headless Chrome or Chromium);
+  `markdown` added to `requirements.txt`.
+- Report: success criteria stated in the introduction (§1); the table of simplifying assumptions (§7) now gives the
+  origin of each one (the paper is silent, a practical constraint, or a measurement choice), what it prevents from
+  concluding and how to remove it.
+- Traceability: every run ID cited in the README, the report and the docs exists; the six failed runs among them are
+  described as failed; the numbers of the report are found in the result files.

@@ -77,7 +77,7 @@ def main(argv):
     print(text, end="")
     if len(argv) > 2:
         Path(argv[2]).parent.mkdir(parents=True, exist_ok=True)
-        Path(argv[2]).write_text(text)
+        Path(argv[2]).write_text(text, encoding="utf-8", newline="\n")
     return 0 if ok else 1
 
 

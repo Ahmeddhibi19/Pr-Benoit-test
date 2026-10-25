@@ -90,7 +90,7 @@ scripts/glowroot/    Glowroot installation and agent check
 setup/               local setup (portable toolchain, download of the authors' artifacts)
 analysis/            analysis scripts; analysis/paper/ holds Table III as printed in the paper
 results/             outputs of the runs and of the analyses, one folder per stage (index: results/README.md)
-report/              the research report (French)
+report/              the research report (French), Markdown and PDF
 tests/               unit tests of the analysis scripts (python -m unittest discover -s tests)
 requirements.txt     Python packages (Python 3.11)
 docs/                methodology notes, assumptions, discrepancies, environment, artifacts, work journal
@@ -115,6 +115,8 @@ There are three levels, from minutes on a laptop to the full pipeline on GitHub 
 the repository root, in bash (Linux, macOS, or Git Bash on Windows), with Python 3.11:
 
 ```bash
+git clone https://github.com/Ahmeddhibi19/Pr-Benoit-test.git && cd Pr-Benoit-test
+#   on Windows: git clone -c core.longpaths=true ...   (some result file names exceed 260 characters with the path)
 python3.11 -m venv .venv && . .venv/bin/activate      # Windows: .venv/Scripts/activate
 pip install -r requirements.txt
 python -m unittest discover -s tests                  # 16 tests of the analysis scripts
@@ -150,7 +152,9 @@ python analysis/figure_table3.py results/comparison/table3_rows.csv results/comp
 ### 2. With the authors' artifacts (about 7.4 GB)
 
 `setup/fetch-artifacts.sh <root>` downloads the Zenodo replication data (md5 checked) and checks out the authors'
-repositories at the commits of the study ([`docs/artifacts.md`](docs/artifacts.md)). With `W` the chosen root:
+repositories at the commits of the study ([`docs/artifacts.md`](docs/artifacts.md)). The #TARGET step builds
+pankti-extract and needs JDK 11 and Maven 3.6.3 on the `PATH` (`MAVEN_EXTRA_ARGS` passes extra Maven arguments, e.g.
+a local repository). With `W` the chosen root:
 
 ```bash
 W=$HOME/pankti-work; bash setup/fetch-artifacts.sh $W
@@ -233,8 +237,9 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar $W/src/pankti-expe
 
 ## Documentation
 
-- [report/rapport.md](report/rapport.md): the research report (in French): method, difficulties, assumptions,
-  results, observations and reflections.
+- [report/rapport.md](report/rapport.md) ([PDF](report/rapport.pdf)): the research report (in French): method,
+  difficulties, assumptions, results, observations and reflections. The PDF is built from the Markdown by
+  `python report/build_pdf.py` (needs Chrome or Chromium).
 - [docs/descartes.md](docs/descartes.md): how pseudo-tested methods are computed, and how the results compare with
   the authors'.
 - [docs/instrumentation.md](docs/instrumentation.md): what PANKTI's instrumentation records, how it is built and

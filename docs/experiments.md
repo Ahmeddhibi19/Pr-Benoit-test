@@ -32,6 +32,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | [E21](#e21-why-generated-tests-fail) | 2026-10-22 | Why do generated tests fail (V.A)? | identity `equals` or identity-keyed lookup; a test passes iff it observed null |
 | [E22](#e22-font-sensitivity-runs) | 2026-10-22 | Do the font methods depend on the fonts or the font cache? | yes: with a pre-built font cache, 46 / 46 targets and #UNIQUE 13,852 (paper 13,851) |
 | [E23](#e23-null-only-check-and-prediction-check) | 2026-10-22 | V.B null-only check; can the final status be predicted from the observed values? | 12 null-only targets; 82 / 82 mutants predicted |
+| [E24](#e24-reproduction-from-a-fresh-clone) | 2026-10-25 | Can a reader reproduce the results from the README alone? | yes, levels 1 and 2; two fixes (Windows long paths, line endings) |
 
 ## E1. PDFBox 2.0.21 test suite on CI
 
@@ -303,3 +304,17 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Assumptions | A23, A10 (well-tested = tested or partially tested). |
 | Limitations | The rule is checked on this case study only. |
 | Next step | Report. |
+
+## E24. Reproduction from a fresh clone
+
+| | |
+|---|---|
+| Objective | Plan task 10.1: check that the README is enough to reproduce the results, without files or knowledge from the development machine. |
+| Method | Fresh clone of the public repository (commit 6480ed5) in an empty directory; a new Python 3.11 environment from `requirements.txt` only; the unit tests; the code blocks of levels 1 and 2 of the README run as written, with `W` pointing to an existing copy of the authors' artifacts (fetched by `setup/fetch-artifacts.sh`, which re-checked the archive). Then `git status` in the clone: every regenerated file must equal the committed one. |
+| Configuration | Windows laptop, Git Bash; JDK 11.0.8 and Maven 3.6.3 from `setup/env.sh` for the pankti-extract build (level 2). |
+| Outcome | Level 1: 16 / 16 tests, all commands successful, no file changed. Level 2: all commands successful (pankti-extract rebuilt; #TARGET 138; 6,276 / 6,373 and 460 / 465 methods as the authors; PANKTI_STATUS 28 / 46; 151 + 86 failures classified; 82 / 82 mutants predicted); the only differences were the line endings of two files written by `check_paper_table3.py` and `compare_authors_report.py` (CRLF on Windows), with identical content. One transient network error (the PDFBox clone) was retried. |
+| Observation | The first clone attempt failed on Windows: with the path of the clone, 30 file names under `results/day4/full/profiles/` exceed 260 characters. `git clone -c core.longpaths=true` solves it (already used for the authors' repository). |
+| Interpretation | The analyses are reproducible from the repository and the authors' public artifacts. |
+| Assumptions | None new. |
+| Limitations | The CI workflows (level 3) were not rerun for this check; each was run when its stage was done (run IDs in the README). |
+| Next step | README: Windows clone option and the JDK / Maven prerequisite of level 2; the two scripts now write LF. |
