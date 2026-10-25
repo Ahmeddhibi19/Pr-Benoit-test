@@ -104,6 +104,9 @@ mutation operators: `void null empty true false 0 1 (short)0 (short)1 (byte)0 (b
 "after" runs were made with a different, smaller set of original tests (or a different configuration). This
 does not affect the 46 target methods (their status is consistent with the paper), but it matters when
 re-running Descartes: the reproduction runs "before" and "after" with the same configuration and the full suite.
+The reproduction's "after" runs (run 39747040848) mutate only the 22 classes of the targets; on these 465 methods
+they agree with the authors' "after" reports for 460, including all 46 targets (§24). The smaller test population
+of the authors' "after" runs in the rest of the module is not investigated further.
 
 ## 8. Overloaded methods
 

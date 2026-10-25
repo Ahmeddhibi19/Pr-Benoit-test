@@ -7,6 +7,7 @@
 #     file (sha512 checked by the plugin) is taken from the Internet Archive.
 #  4. PDAcroFormTest writes into pdfbox/target/test-output but never creates it; it only passes when another
 #     test created the directory before. The directory is created up front.
+# Usage: patch-build.sh [pdfbox_dir]   (default: pdfbox)
 set -euo pipefail
 
 root="${1:-pdfbox}"

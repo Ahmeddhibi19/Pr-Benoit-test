@@ -3,7 +3,9 @@
 #   - Zenodo replication data, version 1 (record 4298605, concept DOI 10.5281/zenodo.4298604)
 #   - PANKTI at the commit used for the PDFBox run, plus the last commit before paper v4
 #   - pankti-experiments at the commit of the PDFBox numbers, plus the last commit before paper v4
-# Usage: bash setup/fetch-artifacts.sh [root]   (default root: /c/w)
+# Usage: bash setup/fetch-artifacts.sh [root]   (default root: /c/w, the directory used on the development laptop)
+# Creates <root>/data (Zenodo archive, its listing and the pdfbox/ part unpacked without the XML profiles) and
+# <root>/src (the repositories).
 set -euo pipefail
 
 root="${1:-/c/w}"

@@ -1,27 +1,23 @@
-full-before: 2 report(s), 4988 methods, mutators per report: [21]
+full-before: 6 report(s), 465 methods (only those of B), mutators per report: [21]
 restricted-none: 2 report(s), 465 methods, mutators per report: [21]
 
 classification    full-beforerestricted-none
-tested                  1748       184
-partially-tested         103        24
-pseudo-tested            524       107
-not-covered             2613       150
-absent                     0      4523
+tested                   181       184
+partially-tested          24        24
+pseudo-tested            110       107
+not-covered              150       150
+absent                     0         0
 
-same classification: 460 / 4988 methods (9.22%)
-pseudo-tested: 107 in both, 417 only in full-before, 0 only in restricted-none; Jaccard index 0.2042
+same classification: 460 / 465 methods (98.92%)
+pseudo-tested: 107 in both, 3 only in full-before, 0 only in restricted-none; Jaccard index 0.9727
 
 differences (A -> B: count):
-  not-covered -> absent: 2463
-  tested -> absent: 1567
-  pseudo-tested -> absent: 414
-  partially-tested -> absent: 79
   pseudo-tested -> tested: 3
   tested -> partially-tested: 1
   partially-tested -> tested: 1
 
 mutant statuses:
-  full-before: NO_COVERAGE 3587, KILLED 2414, SURVIVED 784, TIMED_OUT 71
+  full-before: KILLED 257, NO_COVERAGE 200, SURVIVED 192, TIMED_OUT 2
   restricted-none: KILLED 259, NO_COVERAGE 200, SURVIVED 189, TIMED_OUT 3
   1 methods have more detected mutants in full-before than in restricted-none; those extra mutants are TIMED_OUT 1
   4 methods have more detected mutants in restricted-none than in full-before; those extra mutants are KILLED 4

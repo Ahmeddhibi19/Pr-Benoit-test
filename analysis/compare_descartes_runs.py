@@ -1,9 +1,12 @@
 """Compare two sets of Descartes reports method by method (e.g. this reproduction vs the authors' reports).
 
 usage: compare_descartes_runs.py <reports_A> <reports_B> <out_dir> [--labels A B] [--table3 <invoked-methods.csv>]
+                                 [--only-b]
 
 <reports_A> and <reports_B> are methods.json files or directories searched recursively for methods.json (one
 report per module). Methods are matched on (class, name, parameter descriptor), see descartes.py.
+With --only-b, only the methods of B are compared (B is a run restricted to some classes, e.g. the Descartes
+"after" runs, and A a run of whole modules).
 
 Writes to <out_dir>:
   methods.csv   one row per method: classification in A and in B ("absent" if the method is not in a report)
@@ -35,6 +38,9 @@ def main(argv):
         i = args.index("--labels")
         labels = args[i + 1:i + 3]
         del args[i:i + 3]
+    only_b = "--only-b" in args
+    if only_b:
+        args.remove("--only-b")
     if "--table3" in args:
         i = args.index("--table3")
         table3 = args[i + 1]
@@ -44,6 +50,8 @@ def main(argv):
         return 2
     files_a, files_b, out = reports(args[0]), reports(args[1]), Path(args[2])
     a, b = load_reports(files_a), load_reports(files_b)
+    if only_b:
+        a = {k: m for k, m in a.items() if k in b}
     keys = sorted(set(a) | set(b))
     cls_a = {k: a[k]["classification"] if k in a else "absent" for k in keys}
     cls_b = {k: b[k]["classification"] if k in b else "absent" for k in keys}
@@ -66,7 +74,8 @@ def main(argv):
     pseudo_b = {k for k in keys if cls_b[k] == "pseudo-tested"}
     union = pseudo_a | pseudo_b
     same = sum(1 for k in keys if cls_a[k] == cls_b[k])
-    lines = [f"{labels[0]}: {len(files_a)} report(s), {len(a)} methods, mutators per report: "
+    lines = [f"{labels[0]}: {len(files_a)} report(s), {len(a)} methods" + (" (only those of B)" if only_b else "")
+             + ", mutators per report: "
              f"{sorted({len(mutators(p)) for p in files_a})}",
              f"{labels[1]}: {len(files_b)} report(s), {len(b)} methods, mutators per report: "
              f"{sorted({len(mutators(p)) for p in files_b})}",

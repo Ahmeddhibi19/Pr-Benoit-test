@@ -1,4 +1,4 @@
-class,method,params,reproduction,authors-published,same
+class,method,params,authors-published,reproduction,same
 org.apache.fontbox.ttf.GlyfSimpleDescript,getEndPtOfContours,I,tested,tested,True
 org.apache.fontbox.ttf.GlyfSimpleDescript,getFlags,I,tested,tested,True
 org.apache.fontbox.ttf.GlyfSimpleDescript,getXCoordinate,I,tested,tested,True
@@ -78,7 +78,7 @@ org.apache.pdfbox.pdfparser.COSParser,checkPagesDictionary,Lorg/apache/pdfbox/co
 org.apache.pdfbox.pdfparser.COSParser,checkXRefOffset,J,tested,tested,True
 org.apache.pdfbox.pdfparser.COSParser,checkXRefStreamOffset,J,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdfparser.COSParser,checkXrefOffsets,,tested,tested,True
-org.apache.pdfbox.pdfparser.COSParser,getAccessPermission,,tested,pseudo-tested,False
+org.apache.pdfbox.pdfparser.COSParser,getAccessPermission,,pseudo-tested,tested,False
 org.apache.pdfbox.pdfparser.COSParser,getDocument,,tested,tested,True
 org.apache.pdfbox.pdfparser.COSParser,getEncryption,,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdfparser.COSParser,getLength,Lorg/apache/pdfbox/cos/COSBase;Lorg/apache/pdfbox/cos/COSName;,pseudo-tested,pseudo-tested,True
@@ -135,10 +135,10 @@ org.apache.pdfbox.pdmodel.DefaultResourceCache,getColorSpace,Lorg/apache/pdfbox/
 org.apache.pdfbox.pdmodel.DefaultResourceCache,getExtGState,Lorg/apache/pdfbox/cos/COSObject;,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdmodel.DefaultResourceCache,getFont,Lorg/apache/pdfbox/cos/COSObject;,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdmodel.DefaultResourceCache,getPattern,Lorg/apache/pdfbox/cos/COSObject;,pseudo-tested,pseudo-tested,True
-org.apache.pdfbox.pdmodel.DefaultResourceCache,getProperties,Lorg/apache/pdfbox/cos/COSObject;,tested,pseudo-tested,False
+org.apache.pdfbox.pdmodel.DefaultResourceCache,getProperties,Lorg/apache/pdfbox/cos/COSObject;,pseudo-tested,tested,False
 org.apache.pdfbox.pdmodel.DefaultResourceCache,getShading,Lorg/apache/pdfbox/cos/COSObject;,not-covered,not-covered,True
 org.apache.pdfbox.pdmodel.DefaultResourceCache,getXObject,Lorg/apache/pdfbox/cos/COSObject;,pseudo-tested,pseudo-tested,True
-org.apache.pdfbox.pdmodel.DefaultResourceCache,put,Lorg/apache/pdfbox/cos/COSObject;Lorg/apache/pdfbox/pdmodel/documentinterchange/markedcontent/PDPropertyList;,tested,pseudo-tested,False
+org.apache.pdfbox.pdmodel.DefaultResourceCache,put,Lorg/apache/pdfbox/cos/COSObject;Lorg/apache/pdfbox/pdmodel/documentinterchange/markedcontent/PDPropertyList;,pseudo-tested,tested,False
 org.apache.pdfbox.pdmodel.DefaultResourceCache,put,Lorg/apache/pdfbox/cos/COSObject;Lorg/apache/pdfbox/pdmodel/font/PDFont;,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdmodel.DefaultResourceCache,put,Lorg/apache/pdfbox/cos/COSObject;Lorg/apache/pdfbox/pdmodel/graphics/PDXObject;,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdmodel.DefaultResourceCache,put,Lorg/apache/pdfbox/cos/COSObject;Lorg/apache/pdfbox/pdmodel/graphics/color/PDColorSpace;,pseudo-tested,pseudo-tested,True
@@ -264,7 +264,7 @@ org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getDescent,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFlags,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontBoundingBox,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontFamily,,not-covered,not-covered,True
-org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontFile,,tested,pseudo-tested,False
+org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontFile,,pseudo-tested,tested,False
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontFile2,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontFile3,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDFontDescriptor,getFontName,,partially-tested,partially-tested,True
@@ -328,7 +328,7 @@ org.apache.pdfbox.pdmodel.font.PDSimpleFont,getStandard14Width,I,tested,tested,T
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,getSymbolicFlag,,pseudo-tested,pseudo-tested,True
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,hasExplicitWidth,I,partially-tested,partially-tested,True
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,isFontSymbolic,,partially-tested,partially-tested,True
-org.apache.pdfbox.pdmodel.font.PDSimpleFont,isStandard14,,tested,partially-tested,False
+org.apache.pdfbox.pdmodel.font.PDSimpleFont,isStandard14,,partially-tested,tested,False
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,isSymbolic,,partially-tested,partially-tested,True
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,readEncoding,,tested,tested,True
 org.apache.pdfbox.pdmodel.font.PDSimpleFont,subset,,not-covered,not-covered,True

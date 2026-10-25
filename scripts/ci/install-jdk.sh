@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Install AdoptOpenJDK 11.0.8+10, the JDK recorded in the authors' execution log.
+# Usage: install-jdk.sh [dest_dir]   (default: $RUNNER_TEMP, or /tmp)
 set -euo pipefail
 
 dest="${1:-${RUNNER_TEMP:-/tmp}}"

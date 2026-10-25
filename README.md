@@ -18,6 +18,13 @@ The numbers to reproduce are #TARGET = 138, #EFF_TARGET = 46, the PDFBox rows of
 about the collected profiles (5.5 GB, 158 B to about 55 MB, 19 methods hitting the 200 MB threshold, nesting depth 36),
 Figure 5 and the `isFill` example.
 
+**In short.** Reproduced exactly: #TARGET (138), the 46 effective targets (with the authors' font-cache state),
+#PASSING / #FAILING of the authors' tests, PANKTI_STATUS (28 / 46, all 46 statuses), the `isFill` example and
+Section V.B. Reproduced in shape: the workload columns of Table III (38 of 46 rows identical; the others are font
+methods, whose values depend on the installed fonts). Not reproduced: the nesting depth of 36, which the paper does
+not define. Section V.A is reproduced on every failing test, with a different mechanism for 9 rows. The research
+report is [`report/rapport.md`](report/rapport.md) (in French).
+
 The full comparison, one line per published number with its source file, is in
 [`results/comparison/comparison.txt`](results/comparison/comparison.txt); row by row in
 [`results/comparison/table3_rows.csv`](results/comparison/table3_rows.csv) and
@@ -82,9 +89,10 @@ scripts/pankti/      target extraction, plugin build, workload, test generation 
 scripts/glowroot/    Glowroot installation and agent check
 setup/               local setup (portable toolchain, download of the authors' artifacts)
 analysis/            analysis scripts; analysis/paper/ holds Table III as printed in the paper
-results/             outputs of the runs and of the analyses, one folder per stage; results/comparison/ sums them up
+results/             outputs of the runs and of the analyses, one folder per stage (index: results/README.md)
 report/              the research report (French)
 tests/               unit tests of the analysis scripts (python -m unittest discover -s tests)
+requirements.txt     Python packages (Python 3.11)
 docs/                methodology notes, assumptions, discrepancies, environment, artifacts, work journal
 ```
 
@@ -98,94 +106,129 @@ docs/                methodology notes, assumptions, discrepancies, environment,
 | PIT / Descartes | pitest-maven 1.4.10 / Descartes 1.2.6, 21 operators | operators read from the authors' reports; latest Descartes release at the time of their runs |
 | PANKTI | `0fddf27` (2020-10-26) | last commit before the PDFBox run of 2020-11-03 |
 | Glowroot | 0.13.6 | version used by PANKTI's instrumentation plugin |
-| Python (analysis) | 3.11 with pandas 1.5.3 | the authors' scripts need pandas < 2 |
+| Python (analysis) | 3.11; `requirements.txt` (pandas 1.5.3, numpy 1.26.4, matplotlib 3.8.4) | the authors' scripts need pandas < 2 |
+| GitHub Actions | `ubuntu-22.04` runners; actions pinned by major version (`checkout@v7`, `cache@v6`, `upload-artifact@v7`, `download-artifact@v7`) | the runner image is recorded by every run (`env-report.txt`) |
 
-## Running
+## Reproducing the results
 
-### On GitHub Actions
-
-Both workflows are started from the Actions tab or with the GitHub CLI:
-
-```bash
-gh workflow run env-check.yml          # about 10 min
-gh workflow run descartes-before.yml   # one job per module, 1 PIT thread; pdfbox is the longest (about 70 min)
-gh workflow run production-run.yml -f mode=dry-run   # plugin + Glowroot + pdfbox-app, agent check (about 5 min)
-gh workflow run production-run.yml -f mode=full      # + the authors' workload and the profile metrics (about 25 min)
-gh workflow run production-run.yml -f mode=full -f font_cache=warm       # sensitivity: font cache built first
-gh workflow run production-run.yml -f mode=full -f font_set=dejavu-only  # sensitivity: DejaVu fonts only
-gh workflow run generate-tests.yml -f profiles_run_id=<run-id of a full production-run>   # about 15-25 min per job
-gh workflow run assess-tests.yml -f tests_run_id=<run-id of a generate-tests run>          # compile + 5 runs
-gh workflow run descartes-after.yml -f tests_run_id=<run-id of a generate-tests run>       # about 25 min (pdfbox)
-gh run download <run-id>               # outputs of a run (methods.json, checks, logs, environment report)
-```
-
-### Locally (Windows, no administrator rights)
-
-```powershell
-./setup/windows/install-tools.ps1 -Dest C:\w\tools   # JDK 11.0.8, Maven 3.6.3, gh, uv, Python 3.11 + pandas 1.5.3
-. ./setup/windows/env.ps1 -Tools C:\w\tools          # in a new window: Set-ExecutionPolicy -Scope Process Bypass first
-```
-```bash
-source setup/env.sh /c/w/tools        # Git Bash
-bash setup/fetch-artifacts.sh /c/w    # authors' repositories and replication data (about 7.4 GB, see docs/artifacts.md)
-```
-
-Track A analyses (paths as created by `fetch-artifacts.sh`):
+There are three levels, from minutes on a laptop to the full pipeline on GitHub Actions. All local commands run from
+the repository root, in bash (Linux, macOS, or Git Bash on Windows), with Python 3.11:
 
 ```bash
-P=/c/w/data/pankti-data-v1/pankti-data/pdfbox/pankti-collected-object-profiles
-E=/c/w/src/pankti-experiments-2021/pdfbox
-python analysis/check_paper_table3.py analysis/paper/table3_pdfbox.csv results/day1/paper_table3_checks.txt
-python analysis/compare_authors_report.py $E $P/invoked-methods.csv results/day1/authors_report_vs_paper.csv
-python analysis/profile_stats.py $P results/day1/authors_profile_stats \
-       --listing /c/w/data/pankti-data-v1.listing.csv pankti-data/pdfbox/pankti-collected-object-profiles/
+python3.11 -m venv .venv && . .venv/bin/activate      # Windows: .venv/Scripts/activate
+pip install -r requirements.txt
+python -m unittest discover -s tests                  # 16 tests of the analysis scripts
+```
 
-bash scripts/pdfbox/checkout.sh /c/w/work/pdfbox
-bash scripts/pankti/extract-targets.sh /c/w/src/pankti /c/w/work/pdfbox $E/descartes/before /c/w/work/targets
-python analysis/count_targets.py /c/w/work/targets $E/descartes/before $P/invoked-methods.csv results/day2/targets_authors_reports
+### 1. From the committed results (no download, a few minutes)
 
-# the same comparison with the reproduction's own reports, stored compressed in results/day2/descartes_before/
-python analysis/compare_descartes_runs.py results/day2/descartes_before $E/descartes/before results/day2/descartes_before_vs_authors \
-       --labels reproduction authors --table3 $P/invoked-methods.csv
+The raw outputs of every CI run used in the report are committed under `results/` (index:
+[`results/README.md`](results/README.md)). These commands recompute the derived tables from them; each output can be
+compared with the committed file (`git diff` shows no change):
 
-# PANKTI_STATUS (Table III, last column) from the "before" reports and the "after" runs of descartes-after.yml
+```bash
 I=results/day4/full/profiles/invoked-methods.csv; T=results/day1/authors_report_vs_paper.csv
+# PANKTI_STATUS (Table III, last column): "before" reports, "after" runs, control run without generated tests
 python analysis/pankti_status.py results/day2/descartes_before results/day7/reproduction $I \
        results/day7/pankti_status_reproduction --table3 $T --control results/day7/none
-python analysis/pankti_status.py results/day2/descartes_before results/day7/authors $P/invoked-methods.csv \
-       results/day7/pankti_status_authors --table3 $T --control results/day7/none
+python analysis/compare_descartes_runs.py results/day7/reproduction results/day7/authors \
+       results/day7/reproduction_vs_authors --labels reproduction authors --table3 $I
+# the restriction to the target classes checked against the full "before" run (assumption A21)
+python analysis/compare_descartes_runs.py results/day2/descartes_before results/day7/none \
+       results/day7/restriction_check --labels full-before restricted-none --table3 $I --only-b
 python analysis/mutant_tests.py org.apache.pdfbox.pdmodel.graphics.state.RenderingMode isFill \
-       results/day7/reproduction/pdfbox.mutations.json.gz
-
-# Why tests fail (V.A), null-only and prediction checks (V.B), on the authors' published tests ($G) and on ours
-# (the generated-tests artifact of a generate-tests run, unpacked to $O); --sources: a PDFBox 2.0.21 checkout
-G=/c/w/data/pankti-data-v1/pankti-data/pdfbox/pankti-generated-junit-tests/tests; T3=analysis/paper/table3_pdfbox.csv
-python analysis/failure_analysis.py $G results/day6/authors/test_outcomes_tests.csv.gz $I \
-       results/day8/failure_analysis_authors --table3 $T3
-python analysis/prediction_check.py $G results/day6/authors/test_outcomes_tests.csv.gz results/day7/authors $I \
-       results/day8/prediction_check_authors --table3 $T3 --sources /c/w/work/pdfbox
-# the same with $O and results/day6/reproduction, results/day7/reproduction
+       results/day7/reproduction/pdfbox.mutations.json.gz          # the isFill example: mutant false killed, true not
+# font sensitivity (experiment E22)
+R=results/day8/sensitivity
+python analysis/sensitivity_table.py $R/font_methods main=results/day4/table3_comparison.csv \
+       warm-cache=$R/warm-cache/table3_comparison.csv dejavu-only=$R/dejavu-only/table3_comparison.csv
+# the three-way comparison and its figure
 python analysis/comparison.py results results/comparison
 python analysis/figure_table3.py results/comparison/table3_rows.csv results/comparison/table3_rows.png
 ```
 
-Descartes on one module, locally (the fontbox module takes about one minute):
+### 2. With the authors' artifacts (about 7.4 GB)
+
+`setup/fetch-artifacts.sh <root>` downloads the Zenodo replication data (md5 checked) and checks out the authors'
+repositories at the commits of the study ([`docs/artifacts.md`](docs/artifacts.md)). With `W` the chosen root:
+
+```bash
+W=$HOME/pankti-work; bash setup/fetch-artifacts.sh $W
+P=$W/data/pankti-data-v1/pankti-data/pdfbox/pankti-collected-object-profiles   # the authors' profiles
+G=$W/data/pankti-data-v1/pankti-data/pdfbox/pankti-generated-junit-tests/tests # the authors' generated tests
+E=$W/src/pankti-experiments-2021/pdfbox                                       # their Descartes reports and run.sh
+I=results/day4/full/profiles/invoked-methods.csv; T=results/day1/authors_report_vs_paper.csv
+T3=analysis/paper/table3_pdfbox.csv
+
+# Track A: the paper against the authors' artifacts
+python analysis/check_paper_table3.py $T3 results/day1/paper_table3_checks.txt
+python analysis/compare_authors_report.py $E $P/invoked-methods.csv $T
+python analysis/profile_stats.py $P results/day1/authors_profile_stats \
+       --listing $W/data/pankti-data-v1.listing.csv pankti-data/pdfbox/pankti-collected-object-profiles/
+# #TARGET with the authors' tools (needs a PDFBox checkout and pankti-extract, see scripts/pankti/extract-targets.sh)
+bash scripts/pdfbox/checkout.sh $W/work/pdfbox
+bash scripts/pankti/extract-targets.sh $W/src/pankti $W/work/pdfbox $E/descartes/before $W/work/targets
+python analysis/count_targets.py $W/work/targets $E/descartes/before $P/invoked-methods.csv results/day2/targets_authors_reports
+python analysis/compare_descartes_runs.py results/day2/descartes_before $E/descartes/before \
+       results/day2/descartes_before_vs_authors --labels reproduction authors --table3 $P/invoked-methods.csv
+# our Descartes "after" run against the authors' published one (whole modules)
+python analysis/compare_descartes_runs.py $W/data/pankti-data-v1/pankti-data/pdfbox/descartes-pseudo-tested-method-reports/after \
+       results/day7/reproduction results/day7/reproduction_vs_authors_published \
+       --labels authors-published reproduction --table3 $I --only-b
+# Sections V.A and V.B, prediction check, on the authors' published tests
+python analysis/pankti_status.py results/day2/descartes_before results/day7/authors $P/invoked-methods.csv \
+       results/day7/pankti_status_authors --table3 $T --control results/day7/none
+python analysis/failure_analysis.py $G results/day6/authors/test_outcomes_tests.csv.gz $I \
+       results/day8/failure_analysis_authors --table3 $T3
+python analysis/prediction_check.py $G results/day6/authors/test_outcomes_tests.csv.gz results/day7/authors $I \
+       results/day8/prediction_check_authors --table3 $T3 --sources $W/work/pdfbox
+```
+
+The same two analyses on this reproduction's tests take, instead of `$G`, the `generated-tests` artifact of a
+generate-tests run, unpacked (`zstd -dc generated-tests.tar.zst | tar -x`), with `results/day6/reproduction` and
+`results/day7/reproduction`. The run-time check of the cache lookups (`analysis/java/CacheLookupCheck.java`) gives its
+command in its header.
+
+### 3. The full pipeline on GitHub Actions
+
+Each stage is one workflow, started from the Actions tab or with `gh workflow run <workflow> -f <input>=<value>`;
+every input has a description and a default. Each job records its runner image, CPU, memory and fonts
+(`env-report.txt`) and uploads its outputs as artifacts.
+
+| Workflow | Stage | Main inputs (default) | Duration | Run used in the report |
+|---|---|---|---|---|
+| `env-check.yml` | toolchain, PDFBox 2.0.21 build and test suite | - | 8 min | 38548431201 |
+| `descartes-before.yml` | Descartes on the original test suite, one job per module | `modules`, `threads` (1) | 71 min (pdfbox) | 39409510406, 39415980930 |
+| `production-run.yml` | PANKTI plugin, Glowroot, pdfbox-app, the authors' workload | `mode` (dry-run / smoke / full), `font_set`, `font_cache` | 18 min (full) | 39444526027; sensitivity 39756523874, 39756528629 |
+| `generate-tests.yml` | pankti-generate on our profiles and on the authors' | `profiles_run_id`, `generator_commit` (`7afc584`) | 12-22 min | 39581267651 (authors' profiles; its reproduction job failed), 39588027907 (reproduction) |
+| `assess-tests.yml` | generated tests integrated into PDFBox, 5 separate runs | `tests_run_id`, `runs` (5) | 22 min | 39644913295 |
+| `descartes-after.yml` | Descartes with the passing generated tests (ours, the authors', none) | `tests_run_id`, `sources` | 28 min | 39747040848 |
+
+Notes:
+- A stage that reads the output of an earlier one takes its run ID as input. Artifacts are kept 3 to 14 days
+  (`retention-days`), so the default run IDs stop working after that: rerun the earlier stage first. The outputs used
+  in the report are committed under `results/`.
+- Every job fits in the 6-hour limit of GitHub-hosted runners (timeouts set to 350 minutes); the longest is the
+  pdfbox job of `descartes-before`. A full pass of the pipeline takes about 3 hours of runner time.
+
+### Windows laptop (development only)
+
+The measurements were all made on the Linux runners (assumption A5). For local development on Windows without
+administrator rights, `setup/windows/install-tools.ps1 -Dest <dir>` installs a portable toolchain (JDK 11.0.8,
+Maven 3.6.3, gh, uv, Python 3.11 with the pinned packages) and `setup/windows/env.ps1` / `source setup/env.sh <dir>`
+(Git Bash) set the session environment. Descartes on one module and the instrumentation can also be run locally:
 
 ```bash
 bash scripts/pdfbox/checkout.sh pdfbox && bash scripts/pdfbox/patch-build.sh pdfbox
 bash scripts/pdfbox/add-descartes-profile.sh pdfbox
-bash scripts/pdfbox/run-descartes.sh pdfbox fontbox out/fontbox
+bash scripts/pdfbox/run-descartes.sh pdfbox fontbox out/fontbox            # about one minute
 python analysis/compare_descartes_runs.py out/fontbox/methods.json $E/descartes/before/fontbox out/cmp --labels mine authors
-```
 
-Instrumentation, locally (the agent check starts pdfbox-app without a command, so no profile is written):
-
-```bash
-bash scripts/pankti/build-plugin.sh /c/w/src/pankti results/targets.csv out/plugin   # needs pandas + numpy
+bash scripts/pankti/build-plugin.sh $W/src/pankti results/targets.csv out/plugin   # needs pandas + numpy
 bash scripts/glowroot/install-glowroot.sh out/glowroot out/plugin/pankti-plugin.jar
 bash scripts/pdfbox/build-app.sh pdfbox out/app
 bash scripts/glowroot/check-agent.sh out/glowroot/glowroot out/app/pdfbox-app-2.0.21.jar out/agent
-python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-experiments/pdfbox/execution/pdfbox-app-2.0.21.jar
+python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar $W/src/pankti-experiments/pdfbox/execution/pdfbox-app-2.0.21.jar
 ```
 
 ## Documentation
@@ -203,6 +246,8 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
   final status follows from the observed values.
 - [docs/experiments.md](docs/experiments.md): research log of every experiment (objective, method, configuration,
   outcome, interpretation, limitations).
+- [docs/deviations.md](docs/deviations.md): one-page overview of every deviation from the paper's protocol, with links
+  to the assumptions and discrepancies.
 - [docs/assumptions.md](docs/assumptions.md): every simplifying assumption, with its justification, expected impact and
   validation.
 - [docs/discrepancies.md](docs/discrepancies.md): differences between the paper, the authors' artifacts and this
@@ -210,6 +255,7 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
 - [docs/environment.md](docs/environment.md) and [docs/artifacts.md](docs/artifacts.md): toolchains, external inputs,
   versions and checksums.
 - [docs/journal.md](docs/journal.md): day-by-day work log.
+- [results/README.md](results/README.md): what each results folder holds and which run or script produced it.
 
 ## Deviations from the original setup (summary)
 
@@ -223,4 +269,11 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar /c/w/src/pankti-ex
   the module (A21); a control run without generated tests gives the full run's classification for 460 of the 465
   methods of these classes.
 
-See [docs/assumptions.md](docs/assumptions.md) for the full list.
+See [docs/deviations.md](docs/deviations.md) for the full list.
+
+## License and attribution
+
+The code of this repository is under the MIT license ([LICENSE](LICENSE)). It runs, without modifying them, the
+tools and data of the original study: PANKTI and its experiment repository (ASSERT-KTH), the replication data on
+Zenodo (record 4298605), Apache PDFBox 2.0.21, PIT and Descartes, Glowroot and XStream, each under its own license.
+The paper is cited at the top of this page; the report lists all references.

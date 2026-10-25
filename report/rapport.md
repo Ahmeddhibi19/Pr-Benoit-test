@@ -1,6 +1,18 @@
 # Reproduction de l'étude de cas 2 (PDFBox) de « Production Monitoring to Improve Test Suites »
 
-*Rapport de reproduction, rédigé au fil du travail. État : 22 octobre 2026 (fin du jour 8).*
+*Rapport de reproduction, version 1 — Ahmed Dhibi, 25 octobre 2026.*
+*Dépôt : https://github.com/Ahmeddhibi19/Pr-Benoit-test*
+
+## Résumé
+
+L'étude de cas 2 de l'article (section IV.C) applique PANKTI à Apache PDFBox 2.0.21 : observer une charge de travail de « production », en tirer des tests unitaires différentiels pour les méthodes pseudo-testées, puis mesurer combien de ces méthodes deviennent bien testées. Je l'ai reproduite de deux façons : en confrontant l'article aux artefacts publiés par les auteurs, et en ré-exécutant toute la chaîne avec leurs outils sur GitHub Actions.
+
+- **Reproduit exactement :** les 138 cibles ; les 46 cibles effectives (avec l'état du cache de polices des auteurs) ; les 13 851 tests publiés, régénérés à l'identique ; leurs #PASSING et #FAILING (13 614 / 237) pour les 46 lignes ; le statut final, **28 cibles sur 46 bien testées**, avec nos tests comme avec ceux des auteurs ; l'exemple `isFill` ; la section V.B.
+- **Reproduit en forme :** les colonnes de la charge de travail du tableau III (38 lignes sur 46 identiques ; les autres sont des méthodes liées aux polices, dont les valeurs dépendent des polices installées et du cache de polices).
+- **Non reproduit :** la profondeur d'imbrication de 36, que l'article ne définit pas (73 dans les données des auteurs comme dans les nôtres).
+- **Constats principaux :** (1) un test généré réussit exactement quand la valeur observée en production était `null`, parce que l'oracle compare par `equals` des objets qui comparent par identité ; (2) pour 9 lignes du tableau III, le mécanisme d'échec diffère de celui de l'article (caches indexés par identité, non pas absents) ; (3) le statut final de chaque cible se prédit à partir des valeurs observées (82 mutants sur 82) : les 28 cibles améliorées renvoient des valeurs simples, les 18 autres des objets.
+
+La comparaison complète, nombre par nombre et avec le fichier source de chaque valeur, est dans `results/comparison/comparison.txt`.
 
 Conventions :
 - **[Publié]** : valeur ou affirmation de l'article ;
@@ -180,7 +192,7 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 | A17 | Générateur pankti-generate `7afc584` avec `setUpXStream()` activé | version des tests publiés par les auteurs ; même analyseur de profils que `0fddf27` | validé : 13 851 tests sur 13 851 identiques aux tests publiés |
 | A18 | Seule la compilation des tests passe en Java 9 ; convertisseurs copiés dans chaque paquetage ; classes de plus de 500 tests découpées | ne pas modifier le bytecode de la bibliothèque mutée ; permettre d'exécuter les 11 730 tests de `getFlags` | vérifié localement : bibliothèque en Java 6 (version 50), tests en Java 9 (53), 20 tests sur 20 passent |
 | A21 | Descartes « après » limité aux 22 classes des cibles effectives, avec tous les tests du module | durée (68 min pour pdfbox entier, sans les tests générés) ; l'article ne dit pas ce que les auteurs ont analysé | contrôle sans test généré : 460 méthodes sur 465 classées comme dans l'exécution complète ; les 5 autres viennent d'un test instable |
-| A22 | Seuls les tests qui réussissent aux 5 exécutions sont ajoutés | PIT exige une suite verte ; section II.F de l'article | 14 314 de nos tests, 13 614 de ceux des auteurs, comme au jour 6 |
+| A22 | Seuls les tests qui réussissent aux 5 exécutions sont ajoutés | PIT exige une suite verte ; section II.F de l'article | 14 314 de nos tests, 13 614 de ceux des auteurs : les nombres de tests réussis de la section 8.7 |
 | A23 | Tous les tests en échec classés automatiquement (message JUnit, valeur observée), puis vérification dans le code source et, pour les caches, à l'exécution | l'échantillon et la procédure manuelle des auteurs ne sont pas publiés | aucun test laissé sans catégorie ; une comparaison champ par champ n'a pas été faite |
 | A24 | Deux exécutions de sensibilité, chacune changeant un seul facteur (cache de polices déjà construit ; polices DejaVu seules) | l'origine des écarts sur les méthodes liées aux polices est inconnue | les valeurs par défaut restent celles de l'exécution principale |
 
@@ -204,7 +216,7 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 |---|---|---|
 | #TARGET | 138 | **138** (137 en commun avec la liste issue des rapports des auteurs) |
 | Cibles effectives présentes dans la liste | 46 | 46 sur 46, toutes pseudo-testées avant ajout de tests |
-| Classification Descartes identique aux auteurs | — | 6 276 méthodes sur 6 373 (fontbox, xmpbox, preflight, tools : 100 % ; pdfbox : 99,6 %) |
+| Classification Descartes identique aux auteurs | — | 6 276 méthodes sur 6 373 (fontbox, xmpbox, preflight, tools : 100 % ; pdfbox : 4 421 sur 4 438, 99,6 %) |
 
 ### 8.3 Instrumentation et charge de travail (piste B)
 
@@ -229,7 +241,7 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 
   (`results/day4/table3_comparison.*`, `results/day4/full/`)
 - **[Mesuré]** Les lignes qui diffèrent sont des méthodes liées aux polices : `NamingTable.getName` (650 → 1 457 invocations, 273 → 976 profils uniques), `PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`, `FontCache.getFont`. S'y ajoutent deux méthodes dont les profils collectés dépendent de ce qui a été stocké avant le seuil (`DefaultResourceCache.getColorSpace`, `COSParser.getEncryption`), et la cible supplémentaire `getOS2Windows`, elle aussi liée aux polices.
-- **[Interprétation]** Cause probable à ce stade : l'environnement des polices. PDFBox remplace les polices non incorporées par des polices du système et garde la liste des polices dans un cache sur disque. La vérification par deux exécutions de sensibilité est en section 8.12.
+- **[Interprétation]** Cause : l'environnement des polices. PDFBox remplace les polices non incorporées par des polices du système et garde la liste des polices dans un cache sur disque ; deux exécutions de sensibilité le vérifient (section 8.12).
 
 ### 8.4 Profondeur d'imbrication
 
@@ -250,7 +262,7 @@ La liste complète, au format exigé (exigence d'origine, problème, simplificat
 
 - **[Mesuré sur les artefacts]** À partir des profils des auteurs, pankti-generate `7afc584` (avec `setUpXStream()` activé) produit 13 851 tests, **tous identiques, méthode par méthode, aux 13 851 tests publiés** ; #PANKTI_TESTS = #UNIQUE pour les 46 méthodes. L'étape de génération est donc reproduite exactement. (`results/day5/authors_generation/`)
 - **[Mesuré]** À partir de nos profils : 14 679 tests pour 47 méthodes, égal à #UNIQUE pour chaque méthode (article : 13 851). Les écarts avec l'article sont ceux de #UNIQUE, concentrés sur les méthodes liées aux polices. (`results/day5/table3_partial.csv`)
-- **[Mesuré]** Intégration vérifiée localement sur un échantillon : les tests compilent et passent ; l'exécution complète (5 fois) est l'objet du jour 6.
+- **[Mesuré]** Intégration vérifiée d'abord localement sur un échantillon : les tests compilent et passent ; l'exécution complète (5 fois) est en section 8.7.
 
 ### 8.7 Exécution des tests générés
 
@@ -365,7 +377,7 @@ Pour tester l'explication des écarts sur les méthodes liées aux polices, la c
 - **[Mesuré]** La charge de travail des auteurs est plus petite qu'annoncé : 11 des 50 appels échouent, dont tous ceux sur `000809.pdf`, déjà chiffré. Ce détail ne figure pas dans l'article. Il ne change pas les métriques publiées, qui proviennent de cette même exécution, mais réduit la diversité réelle des entrées observées.
 - **[Mesuré]** Une analyse de mutation n'est pas plus déterministe que la suite de tests qu'elle exécute : avec 4 fils, des tests qui partagent des fichiers ou téléchargent des données font compter comme « détectés » des mutants qui ne le sont pas, au point de faire passer les cibles de 138 à 91.
 - **[Mesuré sur les artefacts]** Les artefacts publiés mélangent deux versions de l'outil et des retouches manuelles : instrumentation en `0fddf27`, génération en `7afc584`, imports et classes de conversion ajoutés à la main. Rien de cela n'est dit dans l'article ; les nombres publiés restent néanmoins exactement reproductibles à partir des artefacts.
-- **[Mesuré sur les artefacts]** Compter des tests non exécutés comme réussis surestime le taux de réussite (98,3 % contre 89,4 % sur les tests réellement exécutés).
+- **[Mesuré sur les artefacts]** Compter des tests non exécutés comme réussis surestime le taux de réussite (98,3 % contre 89,4 %, soit 2 001 sur 2 238, sur les tests réellement exécutés).
 - **[Mesuré]** Le résultat final de l'article (28 / 46) est robuste à la variation des profils : nos 828 tests supplémentaires (dont 114 pour la cible en plus, `getOS2Windows`) ne changent aucun statut. Un seul profil distinct par méthode suffit souvent : `isFill` est améliorée par un unique test.
 - **[Mesuré]** Le critère « bien testée » dépend de la stabilité de la suite de tests existante. Un test qui relit un fichier laissé par une exécution précédente peut faire passer une cible de « pseudo-testée » à « testée » sans aucun nouveau test (`getXrefType`).
 - **[Mesuré]** Les échecs des tests générés ne dépendent pas de l'environnement : ils viennent de l'oracle (`assertEquals`) appliqué à des classes qui comparent par identité, et un test réussit exactement quand la valeur observée était `null`.
@@ -373,11 +385,16 @@ Pour tester l'explication des écarts sur les méthodes liées aux polices, la c
 
 ## 10. Réflexions et leçons apprises
 
+**Ce qui était simple à reproduire, et ce qui ne l'était pas.** Tout ce que fixe le code se reproduit exactement, même six ans plus tard : les cibles, les tests générés à partir des profils des auteurs, leur exécution, le statut final. Les difficultés viennent de ce que l'article ne dit pas : la configuration de Descartes, la version de PANKTI utilisée pour chaque étape, l'état de la machine (polices, cache de polices), la définition de la profondeur d'imbrication, l'échantillon de tests analysés à la main. Chaque fois, la réponse se trouvait dans les artefacts des auteurs (rapports Descartes, journal d'exécution, tests publiés) plutôt que dans le texte.
+
+**Les décisions qui ont changé les résultats.** Trois choix d'outillage, absents de l'article, déplacent fortement les nombres : le nombre de fils de PIT (138 ou 91 cibles), la version du générateur (la forme des tests et leur compilation), et l'état du cache de polices (une cible de plus, et `getName` presque quatre fois plus de profils uniques). Aucun n'aurait été identifié sans comparer chaque étape aux données des auteurs.
+
+
 - **[Interprétation]** La reproductibilité dépend des artefacts bien plus que du texte. L'article ne donne ni versions, ni configuration de Descartes, ni script de charge. Sans le dépôt d'expériences et l'archive Zenodo, ces éléments seraient des suppositions ; avec eux, plusieurs résultats sont reproduits à l'identique six ans plus tard.
 - **Ce qui a fonctionné.** Valider chaque outil de mesure sur les données des auteurs avant de l'appliquer aux nôtres (comptage des profils uniques, comptage des tests, comparaison des tests). Cela a révélé un défaut de mon analyseur XML (les éléments vides) avant qu'il ne fausse un résultat, et chaque comparaison sert ensuite de test de non-régression.
 - **Ce qui a fonctionné.** Traiter chaque résultat surprenant comme un indice : `isFill` « testée » a révélé l'effet du parallélisme ; des tests publiés différents des nôtres ont révélé la version du générateur.
 - **Ce qui a moins bien fonctionné.** Plusieurs échecs d'intégration continue venaient de différences entre l'environnement local (Windows : fins de ligne, conversion des chemins) et l'exécuteur Linux. Rejouer localement l'appel exact de l'intégration continue avant de pousser a évité de les répéter.
-- **À reconsidérer.** Choisir dès le départ le même système d'exploitation pour le développement et les mesures, et figer toutes les dépendances (y compris celles des outils des auteurs).
+- **À reconsidérer.** Choisir dès le départ le même système d'exploitation pour le développement et les mesures, et figer toutes les dépendances (y compris celles des outils des auteurs). Si c'était à refaire, je lirais aussi plus tôt les journaux d'exécution des auteurs ligne par ligne : le message manquant sur le cache de polices y était dès le premier jour.
 - **Ce qui a fonctionné.** Analyser tous les tests en échec à partir de preuves (message, valeur observée, code source, puis une vérification à l'exécution) plutôt qu'un échantillon : la règle « réussit si et seulement si `null` a été observé » n'apparaît que sur l'ensemble des tests, et elle corrige l'explication de l'article pour 9 lignes.
 - **Sur la méthode de l'article.** L'oracle `assertEquals` limite ce que PANKTI peut améliorer : pour un objet sans `equals`, il faudrait comparer l'état (par exemple la forme XML sérialisée) plutôt que l'identité. Ce point, que les données rendent visible, n'est pas discuté dans l'article.
 - **Sur la méthode de l'article.** L'oracle dérivé de la production dépend de choix d'outillage non décrits (nombre de fils de PIT, version du générateur, convertisseurs XStream) et de l'environnement (polices). Ces choix influencent fortement les nombres publiés ; un article de ce type gagnerait à les documenter explicitement.
@@ -405,14 +422,21 @@ Pour tester l'explication des écarts sur les méthodes liées aux polices, la c
 
 ## 13. Conclusion
 
-*(version finale au jour 9)* À ce stade :
-- les cibles (138) sont reproduites exactement ; la classification Descartes est quasi identique à celle des auteurs ;
-- l'outillage de mesure et l'étape de génération sont validés sur les données des auteurs (13 851 tests sur 13 851 identiques) ;
-- la charge de travail redonne les colonnes 1 à 4 du tableau III à quelques pour cent près (mêmes 46 cibles, mêmes 19 méthodes plafonnées, `isFill` à l'identique, figure 5 de même forme) ; les écarts se concentrent sur les méthodes liées aux polices ;
-- l'exécution des tests publiés redonne exactement #PASSING et #FAILING ; nos tests réussissent à 97,5 % (98,3 % sur les 46 lignes du tableau III) ;
-- le statut final est reproduit exactement : 28 cibles sur 46 deviennent bien testées, avec nos tests comme avec ceux des auteurs, et `isFill` est partiellement testée comme dans l'article ; une de ces 28 cibles dépend d'un test instable de PDFBox ;
-- les écarts sur les méthodes liées aux polices viennent de l'environnement : avec un cache de polices déjà construit, comme le montre le journal des auteurs, les 46 cibles effectives de l'article sont retrouvées exactement ;
-- les sections V.A et V.B sont reproduites sur tous les tests ; V.B exactement, V.A avec un mécanisme différent pour 9 lignes ; le statut final se prédit à partir des valeurs observées.
+Le résultat central de l'étude de cas est reproduit : avec les outils et les données des auteurs, dans un environnement contrôlé et documenté, **28 des 46 cibles effectives deviennent bien testées**, avec les tests générés par cette reproduction comme avec ceux publiés par les auteurs, et chacune des 46 cibles a le statut du tableau III.
+
+| Résultat | Niveau de preuve |
+|---|---|
+| 138 cibles ; classification Descartes identique aux auteurs pour 6 276 méthodes sur 6 373 | reproduit exactement, deux exécutions |
+| tests générés : les 13 851 tests publiés régénérés à l'identique ; nos 14 679 tests = #UNIQUE pour chaque méthode | reproduit exactement |
+| #PASSING / #FAILING des tests des auteurs (13 614 / 237) ; nos tests : 97,5 % (98,3 % sur les 46 lignes) | reproduit exactement, 5 exécutions, aucun test instable |
+| statut final 28 / 46 ; `isFill` (le mutant `false` est tué, `true` non) | reproduit exactement ; une des 28 cibles (`getXrefType`) dépend d'un test instable de PDFBox, d'où 27 améliorations robustes |
+| colonnes de la charge de travail (INV / COLL / UNIQ), 19 méthodes plafonnées, figure 5 | reproduit en forme ; 38 lignes sur 46 identiques ; les écarts sont des méthodes liées aux polices, expliqués en partie par le cache de polices (exécution de sensibilité) |
+| sections V.A et V.B | V.B exactement ; V.A sur tous les tests, avec un mécanisme différent de celui de l'article pour 9 lignes (vérifié dans le code et à l'exécution) |
+| profondeur d'imbrication 36 | non reproduit (définition absente) |
+
+**Ce qui reste ouvert.** L'origine exacte des derniers écarts sur les méthodes liées aux polices (probablement les polices Symbol et ZapfDingbats de la machine des auteurs, non testé) ; la définition de la profondeur d'imbrication ; l'hypothèse des champs transitoires de l'article, qu'une comparaison champ par champ permettrait de vérifier.
+
+**Ce que la reproduction apporte en plus.** Elle montre que, dans cette étude de cas, le nombre de cibles améliorées est déterminé par les types de retour des cibles et les valeurs observées en production : l'oracle `assertEquals` ne peut pas améliorer une méthode qui renvoie un objet comparé par identité. C'est la limite principale de la méthode que les données rendent visible, et la piste la plus directe pour l'améliorer.
 
 ## 14. Reproduction et références
 

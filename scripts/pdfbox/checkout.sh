@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Shallow clone of PDFBox at the tag studied in the paper.
+# Usage: checkout.sh [dest_dir]   (default: pdfbox; PDFBOX_TAG overrides the tag 2.0.21)
 set -euo pipefail
 
 dest="${1:-pdfbox}"

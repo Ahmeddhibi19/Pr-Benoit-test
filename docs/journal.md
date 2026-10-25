@@ -435,3 +435,30 @@ passing tests (Section V.B); collect the final comparison in `results/comparison
   checked in the code and at run time (A23).
 - `extracted-methods-pdfbox.csv` has 3,588 rows but 3,587 distinct methods (one duplicate row); the docs said 3,588
   and the result files 3,587. Both are now stated.
+
+## Day 9 - 2026-10-25: repository for a reviewer, report version 1
+
+### Done
+
+- README reorganised for a reader who does not know the project: a short statement of what is and is not
+  reproduced, then three levels of reproduction (from the committed results, with the authors' artifacts, the full
+  pipeline on GitHub Actions with durations and the run of each stage), portable paths, license and attribution.
+- `requirements.txt` (Python packages); `results/README.md` (what each results folder holds and which run produced
+  it); [deviations.md](deviations.md) (one-page overview of every deviation, linked to the assumptions and
+  discrepancies).
+- `analysis/compare_descartes_runs.py --only-b`: the two Day 7 comparisons that had been filtered to the 465 analysed
+  methods by hand (`restriction_check`, `reproduction_vs_authors_published`) are now produced by a command; same
+  numbers (460 / 465).
+- Usage lines added to the scripts that had none; validation cells of A8 and A11 completed; discrepancy 7 updated.
+- Report version 1: summary at the top, final conclusion with the level of evidence of each result, reflections
+  completed; two inaccurate statements corrected (`isFill`: the paper says "well-tested", "partially" comes from
+  the authors' reports; the main run invokes 47 targets, not 46).
+
+### Checks
+
+- A clean Python 3.11 environment from `requirements.txt` only: 16 / 16 unit tests; every command of the first
+  reproduction level, run as written in the README, reproduces the committed files (no difference, figure
+  included).
+- No broken link or anchor in the README, `results/README.md`, the docs and the report.
+- Every number of 100 or more and every percentage of the report is found in a result file, or is a ratio of
+  numbers given next to it.

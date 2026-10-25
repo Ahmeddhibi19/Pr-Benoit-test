@@ -17,7 +17,7 @@ filled in once it is known. Related observations (differences between the paper 
 | A8 | [Source of the frozen target list](#a8-source-of-the-frozen-target-list) | decided, checked |
 | A9 | [Building pankti-extract today](#a9-building-pankti-extract-today) | validated |
 | A10 | [Meaning of "well-tested"](#a10-meaning-of-well-tested) | validated on the authors' data |
-| A11 | [What #PASSING counts](#a11-what-passing-counts) | decided |
+| A11 | [What #PASSING counts](#a11-what-passing-counts) | validated (E17, E18) |
 | A12 | [The pdfbox-app jar](#a12-the-pdfbox-app-jar) | validated (identical content) |
 | A13 | [Glowroot configuration](#a13-glowroot-configuration) | in use |
 | A14 | [The workload script](#a14-the-workload-script) | in use |
@@ -125,7 +125,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | The target list instrumented from Day 3 on is the one computed from the authors' "before" reports, frozen as `results/targets.csv` (copy of `results/day2/instrumentation-candidates-pdfbox.csv`, sha256 in `results/targets.sha256`). The reproduction's own Descartes run is compared with it method by method. |
 | Justification | The reproduction's own run gives 138 targets as well, 137 of them in common with the authors' list, and all 46 effective targets (`results/day2/targets_own_reports.txt`). |
 | Expected impact | One target differs in each direction (`PDFontDescriptor.getFontFile` is instrumented, `PDAnnotation.isNoRotate` is not); neither is an effective target in the paper. |
-| Validation | `analysis/compare_descartes_runs.py` and `analysis/count_targets.py` on both sets of reports. Whether `isNoRotate` is invoked by the workload will be checked on Day 4. |
+| Validation | `analysis/compare_descartes_runs.py` and `analysis/count_targets.py` on both sets of reports. `isNoRotate` is not in the frozen list, so whether the workload invokes it was not measured; with the frozen list the workload invokes all 46 effective targets of the paper (E11). |
 | Reporting | Methodology. |
 
 ## A9. Building pankti-extract today
@@ -161,7 +161,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | None: every generated test is executed, and only tests that actually pass are counted. The paper's way of counting is reported next to it. |
 | Justification | Measures what the metric claims to measure. |
 | Expected impact | #PASSING may be lower than in the paper if some getFlags tests fail. |
-| Validation | Day 6 (test execution). |
+| Validation | E17, E18: every generated test was executed in each of the 5 runs (none "not run"); the 11,613 `getFlags` tests all pass, so the authors' tests give the paper's #PASSING, 13,614, as actually measured. |
 | Reporting | Results; discussion of the difference. |
 
 ## A12. The pdfbox-app jar

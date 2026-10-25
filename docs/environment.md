@@ -37,7 +37,7 @@ so all tools are portable and live in `C:\w\tools`.
 | GitHub CLI | 2.102.0 | release checksums |
 | uv | 0.13.1 | release sha256 |
 | Python | 3.11.17 (installed by uv) | |
-| Python packages | pandas 1.5.3, numpy 1.26.4, matplotlib 3.8.4 | |
+| Python packages | pandas 1.5.3, numpy 1.26.4, matplotlib 3.8.4 | `requirements.txt` |
 
 pandas is pinned below 2.0 because the authors' scripts (`find-pseudo-tested.py`) use `DataFrame.append`, which
 pandas 2 removed. Python 3.11 is used because pandas 1.5 has no build for newer Python versions.

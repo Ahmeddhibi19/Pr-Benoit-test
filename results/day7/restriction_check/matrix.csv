@@ -1,6 +1,6 @@
 full-before \ restricted-none,tested,partially-tested,pseudo-tested,not-covered,absent
-tested,180,1,0,0,1567
-partially-tested,1,23,0,0,79
-pseudo-tested,3,0,107,0,414
-not-covered,0,0,0,150,2463
+tested,180,1,0,0,0
+partially-tested,1,23,0,0,0
+pseudo-tested,3,0,107,0,0
+not-covered,0,0,0,150,0
 absent,0,0,0,0,0

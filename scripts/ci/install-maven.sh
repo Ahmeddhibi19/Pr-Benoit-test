@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Install Maven 3.6.3 from the Apache archive.
+# Usage: install-maven.sh [dest_dir]   (default: $RUNNER_TEMP, or /tmp)
 set -euo pipefail
 
 dest="${1:-${RUNNER_TEMP:-/tmp}}"
