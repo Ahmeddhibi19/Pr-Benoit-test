@@ -51,7 +51,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Original requirement | Run Descartes on the original test suite (PIT requires a green suite). |
 | Problem | The keystore shipped with the PDFBox 2.0.21 tests expired on 2026-06-05: 13 tests of the `examples` module fail with `CertificateExpiredException`. |
 | Simplification | Exclude the two test classes that contain them, `TestCreateSignature` and `CreatePDFATest` (`scripts/pdfbox/descartes-excluded-tests.txt`). PIT excludes whole classes, so 10 passing tests go too (23 of 1,678 tests). |
-| Justification | The excluded tests only exercise the `examples` module. None of the 138 targets and none of the 46 effective targets is in that module (`results/day2/targets_authors_reports.txt`). Setting the clock back to 2020 was the alternative; it would affect every test that reads the date. |
+| Justification | The excluded tests only exercise the `examples` module. None of the 138 targets and none of the 46 effective targets is in that module (`results/02-descartes-before/targets_authors_reports.txt`). Setting the clock back to 2020 was the alternative; it would affect every test that reads the date. |
 | Expected impact | Methods of `examples` lose their coverage. No effect on fontbox, pdfbox, xmpbox, preflight and tools. |
 | Validation | Measured in the "before" run: `examples` has 3 pseudo-tested methods instead of 39 and 308 not-covered instead of 228 (the module has only 24 tests, 23 of them excluded). fontbox, xmpbox, preflight and tools are identical to the authors' reports method by method, pdfbox differs on 17 of 4,438 methods for unrelated reasons (see [descartes.md](descartes.md)). |
 | Reporting | Limitations; #TARGET is unaffected because pankti-extract keeps no method of `examples` that is pseudo-tested in the authors' reports. |
@@ -88,7 +88,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Problem | The authors' machine (fonts, font cache, CPU) is unknown. Several targets are font methods whose invocation counts depend on the installed fonts. |
 | Simplification | All measured runs use a GitHub-hosted `ubuntu-22.04` runner with AdoptOpenJDK 11.0.8+10, Maven 3.6.3 and `fonts-liberation` (the font of the paper's Figure 2). Every run records the runner image, CPU, memory and font list. A Windows laptop is used for development and smoke tests only. |
 | Justification | Closest available match to the authors' setup that can be re-run by anyone. |
-| Expected impact | Font-dependent counts of the workload may differ from the paper (checked from Day 4 on). |
+| Expected impact | Font-dependent counts of the workload may differ from the paper (checked in the workload stage). |
 | Validation | Descartes: Linux results are identical to the authors' reports, while a local Windows run of fontbox differs on 4 methods, all of them OS-specific font-directory finders (`WindowsFontDirFinder` vs `UnixFontDirFinder`). This confirms that the OS matters and that Linux is the right choice. |
 | Reporting | Experimental setup; threats to validity. |
 
@@ -113,7 +113,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | Version 1 (record 4298605, 2020-11-30), checked against its md5. |
 | Justification | Contemporary with the PDFBox run. |
 | Expected impact | None found. |
-| Validation | Its PDFBox profiles give exactly the totals of Section IV.C (`results/day1/authors_profile_stats.txt`). |
+| Validation | Its PDFBox profiles give exactly the totals of Section IV.C (`results/01-paper-vs-artifacts/authors_profile_stats.txt`). |
 | Reporting | Experimental setup. |
 
 ## A8. Source of the frozen target list
@@ -122,8 +122,8 @@ filled in once it is known. Related observations (differences between the paper 
 |---|---|
 | Original requirement | Targets = pseudo-tested methods found by Descartes, filtered by PANKTI. |
 | Problem | Time: the schedule required starting the instrumentation before the reproduction's own Descartes run could be fully analysed. |
-| Simplification | The target list instrumented from Day 3 on is the one computed from the authors' "before" reports, frozen as `results/targets.csv` (copy of `results/day2/instrumentation-candidates-pdfbox.csv`, sha256 in `results/targets.sha256`). The reproduction's own Descartes run is compared with it method by method. |
-| Justification | The reproduction's own run gives 138 targets as well, 137 of them in common with the authors' list, and all 46 effective targets (`results/day2/targets_own_reports.txt`). |
+| Simplification | The target list instrumented from the instrumentation stage on is the one computed from the authors' "before" reports, frozen as `results/targets.csv` (copy of `results/02-descartes-before/instrumentation-candidates-pdfbox.csv`, sha256 in `results/targets.sha256`). The reproduction's own Descartes run is compared with it method by method. |
+| Justification | The reproduction's own run gives 138 targets as well, 137 of them in common with the authors' list, and all 46 effective targets (`results/02-descartes-before/targets_own_reports.txt`). |
 | Expected impact | One target differs in each direction (`PDFontDescriptor.getFontFile` is instrumented, `PDAnnotation.isNoRotate` is not); neither is an effective target in the paper. |
 | Validation | `analysis/compare_descartes_runs.py` and `analysis/count_targets.py` on both sets of reports. `isNoRotate` is not in the frozen list, so whether the workload invokes it was not measured; with the frozen list the workload invokes all 46 effective targets of the paper (E11). |
 | Reporting | Methodology. |
@@ -149,7 +149,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | well-tested = `tested` or `partially-tested`. Strict counts (`tested` only) are reported as well. |
 | Justification | Follows from the paper's definition. The authors' README splits its 28 well-tested methods into 17 tested and 11 partially tested. |
 | Expected impact | None. |
-| Validation | With this reading, the authors' last "after" reports give the status printed in Table III for all 46 methods (`results/day1/authors_report_vs_paper.csv`). |
+| Validation | With this reading, the authors' last "after" reports give the status printed in Table III for all 46 methods (`results/01-paper-vs-artifacts/authors_report_vs_paper.csv`). |
 | Reporting | Methodology. |
 
 ## A11. What #PASSING counts
@@ -173,7 +173,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | Build the jar from tag 2.0.21 with the same JDK (`scripts/pdfbox/build-app.sh`). |
 | Justification | Running a jar built from the documented sources is reproducible; the authors' jar is used only for comparison. |
 | Expected impact | None if the contents are the same. |
-| Validation | Built on the Linux runner (run 39431056888), the jar has the same 5,786 entries as the authors' jar; all 5,644 class files are byte-identical and only 3 build-metadata entries differ (`results/day3/app_jar_vs_authors.txt`). A Windows build also differs in 118 text resources because of line endings. |
+| Validation | Built on the Linux runner (run 39431056888), the jar has the same 5,786 entries as the authors' jar; all 5,644 class files are byte-identical and only 3 build-metadata entries differ (`results/03-instrumentation/app_jar_vs_authors.txt`). A Windows build also differs in 118 text resources because of line endings. |
 | Reporting | Experimental setup. |
 
 ## A13. Glowroot configuration
@@ -185,7 +185,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | Glowroot 0.13.6 with its default configuration; the plugin jar is the only addition. |
 | Justification | Nothing indicates a custom configuration; PANKTI's code does not depend on Glowroot settings (it writes its own files). |
 | Expected impact | Glowroot's own data (traces, UI) may differ; the files written by PANKTI should not. |
-| Validation | Agent check: Glowroot starts without warnings and registers the plugin (`scripts/glowroot/check-agent.sh`); profiles are checked from Day 4. |
+| Validation | Agent check: Glowroot starts without warnings and registers the plugin (`scripts/glowroot/check-agent.sh`); profiles are checked in the workload stage. |
 | Reporting | Experimental setup. |
 
 ## A14. The workload script
@@ -205,11 +205,11 @@ filled in once it is known. Related observations (differences between the paper 
 | Item | Explanation |
 |---|---|
 | Original requirement | #UNIQUE: the number of unique object profiles, i.e. the number of tests pankti-generate creates. |
-| Problem | Running pankti-generate is the next step (Day 5); the metric is needed when the profiles are collected, and pankti-generate's parser loads whole files in memory. |
+| Problem | Running pankti-generate is the next stage (test generation); the metric is needed when the profiles are collected, and pankti-generate's parser loads whole files in memory. |
 | Simplification | `analysis/profile_stats.py --fragments` applies pankti-generate's rule (`ObjectXMLParser`, commit `0fddf27`): top-level XML fragments of the receiving, params and returned files, paired by position, and the number of distinct triples (params only for methods with parameters). Fragments are compared on their exact text; pankti-generate compares them after a deterministic re-serialisation. |
 | Justification | Equal texts give equal re-serialisations; XStream writes a given object the same way every time. |
 | Expected impact | None found. |
-| Validation | On the authors' raw data (5.9 GB), the script gives the #UNIQUE of Table III for all 46 methods (13,851 in total), as well as #INVOCATIONS and #COLLECTED (`results/day4/authors_profile_metrics.*`). Unit tests in `tests/test_analysis.py`. The number of tests pankti-generate actually produces is compared on Day 5. |
+| Validation | On the authors' raw data (5.9 GB), the script gives the #UNIQUE of Table III for all 46 methods (13,851 in total), as well as #INVOCATIONS and #COLLECTED (`results/04-workload/authors_profile_metrics.*`). Unit tests in `tests/test_analysis.py`. The number of tests pankti-generate actually produces is compared in the test-generation stage. |
 | Reporting | Methodology. |
 
 ## A16. Nesting depth
@@ -233,7 +233,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | pankti-generate at `7afc584` with the line that adds `setUpXStream()` enabled (`scripts/pankti/build-generator.sh`, one-line diff saved with each run). The instrumentation stays at `0fddf27`. |
 | Justification | `7afc584` is the only change to pankti-generate between the workload run and the authors' last "after" Descartes run; its profile parser is identical to `0fddf27`'s, so the set of tests (#UNIQUE) does not depend on the choice. The setup method registers converters needed to deserialise `Inflater` and `Cleaner` fields. |
 | Expected impact | Four classes get a `setUpXStream()` method that the published ones do not have; it only registers converters. |
-| Validation | Generated from the authors' own profiles (generate-tests run 39581267651), the 13,851 tests are identical, method by method, to the 13,851 tests the authors published (`results/day5/authors_generation/`). |
+| Validation | Generated from the authors' own profiles (generate-tests run 39581267651), the 13,851 tests are identical, method by method, to the 13,851 tests the authors published (`results/05-test-generation/authors_generation/`). |
 | Reporting | Implementation; observations (the published artifacts mix two tool versions and manual edits). |
 
 ## A18. Integration of the generated tests
@@ -245,7 +245,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | `scripts/pankti/integrate-tests.sh`: only the test compilation (`default-testCompile`) gets `<release>9</release>`; the library stays at release 6 and animal-sniffer stays enabled. PANKTI's three converters are copied into every test package instead of being imported by hand. Classes with more than 500 tests are split into parts without changing any test (`scripts/pankti/split_test_classes.py`). XStream 1.4.12 is a test dependency of fontbox and pdfbox. |
 | Justification | The code that Descartes mutates is compiled exactly as in the original build (class file version 50), while the tests can use the Java 9 API (version 53). Splitting keeps every test and lets all of them be compiled and executed (the authors executed 117 of the 11,730 getFlags tests). |
 | Expected impact | None on the library; test classes have different names (`...PanktiGenPartN`) for the split classes. |
-| Validation | Local check: 3 classes generated from the authors' profiles, split into 6, compile and their 20 tests pass; library class version 50, test class version 53, animal-sniffer passes. The full test set is compiled and run on Day 6. |
+| Validation | Local check: 3 classes generated from the authors' profiles, split into 6, compile and their 20 tests pass; library class version 50, test class version 53, animal-sniffer passes. The full test set is compiled and run in the test-execution stage. |
 | Reporting | Implementation; limitations. |
 
 ## A19. How the tests are run and counted
@@ -265,7 +265,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Item | Explanation |
 |---|---|
 | Original requirement | Plan task 6.3: check the tool against the authors' data, separating the effect of the environment from the effect of the profiles. |
-| Problem | The 22 test classes the authors published (Zenodo) do not compile as published: they use the `@Before` annotation without importing `org.junit.Before` (assess-tests run 39641425498, `results/day6/run-39641425498-split-bug/authors-compile.log`). |
+| Problem | The 22 test classes the authors published (Zenodo) do not compile as published: they use the `@Before` annotation without importing `org.junit.Before` (assess-tests run 39641425498, `results/06-test-execution/run-39641425498-split-bug/authors-compile.log`). |
 | Simplification | `scripts/pankti/integrate-tests.sh` adds `import org.junit.Before;` to the classes that use `@Before` without importing it, and logs each one; nothing else in the published classes is changed. They are then integrated and run exactly like the reproduction's tests. |
 | Justification | A missing import cannot change the behaviour of a test that compiles; the authors must have had it when they ran the tests. |
 | Expected impact | None on the outcomes. |
@@ -281,7 +281,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | The "after" runs analyse only the 22 classes that declare the effective targets (`TARGET_CLASSES` in `scripts/pdfbox/run-descartes.sh`), with all the tests of the module. Same Descartes configuration as "before" (1 thread). |
 | Justification | Descartes classifies each method from the outcome of its own mutants, which only depends on the tests that cover it; restricting the mutated classes does not change the tests. Caveat found while preparing the run: pitest-maven defaults `targetTests` to `targetClasses`, so a restricted run would select no test at all (every method "not covered"); the tests are now always given explicitly as the module's package, which is what the "before" runs used implicitly. |
 | Expected impact | None on the classification of the methods of these classes. |
-| Validation | Job "none" of the descartes-after workflow (run 39747040848): the same restricted run with no generated test gives the classification of the full "before" run for 460 of the 465 methods of the 22 classes (fontbox 62 / 62, pdfbox 398 / 403; `results/day7/restriction_check/`). The 5 differences are mutants killed by an unstable test, `TestOptionalContentGroups.testOCGConsumption`, in one run and not in the other, and one timeout (discrepancies.md §23); the restriction cannot cause them, since the tests are the same. The authors' published "after" reports, which cover whole modules, agree with our restricted "after" run on all 46 targets. |
+| Validation | Job "none" of the descartes-after workflow (run 39747040848): the same restricted run with no generated test gives the classification of the full "before" run for 460 of the 465 methods of the 22 classes (fontbox 62 / 62, pdfbox 398 / 403; `results/07-descartes-after/restriction_check/`). The 5 differences are mutants killed by an unstable test, `TestOptionalContentGroups.testOCGConsumption`, in one run and not in the other, and one timeout (discrepancies.md §23); the restriction cannot cause them, since the tests are the same. The authors' published "after" reports, which cover whole modules, agree with our restricted "after" run on all 46 targets. |
 | Reporting | Methodology. |
 
 ## A22. Which generated tests are added
@@ -293,7 +293,7 @@ filled in once it is known. Related observations (differences between the paper 
 | Simplification | The tests that passed in all five runs (`scripts/pankti/keep_passing_tests.py`): 14,314 of the 14,679 generated by this reproduction; for the authors' published tests, 13,614 of 13,851. Failing tests are removed; classes left without tests are removed. |
 | Justification | Follows the paper's assessment step; a failing test cannot be kept in a suite that PIT accepts. |
 | Expected impact | None found: removing a failing test cannot make a method better tested. |
-| Validation | The filter keeps exactly the passing counts of Day 6 for both test sets. |
+| Validation | The filter keeps exactly the passing counts of the test-execution stage for both test sets. |
 | Reporting | Methodology. |
 
 ## A23. Failure causes classified from the evidence of every test

@@ -2,8 +2,8 @@
 
 usage: comparison.py <results_dir> <out_dir>
 
-Reads the per-row outputs of the earlier stages (results/day4/table3_comparison.csv, results/day6/
-table3_execution.csv, results/day7/table3_status.csv) and writes:
+Reads the per-row outputs of the earlier stages (results/04-workload/table3_comparison.csv, results/06-test-execution/
+table3_execution.csv, results/07-descartes-after/table3_status.csv) and writes:
   <out_dir>/table3_rows.csv   one row per Table III row and column: paper, authors, ours, ours - paper
   <out_dir>/comparison.csv    one row per published quantity (totals, ratios, profile facts, examples, success
                               criteria of the plan), with the source file of each value and a verdict
@@ -19,45 +19,45 @@ from pathlib import Path
 
 COLUMNS = [
     # Table III column, (file, paper column, authors column, ours column)
-    ("#INVOCATIONS", "day4/table3_comparison.csv", "paper_invocations", "authors_invocations", "ours_invocations"),
-    ("#COLLECTED", "day4/table3_comparison.csv", "paper_collected", "authors_collected", "ours_collected"),
-    ("#UNIQUE", "day4/table3_comparison.csv", "paper_unique", "authors_unique", "ours_unique"),
-    ("#PANKTI_TESTS", "day6/table3_execution.csv", "paper_tests", "authors_tests_here", "ours_tests"),
-    ("#PASSING", "day6/table3_execution.csv", "paper_passing", "authors_passing_here", "ours_passing"),
-    ("#FAILING", "day6/table3_execution.csv", "paper_failing", "authors_failing_here", "ours_failing"),
-    ("PANKTI_STATUS", "day7/table3_status.csv", "paper_status", "authors_status_here", "ours_status"),
+    ("#INVOCATIONS", "04-workload/table3_comparison.csv", "paper_invocations", "authors_invocations", "ours_invocations"),
+    ("#COLLECTED", "04-workload/table3_comparison.csv", "paper_collected", "authors_collected", "ours_collected"),
+    ("#UNIQUE", "04-workload/table3_comparison.csv", "paper_unique", "authors_unique", "ours_unique"),
+    ("#PANKTI_TESTS", "06-test-execution/table3_execution.csv", "paper_tests", "authors_tests_here", "ours_tests"),
+    ("#PASSING", "06-test-execution/table3_execution.csv", "paper_passing", "authors_passing_here", "ours_passing"),
+    ("#FAILING", "06-test-execution/table3_execution.csv", "paper_failing", "authors_failing_here", "ours_failing"),
+    ("PANKTI_STATUS", "07-descartes-after/table3_status.csv", "paper_status", "authors_status_here", "ours_status"),
 ]
 
 # quantity, paper, authors, ours, verdict, source file(s) of the authors' and our values (relative to results/)
 FACTS = [
     ("#TARGET", "138", "138", "138", "exact (137 methods in common)",
-     "day2/targets_authors_reports.txt day2/targets_own_reports.txt"),
-    ("smallest profile (bytes)", "158", "158", "158", "exact", "day1/authors_profile_stats.txt day4/full/profile_stats.txt"),
+     "02-descartes-before/targets_authors_reports.txt 02-descartes-before/targets_own_reports.txt"),
+    ("smallest profile (bytes)", "158", "158", "158", "exact", "01-paper-vs-artifacts/authors_profile_stats.txt 04-workload/full/profile_stats.txt"),
     ("largest profile", "nearly 55 MB", "54.7 MiB", "54.7 MiB", "exact (binary units)",
-     "day1/authors_profile_stats.txt day4/full/profile_stats.txt"),
+     "01-paper-vs-artifacts/authors_profile_stats.txt 04-workload/full/profile_stats.txt"),
     ("profiles on disk", "5.5 GB", "5.49 GiB", "5.30 GiB", "close (-3.5%)",
-     "day1/authors_profile_stats.txt day4/full/profile_stats.txt"),
+     "01-paper-vs-artifacts/authors_profile_stats.txt 04-workload/full/profile_stats.txt"),
     ("methods hitting the 200 MB threshold", "19", "19", "19", "exact",
-     "day1/authors_profile_stats.txt day4/full/profile_stats.txt"),
+     "01-paper-vs-artifacts/authors_profile_stats.txt 04-workload/full/profile_stats.txt"),
     ("maximum nesting depth", "36", "73", "73", "differs: 36 not reproduced; the paper does not define it",
-     "day4/full/profile_stats.txt"),
+     "04-workload/full/profile_stats.txt"),
     ("Figure 5, profiles per 10 MiB bin", "histogram", "57458 / 71 / 3 / 23 / 5 / 3", "58563 / 75 / 3 / 23 / 5 / 3",
-     "same shape; bins above 20 MiB identical", "day5/fig5.csv"),
+     "same shape; bins above 20 MiB identical", "05-test-generation/fig5.csv"),
     ("isFill: invocations / collected / unique / tests", "30,944 / 30,944 / 1 / 1", "30,944 / 30,944 / 1 / 1",
-     "30,944 / 30,944 / 1 / 1", "exact", "day4/table3_comparison.txt"),
+     "30,944 / 30,944 / 1 / 1", "exact", "04-workload/table3_comparison.txt"),
     ("isFill: status after", "well-tested", "partially-tested (their report and their test run here)",
-     "partially-tested", "exact: mutant false detected, true not", "day7/pankti_status_reproduction.csv"),
+     "partially-tested", "exact: mutant false detected, true not", "07-descartes-after/pankti_status_reproduction.csv"),
     ("all 46 targets pseudo-tested before (plan A.6, exact)", "46 / 46", "46 / 46", "46 / 46", "exact",
-     "day2/targets_authors_reports.txt"),
+     "02-descartes-before/targets_authors_reports.txt"),
     ("V.A: failing tests of methods returning a primitive, primitive array, wrapper or enum", "0", "0", "0",
-     "exact", "day8/failure_analysis_reproduction.txt day8/prediction_check_reproduction.txt"),
+     "exact", "08-failure-analysis/failure_analysis_reproduction.txt 08-failure-analysis/prediction_check_reproduction.txt"),
     ("V.B: PDFBox targets with passing tests that stay pseudo-tested, all null-only", "12 (15 with other subjects)",
-     "12", "12", "exact", "day8/prediction_check_authors.txt day8/prediction_check_reproduction.txt"),
+     "12", "12", "exact", "08-failure-analysis/prediction_check_authors.txt 08-failure-analysis/prediction_check_reproduction.txt"),
     ("prediction check (plan A.6): mutant outcomes predicted from the observed values", "-", "82 / 82", "82 / 82",
-     "all predicted", "day8/prediction_check_authors.txt day8/prediction_check_reproduction.txt"),
+     "all predicted", "08-failure-analysis/prediction_check_authors.txt 08-failure-analysis/prediction_check_reproduction.txt"),
     ("sensitivity run with a pre-built font cache: #EFF_TARGET / INV / COLL / UNIQ", "46 / 121,175 / 57,563 / 13,851",
      "-", "46 / 121,300 / 57,677 / 13,852", "targets exact, totals within 0.2% (38 rows identical)",
-     "day8/sensitivity/warm-cache/profile_stats.txt day8/sensitivity/warm-cache/table3_comparison.txt"),
+     "08-failure-analysis/sensitivity/warm-cache/profile_stats.txt 08-failure-analysis/sensitivity/warm-cache/table3_comparison.txt"),
 ]
 
 
@@ -119,7 +119,7 @@ def main(argv):
                         f"{100 * total(num, 'ours') / total(den, 'ours'):.2f}%", "same order of magnitude",
                         "computed from table3_rows.csv"))
     summary.append(("#EFF_TARGET", "46", "46", "47 (46 in common, Jaccard 0.979)",
-                    "set agreement; extra: TrueTypeFont.getOS2Windows", "day4/table3_comparison.txt"))
+                    "set agreement; extra: TrueTypeFont.getOS2Windows", "04-workload/table3_comparison.txt"))
 
     for fact in FACTS:
         # every number of this reproduction's value must appear in one of the cited result files

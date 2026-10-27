@@ -11,7 +11,7 @@ A test passes in a run if its <testcase> has no <failure>, <error> or <skipped>.
   not run  otherwise (absent or skipped in some run) - never counted as passing.
 Tests are attributed to target methods as in count_generated_tests.py; split classes (...PanktiGenPartN) belong to
 their target class. With --generated, the number of generated tests per method is shown next to the executed ones;
-with --table3 (results/day1/authors_report_vs_paper.csv), the paper's #PASSING / #FAILING and the authors' executed
+with --table3 (results/01-paper-vs-artifacts/authors_report_vs_paper.csv), the paper's #PASSING / #FAILING and the authors' executed
 counts are added.
 Writes <out_prefix>.csv (per method), <out_prefix>_tests.csv (per test and run), <out_prefix>_failures.csv
 (failure types) and <out_prefix>.txt (summary).

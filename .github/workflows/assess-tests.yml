@@ -102,7 +102,7 @@ jobs:
         run: |
           bash scripts/pankti/integrate-tests.sh pdfbox generated \
             pankti/pankti-instrument/src/main/java/se/kth/castor/pankti/instrument/converters | tee out/integration.txt
-          cp results/day4/full/profiles/invoked-methods.csv out/invoked-methods.csv
+          cp results/04-workload/full/profiles/invoked-methods.csv out/invoked-methods.csv
 
       - name: Build and compile the tests
         run: |
@@ -118,7 +118,7 @@ jobs:
         run: |
           python3 analysis/count_generated_tests.py generated/tests out/invoked-methods.csv out/generated_tests > /dev/null
           python3 analysis/test_outcomes.py runs out/invoked-methods.csv out/test_outcomes \
-            --generated out/generated_tests.csv --table3 results/day1/authors_report_vs_paper.csv
+            --generated out/generated_tests.csv --table3 results/01-paper-vs-artifacts/authors_report_vs_paper.csv
           cp runs/runs.txt out/
           tar -C runs -czf out/surefire-reports.tar.gz $(cd runs && ls -d run-*/)
           gzip -f out/test_outcomes_tests.csv

@@ -9,9 +9,9 @@ the verdicts of the five runs of [execution.md](execution.md) and the "after" De
 | Script | Output |
 |---|---|
 | `analysis/generated_tests.py` | reads the oracle of each generated test (the value observed in production) |
-| `analysis/failure_analysis.py` | `results/day8/failure_analysis_{reproduction,authors}.*` |
-| `analysis/prediction_check.py` | `results/day8/prediction_check_{reproduction,authors}.*` |
-| `analysis/java/CacheLookupCheck.java` | `results/day8/cache_lookup_check.txt` |
+| `analysis/failure_analysis.py` | `results/08-failure-analysis/failure_analysis_{reproduction,authors}.*` |
+| `analysis/prediction_check.py` | `results/08-failure-analysis/prediction_check_{reproduction,authors}.*` |
+| `analysis/java/CacheLookupCheck.java` | `results/08-failure-analysis/cache_lookup_check.txt` |
 
 ## The oracle
 
@@ -56,7 +56,7 @@ Two mechanisms explain all the failures:
    and the method returns `null`.
 
    A run-time check confirms it (`analysis/java/CacheLookupCheck.java`, on three failing tests of the authors,
-   `results/day8/cache_lookup_check.txt`). The deserialised cache is complete: 3, 4 and 7 entries, each
+   `results/08-failure-analysis/cache_lookup_check.txt`). The deserialised cache is complete: 3, 4 and 7 entries, each
    `SoftReference` still pointing to its object. The parameter is not a key, so the call returns `null`. Called with
    the cache's own key that has the same object number, the method returns the expected object, e.g.
    `PDTrueTypeFont BJEDFM+ArialMT`. Even then the assertion would most likely still fail, by mechanism 1 (`PDFont.equals`
@@ -107,7 +107,7 @@ the `false` mutant and not the `true` mutant: partially tested.
 
 ## What decides the final status
 
-Classified by return type (`results/day8/prediction_check_*.txt`), the 47 targets split exactly:
+Classified by return type (`results/08-failure-analysis/prediction_check_*.txt`), the 47 targets split exactly:
 
 | Return type | Targets | Well-tested after |
 |---|---|---|

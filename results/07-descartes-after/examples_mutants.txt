@@ -1,34 +1,34 @@
 # XrefTrailerResolver.getXrefType: full 'before' run (CI run 39415980930), then the restricted runs of CI run 39747040848
-results/day7/before/pdfbox.mutations.json.gz
+results/07-descartes-after/before/pdfbox.mutations.json.gz
   ()Lorg/apache/pdfbox/pdfparser/XrefTrailerResolver$XRefType; mutant null: SURVIVED, 183 of 183 covering tests run; killed by: -
-results/day7/none/pdfbox.mutations.json.gz
+results/07-descartes-after/none/pdfbox.mutations.json.gz
   ()Lorg/apache/pdfbox/pdfparser/XrefTrailerResolver$XRefType; mutant null: KILLED, 53 of 183 covering tests run; killed by: TestOptionalContentGroups.testOCGConsumption (position 53 in PIT's order)
-results/day7/reproduction/pdfbox.mutations.json.gz
+results/07-descartes-after/reproduction/pdfbox.mutations.json.gz
   ()Lorg/apache/pdfbox/pdfparser/XrefTrailerResolver$XRefType; mutant null: KILLED, 1 of 200 covering tests run; killed by: TestXrefTrailerResolverPanktiGen.testGetXrefType3 (position 1 in PIT's order)
-results/day7/authors/pdfbox.mutations.json.gz
+results/07-descartes-after/authors/pdfbox.mutations.json.gz
   ()Lorg/apache/pdfbox/pdfparser/XrefTrailerResolver$XRefType; mutant null: KILLED, 1 of 200 covering tests run; killed by: TestXrefTrailerResolverPanktiGen.testGetXrefType11 (position 1 in PIT's order)
 
 # RenderingMode.isFill (paper, Section II.C and IV.C)
-results/day7/none/pdfbox.mutations.json.gz
+results/07-descartes-after/none/pdfbox.mutations.json.gz
   ()Z mutant false: SURVIVED, 28 of 28 covering tests run; killed by: -
   ()Z mutant true: SURVIVED, 28 of 28 covering tests run; killed by: -
-results/day7/reproduction/pdfbox.mutations.json.gz
+results/07-descartes-after/reproduction/pdfbox.mutations.json.gz
   ()Z mutant false: KILLED, 1 of 29 covering tests run; killed by: TestRenderingModePanktiGen.testIsFill1 (position 1 in PIT's order)
   ()Z mutant true: SURVIVED, 29 of 29 covering tests run; killed by: -
-results/day7/authors/pdfbox.mutations.json.gz
+results/07-descartes-after/authors/pdfbox.mutations.json.gz
   ()Z mutant false: KILLED, 1 of 29 covering tests run; killed by: TestRenderingModePanktiGen.testIsFill1 (position 1 in PIT's order)
   ()Z mutant true: SURVIVED, 29 of 29 covering tests run; killed by: -
 
 # NamingTable.getName (paper, Section II.C)
-results/day7/none/fontbox.mutations.json.gz
+results/07-descartes-after/none/fontbox.mutations.json.gz
   (IIII)Ljava/lang/String; mutant "": SURVIVED, 7 of 7 covering tests run; killed by: -
   (IIII)Ljava/lang/String; mutant "A": SURVIVED, 7 of 7 covering tests run; killed by: -
   (IIII)Ljava/lang/String; mutant null: SURVIVED, 7 of 7 covering tests run; killed by: -
-results/day7/reproduction/fontbox.mutations.json.gz
+results/07-descartes-after/reproduction/fontbox.mutations.json.gz
   (IIII)Ljava/lang/String; mutant "": KILLED, 1 of 983 covering tests run; killed by: TestNamingTablePanktiGenPart1.testGetName289 (position 1 in PIT's order)
   (IIII)Ljava/lang/String; mutant "A": KILLED, 1 of 983 covering tests run; killed by: TestNamingTablePanktiGenPart1.testGetName289 (position 1 in PIT's order)
   (IIII)Ljava/lang/String; mutant null: KILLED, 112 of 983 covering tests run; killed by: TestNamingTablePanktiGenPart1.testGetName235 (position 112 in PIT's order)
-results/day7/authors/fontbox.mutations.json.gz
+results/07-descartes-after/authors/fontbox.mutations.json.gz
   (IIII)Ljava/lang/String; mutant "": KILLED, 1 of 280 covering tests run; killed by: TestNamingTablePanktiGen.testGetName220 (position 1 in PIT's order)
   (IIII)Ljava/lang/String; mutant "A": KILLED, 1 of 280 covering tests run; killed by: TestNamingTablePanktiGen.testGetName220 (position 1 in PIT's order)
   (IIII)Ljava/lang/String; mutant null: KILLED, 91 of 280 covering tests run; killed by: TestNamingTablePanktiGen.testGetName192 (position 91 in PIT's order)

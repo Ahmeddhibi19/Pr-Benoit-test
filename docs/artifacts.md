@@ -42,7 +42,7 @@ Content of `pdfbox/` used here:
 | `data/report-file-sizes.csv`, `data/find-file-sizes.py` | profile sizes |
 | `time-coverage-version.md` (2021 snapshot only) | test-suite time and coverage, 2.0.22 note |
 
-A summary of all Descartes reports is in `results/day1/authors_descartes_reports.csv`.
+A summary of all Descartes reports is in `results/01-paper-vs-artifacts/authors_descartes_reports.csv`.
 
 ## Workload documents
 

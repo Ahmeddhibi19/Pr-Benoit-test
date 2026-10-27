@@ -42,7 +42,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | Workflow `env-check`: checkout of tag 2.0.21 (`fa8029d8`), `mvn install` with tests. |
 | Runs | 38535865735, 38538739999, 38539831127 and 38540837977 (all failed), then 38542374578 and 38548431201 (green). |
 | Reference | The authors report 1,675 tests for the original suite. |
-| Result | 1,678 tests, 0 failures, 13 errors (all `CertificateExpiredException` in `examples`), 143 s (`results/day1/env-check/`). |
+| Result | 1,678 tests, 0 failures, 13 errors (all `CertificateExpiredException` in `examples`), 143 s (`results/01-paper-vs-artifacts/env-check/`). |
 | Failures | Dead download URLs (IPA fonts 404, Isartor 403, a certificate-policy PDF not served to CI), one order-dependent test (`PDAcroFormTest`), the expired test keystore. |
 | Interpretation | The suite runs with build-only adjustments (assumption A1); the keystore has to be handled for Descartes (A2). |
 
@@ -53,7 +53,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Separate the paper from its artifacts before reproducing anything (Track A). |
 | Data | `pankti-experiments` at `7bc7791` and `1d8f9aa`; Zenodo record 4298605 (md5 `9c902f3e...`). |
 | Method | `analysis/check_paper_table3.py`, `compare_authors_report.py`, `summarize_descartes_reports.py`, `profile_stats.py`. |
-| Result | Table III is internally consistent. The authors' raw data gives exactly the paper's 121,175 invocations, 57,563 profiles, 158 B minimum, 54.7 MiB maximum and 5.49 GiB total. The authors' last "after" reports give all 46 statuses of Table III (well-tested = tested or partially tested). 11,613 of the 13,614 "passing" tests were never executed. (`results/day1/`, `docs/discrepancies.md`) |
+| Result | Table III is internally consistent. The authors' raw data gives exactly the paper's 121,175 invocations, 57,563 profiles, 158 B minimum, 54.7 MiB maximum and 5.49 GiB total. The authors' last "after" reports give all 46 statuses of Table III (well-tested = tested or partially tested). 11,613 of the 13,614 "passing" tests were never executed. (`results/01-paper-vs-artifacts/`, `docs/discrepancies.md`) |
 | Failures | The first comparison merged overloaded methods (rows 31 and 35); fixed by matching on the parameter descriptor (2026-10-20). |
 | Interpretation | The paper's numbers are traceable to the artifacts; the reproduction executes every generated test (A11). |
 
@@ -64,7 +64,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Check that the setup scripts rebuild the environment (the work moved to another PC on 2026-10-20). |
 | Environment | Windows 10 LTSC, Intel i7-1185G7, 16 GB RAM, no administrator rights. |
 | Method | `setup/windows/install-tools.ps1`, `setup/fetch-artifacts.sh`; local build of the fontbox and pdfbox modules with tests. |
-| Result | Toolchain and artifacts rebuilt with all checksums matching (about 30 min, 7.4 GB). 558 / 558 tests pass (fontbox 27, pdfbox 531), 6.5 min. The Day-1 analyses give byte-identical outputs. |
+| Result | Toolchain and artifacts rebuilt with all checksums matching (about 30 min, 7.4 GB). 558 / 558 tests pass (fontbox 27, pdfbox 531), 6.5 min. The analyses of the first stage (paper against artifacts) give byte-identical outputs. |
 | Interpretation | The scripts are sufficient to recreate the environment. |
 
 ## E4. Descartes on fontbox (Windows)
@@ -85,7 +85,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | Workflow `descartes-before`, run 39409510406, one job per module, 4 PIT threads. |
 | Result | fontbox, xmpbox, preflight, tools: identical to the authors' reports for every method. examples: 231 / 311 (excluded test classes, A2). pdfbox: 4,202 / 4,438, with 1,799 tested methods instead of 1,580, 310 timed-out mutants instead of 62, and 25 of the 40 pdfbox targets "tested". pdfbox took 49 min. |
 | Failures | `RenderingMode.isFill`, which the paper uses as its example of a pseudo-tested method, came out "tested", which contradicts the paper's account. Of the 280 extra detections, 215 are timeouts and 65 are failures of tests that use fixed files under `target/test-output` or download PDFs during the test (`PDAcroFormFlattenTest` mostly). |
-| Interpretation | Hypothesis: parallel PIT workers interfere with these tests. The pdfbox report of this run is not used (kept in `results/day2/descartes_before_pdfbox_4_threads/`). With it, the pipeline would select 91 targets instead of 138. |
+| Interpretation | Hypothesis: parallel PIT workers interfere with these tests. The pdfbox report of this run is not used (kept in `results/02-descartes-before/descartes_before_pdfbox_4_threads/`). With it, the pipeline would select 91 targets instead of 138. |
 
 ## E6. Descartes "before", pdfbox, 1 thread
 
@@ -103,7 +103,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 |---|---|
 | Objective | #TARGET (paper: 138; README of the experiments: 129). |
 | Method | `scripts/pankti/extract-targets.sh` (pankti-extract `0fddf27`, the authors' `find-pseudo-tested.py`), `analysis/count_targets.py`. |
-| Result | 3,588 methods kept out of 9,021. With the authors' reports: 138 targets. With the reproduction's reports (E5 without pdfbox, plus E6): 138, of which 137 are in common. Both lists contain the 46 effective targets. A second run gives the same candidate list. (`results/day2/targets_*`) |
+| Result | 3,588 methods kept out of 9,021. With the authors' reports: 138 targets. With the reproduction's reports (E5 without pdfbox, plus E6): 138, of which 137 are in common. Both lists contain the 46 effective targets. A second run gives the same candidate list. (`results/02-descartes-before/targets_*`) |
 | Failures | Spoon's snapshot repository no longer exists (warnings only). JDT's version ranges now resolve Java 17 jars, which are never loaded. The extractor writes its full list in hash-map order. |
 | Interpretation | #TARGET is reproduced exactly. The README's 129 predates the paper's run. |
 
@@ -115,9 +115,9 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | Workflow `production-run`, mode `dry-run`: PANKTI `0fddf27` `instrument.py` on the frozen `results/targets.csv`, plugin build, Glowroot 0.13.6, pdfbox-app built from the tag, pdfbox-app started under the agent without a command. |
 | Runs | 39428845392 (failed), 39431056888 (green). |
 | Expected | One aspect per target; Glowroot starts and registers the plugin; no profile written (no target runs). |
-| Result | 138 / 138 aspects; Glowroot starts without warnings and registers `panktiplugin`; no profile written. pdfbox-app built on the runner: all 5,644 class files and all other entries identical to the authors' jar except 3 build-metadata files. (`results/day3/`) |
+| Result | 138 / 138 aspects; Glowroot starts without warnings and registers `panktiplugin`; no profile written. pdfbox-app built on the runner: all 5,644 class files and all other entries identical to the authors' jar except 3 build-metadata files. (`results/03-instrumentation/`) |
 | Failures | Run 39428845392: `install-glowroot.sh` lost the relative plugin path after `cd` (the local test had used an absolute path). Fixed and replayed locally with relative paths before re-running. |
-| Interpretation | The instrumentation is ready for the workload (Day 4). The authors ran plain PDFBox 2.0.21 (open question T11 answered). Whether the aspects actually capture profiles is only visible once a target runs (Day 4 smoke test). |
+| Interpretation | The instrumentation is ready for the workload stage. The authors ran plain PDFBox 2.0.21 (open question T11 answered). Whether the aspects actually capture profiles is only visible once a target runs (smoke test of the workload stage). |
 
 ## E9. Profile metrics on the authors' data
 
@@ -127,7 +127,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Data | Zenodo record 4298605, `pdfbox/pankti-collected-object-profiles/`: 231 files, 5.9 GB of XML. |
 | Method | `analysis/profile_stats.py --fragments` (pankti-generate's pairing and uniqueness rule, maximum element depth). |
 | Reference | Table III and the text of Section IV.C. |
-| Result | #INVOCATIONS, #COLLECTED and #UNIQUE equal to Table III for all 46 methods (121,175 / 57,563 / 13,851). No method has different numbers of receiving, params and returned fragments. Maximum XML element depth: 73 (`COSParser.getEncryption`). 167 s on the laptop. (`results/day4/authors_profile_metrics.*`) |
+| Result | #INVOCATIONS, #COLLECTED and #UNIQUE equal to Table III for all 46 methods (121,175 / 57,563 / 13,851). No method has different numbers of receiving, params and returned fragments. Maximum XML element depth: 73 (`COSParser.getEncryption`). 167 s on the laptop. (`results/04-workload/authors_profile_metrics.*`) |
 | Failures | First run crashed: for an empty element (`<null/>`) expat reports the position after the tag, not a closing tag. Fixed, with unit tests. |
 | Interpretation | The uniqueness rule is validated. The pairing problem possible in PANKTI `0fddf27` (a call that throws leaves a receiving object without a returned value) did not occur in the authors' run. The paper's depth of 36 has an undocumented definition (A16). |
 
@@ -138,7 +138,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Plan task 4.1: does the plugin record profiles, does the XML parse, is the count cumulative over JVM launches? |
 | Method | `production-run` mode `smoke`, run 39442198598: `PDFToImage` on `000752.pdf`, twice, each in a new JVM, cold font cache. |
 | Expected | isFill files present; count after the second launch = 2 x first; isFill profiles of 158 bytes, 1 unique (paper). |
-| Result | All checks pass. isFill: 4,349 then 8,698 invocations, every profile 158 bytes, 1 unique. 27 targets invoked, 3.4 GB of profiles, 11 methods already at the 200 MB threshold, no fragment mismatch, maximum depth 39. 237 s. (`results/day4/smoke/`) |
+| Result | All checks pass. isFill: 4,349 then 8,698 invocations, every profile 158 bytes, 1 unique. 27 targets invoked, 3.4 GB of profiles, 11 methods already at the 200 MB threshold, no fragment mismatch, maximum depth 39. 237 s. (`results/04-workload/smoke/`) |
 | Interpretation | The instrumentation works as described in the paper; counts accumulate across JVM launches (T7). The threshold is reached very quickly. |
 
 ## E11. Full workload
@@ -149,7 +149,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | `production-run` mode `full`, run 39444526027: the authors' `run.sh` (only its two jar paths replaced, `run-sh.diff`), 50 JVM launches, cold font cache, frozen 138 targets. Metrics: `profile_stats.py --fragments`, `compare_table3.py`, `workload_log.py`. |
 | Environment | `ubuntu-22.04` runner (image 20261012), 57 fonts installed (DejaVu, Lato, Liberation, Noto Color Emoji; list in `env-report.txt`). |
 | Reference | Table III rows 30-75 and Section IV.C; the authors' `execution.log`. |
-| Result | Workload: 50 / 50 commands with the same outcome as the authors' (39 ok, 9 errors on `000809.pdf`, 2 PDFMerger usage messages); 687 s (the authors' log spans about 16 min). Profiles: 47 methods invoked, all 46 of Table III plus `TrueTypeFont.getOS2Windows` (342 invocations). Totals: 122,384 invocations (paper 121,175), 58,672 collected (57,563), 14,679 unique (13,851); collected/invocations 47.9% (47.5%), unique/collected 25.0% (24.0%). 19 methods hit the threshold (19). Smallest profile 158 B, largest 54.7 MiB, 5.30 GiB in total (paper 5.5 GB). Maximum XML depth 73, the same as the authors' data. **isFill: 30,944 / 30,944 / 1 unique, 158 B each: exact match.** Per method, 41 of 46 invocation counts, 40 collected counts and 38 unique counts are identical to Table III. (`results/day4/full/`, `results/day4/table3_comparison.*`) |
+| Result | Workload: 50 / 50 commands with the same outcome as the authors' (39 ok, 9 errors on `000809.pdf`, 2 PDFMerger usage messages); 687 s (the authors' log spans about 16 min). Profiles: 47 methods invoked, all 46 of Table III plus `TrueTypeFont.getOS2Windows` (342 invocations). Totals: 122,384 invocations (paper 121,175), 58,672 collected (57,563), 14,679 unique (13,851); collected/invocations 47.9% (47.5%), unique/collected 25.0% (24.0%). 19 methods hit the threshold (19). Smallest profile 158 B, largest 54.7 MiB, 5.30 GiB in total (paper 5.5 GB). Maximum XML depth 73, the same as the authors' data. **isFill: 30,944 / 30,944 / 1 unique, 158 B each: exact match.** Per method, 41 of 46 invocation counts, 40 collected counts and 38 unique counts are identical to Table III. (`results/04-workload/full/`, `results/04-workload/table3_comparison.*`) |
 | Differences | `NamingTable.getName` (650 -> 1,457 invocations, 273 -> 976 unique), `PDFontDescriptor.getFlags` (227 -> 257), `isSerif`/`isItalic`/`isFixedPitch` (21 -> 31), `FontCache.getFont` (106 -> 103 unique), `DefaultResourceCache.getColorSpace` (25 -> 29 collected), `COSParser.getEncryption` (33 -> 35 unique), and the extra `TrueTypeFont.getOS2Windows`. |
 | Interpretation | The workload behaves exactly as the authors' did. All non-font methods match and the font methods do not, which points to the fonts installed on the machine (PDFBox matches and caches system fonts); the authors' font set is unknown (risk R3, assumption A5). This cause is probable, not verified. |
 
@@ -159,7 +159,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 |---|---|
 | Objective | Plan task 5.1: the distribution of profile sizes (paper, Figure 5: 10 MB bins, logarithmic count axis). |
 | Method | `analysis/figure5.py` on the size files of the authors' data (the data behind the paper's figure) and of run 39444526027. 10 MiB bins, since the paper uses binary units (discrepancies.md, item 1b). |
-| Result | Authors / reproduction: 57,458 / 58,563 profiles below 10 MiB, 71 / 75 in 10-20 MiB, then 3, 23, 5, 3 in both for 20-30, 30-40, 40-50 and 50-60 MiB. Smallest 158 B in both, largest 57,385,679 B / 57,385,628 B. (`results/day5/fig5.png`, `fig5.csv`) |
+| Result | Authors / reproduction: 57,458 / 58,563 profiles below 10 MiB, 71 / 75 in 10-20 MiB, then 3, 23, 5, 3 in both for 20-30, 30-40, 40-50 and 50-60 MiB. Smallest 158 B in both, largest 57,385,679 B / 57,385,628 B. (`results/05-test-generation/fig5.png`, `fig5.csv`) |
 | Interpretation | Same shape as the paper's figure; the large profiles (above 20 MiB, all from methods capped by the threshold) are identical in number, the small ones differ with the font methods (E11). |
 
 ## E13. Regenerating the authors' tests
@@ -169,7 +169,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Validate the generation step on its own: from the authors' profiles, does pankti-generate produce the tests they published? |
 | Method | Workflow `generate-tests` (run 39581267651, job "authors"): Zenodo profiles, pankti-generate at `7afc584` with `setUpXStream()` enabled (A17), 12 GB heap; `analysis/count_generated_tests.py`, `analysis/compare_generated_tests.py` against the 22 published classes. |
 | Hypothesis | The published tests come from `7afc584` (their `deserializeObject()` helpers); a 3-class local run already matched. |
-| Result | 22 classes, 13,851 tests, 4,464 resource files (as published), 564 s. #PANKTI_TESTS = #UNIQUE for all 46 methods. Test by test: 13,851 identical, 0 different, 0 missing, 0 extra. (`results/day5/authors_generation/`) |
+| Result | 22 classes, 13,851 tests, 4,464 resource files (as published), 564 s. #PANKTI_TESTS = #UNIQUE for all 46 methods. Test by test: 13,851 identical, 0 different, 0 missing, 0 extra. (`results/05-test-generation/authors_generation/`) |
 | Failures | The other job of the same run (reproduction) failed: the profile archive was looked for in a sub-folder (single artifacts are downloaded directly into the path). Fixed. |
 | Interpretation | The generation step is reproduced exactly. The published tests were made with a later generator than the instrumentation and edited by hand (imports, converter classes). |
 
@@ -180,14 +180,14 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Plan task 5.2: generate the differential unit tests from this reproduction's profiles (production-run 39444526027). |
 | Method | Workflow `generate-tests`, run 39588027907 (job "reproduction"): the profile archive of run 39444526027, pankti-generate `7afc584` with `setUpXStream()` (A17), 12 GB heap. |
 | Expected | #PANKTI_TESTS = #UNIQUE for every method (14,679 from E11); paper: 13,851. |
-| Result | 22 test classes, 14,679 tests for 47 methods, #PANKTI_TESTS = #UNIQUE for all 47; 5,414 resource files (4.9 GB); no method skipped, no exception in the log; 455 s. The tests and resources are archived as artifact `generated-tests-2` (391 MB compressed, kept 5 days) and copied locally. (`results/day5/reproduction_generation/`, `results/day5/table3_partial.csv`) |
+| Result | 22 test classes, 14,679 tests for 47 methods, #PANKTI_TESTS = #UNIQUE for all 47; 5,414 resource files (4.9 GB); no method skipped, no exception in the log; 455 s. The tests and resources are archived as artifact `generated-tests-2` (391 MB compressed, kept 5 days) and copied locally. (`results/05-test-generation/reproduction_generation/`, `results/05-test-generation/table3_partial.csv`) |
 | Interpretation | Column #PANKTI_TESTS of Table III follows #UNIQUE exactly, as in the authors' run; the differences with the paper are those of #UNIQUE (E11). |
 
 ## E15. Integration check
 
 | | |
 |---|---|
-| Objective | Plan task 5.3: prepare and test the integration of the generated tests into PDFBox before running the whole set (Day 6). |
+| Objective | Plan task 5.3: prepare and test the integration of the generated tests into PDFBox before running the whole set (test-execution stage). |
 | Method | `scripts/pankti/integrate-tests.sh` on a fresh PDFBox 2.0.21 checkout with 3 classes generated locally from the authors' profiles (RenderingMode, PDCIDSystemInfo, XrefTrailerResolver), split with at most 5 tests per class; `mvn -pl pdfbox -am test -Dtest='Test*PanktiGen*'`. Laptop (Windows), JDK 11.0.8. |
 | Result | First attempt: compilation error, `java.lang.ref.Cleaner` not found: PDFBox's `jdkGte9` profile compiles everything with `<release>6</release>`, which overrides `testSource`/`testTarget`. Second attempt, with `<release>9</release>` on the `default-testCompile` execution only: 6 classes compile, 20 / 20 tests pass (Table III: all pass for these methods). Library classes keep version 50 (Java 6), test classes 53 (Java 9); animal-sniffer passes. |
 | Interpretation | The integration works with smaller build changes than the authors' (A18). |
@@ -213,12 +213,12 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Plan task 6.2: #PASSING, #FAILING and flaky tests per method for the 14,679 tests generated from our profiles. |
 | Method | Workflow `assess-tests`, job "reproduction"; integration (A18), compilation, 5 separate runs (A19), `analysis/test_outcomes.py`, `analysis/table3_execution.py`. |
 | Configuration | Runs 39641425498 (discarded, see Outcome) and 39644913295 (result); tests of generate-tests run 39588027907; ubuntu-22.04 runner, JDK 11.0.8, PDFBox surefire settings (pdfbox `-Xmx768m`). |
-| Outcome | First run: 666 failing tests, 301 of them in the split `HorizontalMetricsTable` classes (`ConversionException`), caused by the class splitter dropping `setUpXStream()` (docs/execution.md). After the fix: all 14,679 tests executed in each of the 5 runs (about 145 s per run); **14,314 passing, 365 failing, 0 flaky** (97.51%; paper 98.29%). 38 of the 46 rows have the paper's #PASSING and #FAILING; in the 8 others (font methods, and `getColorSpace` and `getEncryption`) the number of tests differs, as #UNIQUE did (E11); the extra method `TrueTypeFont.getOS2Windows` has 114 tests, all failing. Failures: `AssertionError` in all but the `getOS2Windows` tests that throw `EOFException` or `IOException: Bad file descriptor`. (`results/day6/reproduction/`, `results/day6/table3_execution.*`) |
+| Outcome | First run: 666 failing tests, 301 of them in the split `HorizontalMetricsTable` classes (`ConversionException`), caused by the class splitter dropping `setUpXStream()` (docs/execution.md). After the fix: all 14,679 tests executed in each of the 5 runs (about 145 s per run); **14,314 passing, 365 failing, 0 flaky** (97.51%; paper 98.29%). 38 of the 46 rows have the paper's #PASSING and #FAILING; in the 8 others (font methods, and `getColorSpace` and `getEncryption`) the number of tests differs, as #UNIQUE did (E11); the extra method `TrueTypeFont.getOS2Windows` has 114 tests, all failing. Failures: `AssertionError` in all but the `getOS2Windows` tests that throw `EOFException` or `IOException: Bad file descriptor`. (`results/06-test-execution/reproduction/`, `results/06-test-execution/table3_execution.*`) |
 | Observation | The extra failures (128) are exactly the extra tests of these 4 methods (114 + 8 + 4 + 2); where the profiles are the same, the outcomes are the same as in the paper. No test is flaky. |
 | Interpretation | The pass/fail behaviour of the generated tests is reproduced; the differences come from the profiles collected (environment, E11), not from running the tests. `getOS2Windows` returns an `OS2WindowsMetricsTable`, which does not override `equals()`, and its profiles contain an open font file (`RandomAccessFile`): the derived oracle cannot work for such objects (paper, Section V.A). |
 | Assumptions | A17-A19. |
 | Limitations | Flakiness is checked by reruns only (5 JVMs); the test order inside a run is surefire's default. |
-| Next step | Day 7: Descartes "after" with the passing tests. |
+| Next step | Descartes "after" with the passing tests. |
 
 
 ## E18. Execution of the authors' published tests
@@ -228,12 +228,12 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Plan task 6.3: separate the effect of the environment from the effect of the profiles, by running the authors' own tests here. |
 | Method | Same workflow, job "authors": the 22 classes the authors published (Zenodo), with the missing `@Before` import added (A20), integrated and run like ours. |
 | Configuration | Run 39644913295 (run 39641425498 failed to compile them: the missing import). |
-| Outcome | 13,851 tests executed in each of the 5 runs (about 120 s per run): **13,614 passing, 237 failing, 0 flaky** - Table III's totals, and the paper's #PASSING and #FAILING for **all 46 methods**. Failures: `AssertionError` only. (`results/day6/authors/`) |
+| Outcome | 13,851 tests executed in each of the 5 runs (about 120 s per run): **13,614 passing, 237 failing, 0 flaky** - Table III's totals, and the paper's #PASSING and #FAILING for **all 46 methods**. Failures: `AssertionError` only. (`results/06-test-execution/authors/`) |
 | Observation | The 11,613 `getFlags` tests the authors counted as passing without executing them (discrepancies.md item 2) do pass when executed. |
 | Interpretation | The environment of this reproduction does not change the outcome of the tests; columns #PASSING and #FAILING of Table III are reproduced exactly from the authors' tests, and the differences of E17 come from the profiles. |
 | Assumptions | A20 (import repair), A18, A19. |
 | Limitations | The published classes needed a one-line repair to compile. |
-| Next step | Day 7. |
+| Next step | Descartes "after" with the passing tests. |
 
 ## E19. Descartes "after": local check
 
@@ -255,20 +255,20 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 |---|---|
 | Objective | Plan tasks 7.2-7.4: classify the effective targets after the passing generated tests are added (Table III, PANKTI_STATUS) and check the paper's examples. |
 | Method | Workflow descartes-after, run 39747040848: sources none (control), reproduction (14,314 passing tests) and authors (13,614 passing published tests), modules fontbox and pdfbox, mutation restricted to the 22 classes of the effective targets. `analysis/pankti_status.py` (with `--control`), `analysis/table3_status.py`, `analysis/compare_descartes_runs.py`, `analysis/mutant_tests.py`. |
-| Configuration | GitHub Actions ubuntu-22.04, JDK 11.0.8, Maven 3.6.3, PIT 1.4.10 + Descartes 1.2.6, 21 operators, 1 thread; tests filtered with the Day 6 verdicts. 6 jobs, all successful; pdfbox 16-21 min, fontbox under 1 min. |
+| Configuration | GitHub Actions ubuntu-22.04, JDK 11.0.8, Maven 3.6.3, PIT 1.4.10 + Descartes 1.2.6, 21 operators, 1 thread; tests filtered with the verdicts of the test execution. 6 jobs, all successful; pdfbox 16-21 min, fontbox under 1 min. |
 | Outcome | Well-tested: 28 / 46 (17 tested, 11 partially tested) with our tests and with the authors' tests, the status of Table III for all 46 methods in both cases; `getOS2Windows` stays pseudo-tested. Both test sets give the same classification for all 465 analysed methods. Control: 460 / 465 methods as in the full "before" run; `getXrefType` is tested without any generated test. `isFill`: partially tested (`false` killed, `true` not); `getName`: tested (`null`, `"A"`, `""` killed). |
 | Observation | The `getXrefType` `null` mutant survived 183 tests in the full "before" run and was killed by the 53rd test, `testOCGConsumption`, in the control run: the same test passes or fails on the same mutant depending on the run. The authors' published "after" reports agree with ours on all 46 targets. |
 | Interpretation | PANKTI_STATUS is reproduced exactly, with the authors' tests and with ours, although our tests differ for 8 methods: the extra tests do not change any status. One of the 28 targets (`getXrefType`) owes its "pseudo-tested before" status to an unstable test; counting only targets that are pseudo-tested in both runs without generated tests, 27 / 46 are improved by PANKTI. |
 | Assumptions | A21 (restriction, validated), A22 (passing tests only), A3 (1 thread). |
 | Limitations | One control run: other unstable kills may exist that this run did not reveal. Descartes "after" analyses 22 classes, not whole modules (the authors analysed whole modules). |
-| Next step | Day 8: failure analysis (Section V.A categories) and the methods that stay pseudo-tested despite passing tests (Section V.B). |
+| Next step | Failure analysis (Section V.A categories) and the methods that stay pseudo-tested despite passing tests (Section V.B). |
 
 ## E21. Why generated tests fail
 
 | | |
 |---|---|
 | Objective | Plan task 8.2: classify the failing tests into the paper's causes (Section V.A), plus any new cause. |
-| Method | `analysis/failure_analysis.py` on both test sets (sources of the tests, Day 6 verdicts and failure messages); `equals`/`hashCode` declarations of the returned classes and cache keys read in the PDFBox 2.0.21 sources; `analysis/java/CacheLookupCheck.java` on three failing tests of the authors (`DefaultResourceCache.getFont1`, `getColorSpace10`, `getXObject6`). |
+| Method | `analysis/failure_analysis.py` on both test sets (sources of the tests, verdicts and failure messages of the test execution); `equals`/`hashCode` declarations of the returned classes and cache keys read in the PDFBox 2.0.21 sources; `analysis/java/CacheLookupCheck.java` on three failing tests of the authors (`DefaultResourceCache.getFont1`, `getColorSpace10`, `getXObject6`). |
 | Configuration | Laptop, Python 3.11; the run-time check with JDK 11.0.8, pdfbox/fontbox 2.0.21 and XStream 1.4.12 (the test dependency). |
 | Outcome | Authors' tests: 237 failures = 151 identity `equals` + 86 lookups returning `null`; ours: 365 = 265 + 98 + 2 exceptions (`getOS2Windows`). In all 13 / 14 methods with failures, every passing test observed `null` and no failing test did. Run-time check: the deserialised caches hold all their entries (3, 4, 7) with live `SoftReference`s; the parameter is not one of the keys and the call returns `null`; with the cache's own key it returns the expected object. |
 | Observation | The paper's "cache not available" (5 rows) and "transient fields" (4 rows) are not what makes these tests fail: the cache is present but keyed by identity, and the returned classes have no `equals`. |
@@ -284,19 +284,19 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Objective | Plan task 8.3 (P2): test whether the font-method differences of Table III (#UNIQUE differs in 8 rows) depend on the environment. |
 | Method | Two runs of `production-run.yml` in mode full, each changing one factor (A24): run 39756523874, font cache built before the workload (`font_cache=warm`); run 39756528629, DejaVu fonts only (`font_set=dejavu-only`). Compared with the main run 39444526027 and Table III by `analysis/compare_table3.py`. Prediction written before the runs: if the font cache build drives `NamingTable.getName`, its invocations fall in both runs, and the non-font targets do not change. |
 | Configuration | As the main run (ubuntu-22.04, JDK 11.0.8, PANKTI `0fddf27`, Glowroot 0.13.6). |
-| Outcome | Both runs successful, 50 / 50 command outcomes as the authors'. **Warm font cache** (57 fonts, cache built before the workload): 46 effective targets, exactly the paper's (Jaccard 1.0; `getOS2Windows` is no longer invoked); totals 121,300 / 57,677 / 13,852 (paper 121,175 / 57,563 / 13,851); `NamingTable.getName` 715 invocations and 260 unique profiles (paper 650 / 273; cold cache 1,457 / 976). **DejaVu only** (22 fonts): `getName` 741 / 403, and 13 rows differ, among them the glyph and metrics methods (e.g. `GlyfSimpleDescript.getFlags` 20,340 / 8,330 instead of 23,471 / 11,730), #UNIQUE 10,043; `FontCache.getFont` is not invoked. Rows with the paper's #INVOCATIONS and #UNIQUE: cold 38, warm 38, DejaVu 32 of 46 (`results/day8/sensitivity/`). |
+| Outcome | Both runs successful, 50 / 50 command outcomes as the authors'. **Warm font cache** (57 fonts, cache built before the workload): 46 effective targets, exactly the paper's (Jaccard 1.0; `getOS2Windows` is no longer invoked); totals 121,300 / 57,677 / 13,852 (paper 121,175 / 57,563 / 13,851); `NamingTable.getName` 715 invocations and 260 unique profiles (paper 650 / 273; cold cache 1,457 / 976). **DejaVu only** (22 fonts): `getName` 741 / 403, and 13 rows differ, among them the glyph and metrics methods (e.g. `GlyfSimpleDescript.getFlags` 20,340 / 8,330 instead of 23,471 / 11,730), #UNIQUE 10,043; `FontCache.getFont` is not invoked. Rows with the paper's #INVOCATIONS and #UNIQUE: cold 38, warm 38, DejaVu 32 of 46 (`results/08-failure-analysis/sensitivity/`). |
 | Observation | The prediction holds: `getName` invocations fall in both runs, and the non-font rows do not change (except two rows whose collected profiles depend on what was stored before the 200 MB threshold). The authors' execution log has no "Building on-disk font cache" message, which our cold-cache run prints at its first command, and the same six TrueType fallback choices as the warm-cache run (`LiberationSerif` for `TimesNewRomanPSMT`, ...). It has no fallback for the standard fonts Symbol and ZapfDingbats, which our runs replace by LiberationSans five times each. |
 | Interpretation | The authors ran the workload with a PDFBox font cache already built, on a machine with the Liberation fonts and fonts for Symbol and ZapfDingbats. Building the cache during the workload explains `getOS2Windows` and most of the `getName` difference; the remaining differences (`PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`, part of `getName`) are consistent with the missing Symbol / ZapfDingbats fonts, not tested. The near-exact #UNIQUE total of the warm run comes partly from differences that cancel out (38 rows identical). |
 | Assumptions | A24. |
 | Limitations | One run per variant; the font set of the authors' machine is inferred from their log, not known. |
-| Next step | Future work: a run with a pre-built cache and fonts for Symbol and ZapfDingbats. The main results (Days 4-7) keep the cold cache, as documented; the conclusions do not depend on it (the final status is reproduced with both test sets). |
+| Next step | Future work: a run with a pre-built cache and fonts for Symbol and ZapfDingbats. The main results (workload to Descartes "after") keep the cold cache, as documented; the conclusions do not depend on it (the final status is reproduced with both test sets). |
 
 ## E23. Null-only check and prediction check
 
 | | |
 |---|---|
 | Objective | Plan tasks 8.2 (null-only check of Section V.B) and 8.1 (prediction check of plan A.6): predict each target's status from the values its passing tests observed. |
-| Method | `analysis/prediction_check.py`: for every mutant of every target in the "after" reports of Day 7, predicted detected if one passing test of the target observed a value different from the mutant's default value (`generated_tests.mutant_killed`); compared with Descartes. Return types from `invoked-methods.csv`, `equals` declarations from the PDFBox sources. |
+| Method | `analysis/prediction_check.py`: for every mutant of every target in the "after" reports (`results/07-descartes-after/`), predicted detected if one passing test of the target observed a value different from the mutant's default value (`generated_tests.mutant_killed`); compared with Descartes. Return types from `invoked-methods.csv`, `equals` declarations from the PDFBox sources. |
 | Configuration | Laptop, Python 3.11; both test sets. |
 | Outcome | 82 / 82 mutants and 47 / 47 classifications predicted, for both test sets. 12 PDFBox targets keep passing tests and stay pseudo-tested; all have only `null` observations and only the `null` mutant (paper: 15 over three subjects, 12 in PDFBox). All 28 well-tested targets return a primitive, `String`, wrapper, array or enum; all 19 pseudo-tested targets return another object, with `equals` by identity. |
 | Observation | Descartes' verdict after the generated tests is a function of the observed values: no other test kills a mutant that the target's own tests leave alive. |
@@ -313,7 +313,7 @@ seeds. CI runs use the GitHub-hosted `ubuntu-22.04` runner (4 vCPU AMD EPYC 7763
 | Method | Fresh clone of the public repository (commit 6480ed5) in an empty directory; a new Python 3.11 environment from `requirements.txt` only; the unit tests; the code blocks of levels 1 and 2 of the README run as written, with `W` pointing to an existing copy of the authors' artifacts (fetched by `setup/fetch-artifacts.sh`, which re-checked the archive). Then `git status` in the clone: every regenerated file must equal the committed one. |
 | Configuration | Windows laptop, Git Bash; JDK 11.0.8 and Maven 3.6.3 from `setup/env.sh` for the pankti-extract build (level 2). |
 | Outcome | Level 1: 16 / 16 tests, all commands successful, no file changed. Level 2: all commands successful (pankti-extract rebuilt; #TARGET 138; 6,276 / 6,373 and 460 / 465 methods as the authors; PANKTI_STATUS 28 / 46; 151 + 86 failures classified; 82 / 82 mutants predicted); the only differences were the line endings of two files written by `check_paper_table3.py` and `compare_authors_report.py` (CRLF on Windows), with identical content. One transient network error (the PDFBox clone) was retried. |
-| Observation | The first clone attempt failed on Windows: with the path of the clone, 30 file names under `results/day4/full/profiles/` exceed 260 characters. `git clone -c core.longpaths=true` solves it (already used for the authors' repository). |
+| Observation | The first clone attempt failed on Windows: with the path of the clone, 30 file names under `results/04-workload/full/profiles/` exceed 260 characters. `git clone -c core.longpaths=true` solves it (already used for the authors' repository). |
 | Interpretation | The analyses are reproducible from the repository and the authors' public artifacts. |
 | Assumptions | None new. |
 | Limitations | The CI workflows (level 3) were not rerun for this check; each was run when its stage was done (run IDs in the README). |

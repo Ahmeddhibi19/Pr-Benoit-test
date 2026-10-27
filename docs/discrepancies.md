@@ -10,9 +10,9 @@ Artifacts used (see [artifacts.md](artifacts.md)):
 - Zenodo replication data, version 1 (record 4298605)
 
 Scripts and outputs:
-- `analysis/check_paper_table3.py` -> `results/day1/paper_table3_checks.txt`
-- `analysis/compare_authors_report.py` -> `results/day1/authors_report_vs_paper.csv`
-- `analysis/summarize_descartes_reports.py` -> `results/day1/authors_descartes_reports.csv`
+- `analysis/check_paper_table3.py` -> `results/01-paper-vs-artifacts/paper_table3_checks.txt`
+- `analysis/compare_authors_report.py` -> `results/01-paper-vs-artifacts/authors_report_vs_paper.csv`
+- `analysis/summarize_descartes_reports.py` -> `results/01-paper-vs-artifacts/authors_descartes_reports.csv`
 
 ## 1. Internal consistency of Table III (PDFBox rows)
 
@@ -35,7 +35,7 @@ and the 46 `-object-profile-sizes.txt` files hold 57,563 sizes, as in Table III.
 as in the text. The largest is 57.4 MB = 54.7 MiB ("nearly 55 MB") and the total is 5.9 GB = 5.5 GiB ("5.5 GB"),
 so the paper reports sizes in binary units (MiB/GiB). The reproduction does the same.
 
-Script: `analysis/profile_stats.py` -> `results/day1/authors_profile_stats.{csv,txt}`. It also shows that each of the 19
+Script: `analysis/profile_stats.py` -> `results/01-paper-vs-artifacts/authors_profile_stats.{csv,txt}`. It also shows that each of the 19
 methods with fewer collected profiles than invocations has an XML file of at least 200 MiB, which confirms that the
 threshold explains them. The 57,563 sizes fall into the 10 MiB bins of Figure 5 as 57,458 / 71 / 3 / 23 / 5 / 3.
 
@@ -78,7 +78,7 @@ is not), and the paper counts it as well-tested.
 **Status: explained (138 reproduced exactly; 129 most likely an earlier iteration).**
 `scripts/pankti/extract-targets.sh` builds pankti-extract at `0fddf27`, applies it to PDFBox 2.0.21 (3,588 rows, 3,587 distinct methods, kept
 out of 9,021) and runs the authors' `find-pseudo-tested.py` on their six "before" reports. Result: **138 targets**, the
-paper's #TARGET, including all 46 effective targets (`results/day2/targets_authors_reports.{csv,txt}`). Per module:
+paper's #TARGET, including all 46 effective targets (`results/02-descartes-before/targets_authors_reports.{csv,txt}`). Per module:
 pdfbox 117, xmpbox 12, fontbox 8, preflight 1, examples 0, tools 0.
 
 The six reports contain 644 pseudo-tested methods before the filter (fontbox 61, pdfbox 458, preflight 63,
@@ -174,7 +174,7 @@ authors' "before" report. None of the 46 effective targets of the case study is 
 **Status: explained.** The jar in the experiments repository (9,890,400 bytes, sha256 `a9327e88...24a1b1`) differs from
 the one on Maven Central (9,897,381 bytes): the authors built it from a local checkout. The reproduction builds
 the jar from the `2.0.21` tag on the Linux runner (`scripts/pdfbox/build-app.sh`, 9,890,413 bytes). Entry by entry
-(`analysis/compare_jars.py`, `results/day3/app_jar_vs_authors.txt`) the two jars are identical: same 5,786 entries,
+(`analysis/compare_jars.py`, `results/03-instrumentation/app_jar_vs_authors.txt`) the two jars are identical: same 5,786 entries,
 all 5,644 class files byte-identical, and only `MANIFEST.MF`, the copyright year in `NOTICE` and the build date in
 `pom.properties` differ. The authors' jar is plain PDFBox 2.0.21, built on 2020-09-21 with JDK 11.0.8.
 
@@ -182,7 +182,7 @@ all 5,644 class files byte-identical, and only `MANIFEST.MF`, the copyright year
 
 **Status: explained.** Runs 39409510406 and 39415980930 (GitHub Actions, configuration in
 [descartes.md](descartes.md)) compared method by method with the authors' reports of 2020-09-21
-(`analysis/compare_descartes_runs.py`, output in `results/day2/descartes_before_vs_authors/`). All 46 effective
+(`analysis/compare_descartes_runs.py`, output in `results/02-descartes-before/descartes_before_vs_authors/`). All 46 effective
 targets are pseudo-tested in both. Per module:
 - fontbox, xmpbox, preflight and tools: the same classification for every method (1,624 methods, Jaccard index of the
   pseudo-tested sets 1.0).
@@ -222,7 +222,7 @@ reproduction reports the XML depth for both data sets (assumption A16).
 ## 18. Profile pairing in the authors' data (open question T8)
 
 **Status: explained.** In every method of the authors' data, the receiving, params and returned files hold the same
-number of fragments (`results/day4/authors_profile_metrics.txt`), so the pairing problem possible in PANKTI
+number of fragments (`results/04-workload/authors_profile_metrics.txt`), so the pairing problem possible in PANKTI
 `0fddf27` (item 9) did not affect the paper's PDFBox numbers.
 
 ## 19. Outcome of the authors' workload
@@ -234,7 +234,7 @@ All 9 errors concern `000809.pdf`: `Encrypt` fails ("Document is already encrypt
 
 ## 20. Workload metrics of the reproduction vs Table III
 
-**Status: explained in part (font cache state and font set, §27).** Run 39444526027 (`results/day4/table3_comparison.*`): the 46 effective targets
+**Status: explained in part (font cache state and font set, §27).** Run 39444526027 (`results/04-workload/table3_comparison.*`): the 46 effective targets
 of Table III are all invoked, `RenderingMode.isFill` matches exactly (30,944 invocations, 1 unique profile of 158 B),
 and 41 / 40 / 38 of the 46 rows have the paper's #INVOCATIONS / #COLLECTED / #UNIQUE. The differing rows are font
 methods (`NamingTable.getName`, `PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`,
@@ -261,7 +261,7 @@ importing `org.junit.Before`; the other four have no `@Before`. The authors must
 **Status: explained.** Two Descartes runs of the same pdfbox tests (full "before" run 39415980930, and the restricted
 control run of 39747040848) disagree on 5 of 403 methods of the 22 target classes. The mutants concerned are killed by
 `TestOptionalContentGroups.testOCGConsumption` in one run and survive it in the other, or time out in only one run
-(`analysis/mutant_tests.py`, `results/day7/examples_mutants.txt`). PIT also runs the tests in a different order in the
+(`analysis/mutant_tests.py`, `results/07-descartes-after/examples_mutants.txt`). PIT also runs the tests in a different order in the
 two runs (the test is 64th in one, 53rd in the other). The test reads `target/test-output/ocg-generation.pdf` and
 calls `testOCGGeneration()` to write it only if the file does not exist yet. When the file was written earlier,
 without the mutant, the test passes; when the test has to write it with the mutant active, the file is wrong and the
@@ -276,7 +276,7 @@ well-tested status after the generated tests is therefore not robust evidence of
 
 **Status: reproduced.** With the passing tests generated by this reproduction and with the authors' passing published
 tests, run here, 28 of the 46 targets are well-tested (17 tested, 11 partially tested), each with the status of
-Table III (`results/day7/table3_status.csv`). The reproduction's extra tests (8 methods with a different #UNIQUE) do
+Table III (`results/07-descartes-after/table3_status.csv`). The reproduction's extra tests (8 methods with a different #UNIQUE) do
 not change any status. With the caveat of §23, 27 / 46 targets are improved robustly.
 
 ## 25. Causes of the failing tests (Section V.A)
@@ -286,14 +286,14 @@ the returned class compares by identity (`equals` not overridden) or because a c
 returns `null` after deserialisation; a test passes exactly when it observed `null` ([failures.md](failures.md)).
 The paper attributes rows 37, 44, 45, 46 and 50 to `SoftReference` caches "not available" in the test, but the
 deserialised caches are complete: the lookup fails because `COSObject` and `FontInfo` keys compare by identity
-(run-time check on three tests, `results/day8/cache_lookup_check.txt`). It attributes rows 33, 34, 35 and 53 to
+(run-time check on three tests, `results/08-failure-analysis/cache_lookup_check.txt`). It attributes rows 33, 34, 35 and 53 to
 transient fields, but `GeneralPath` and `PDEncryption` do not override `equals`, which is enough to make every test
 with a non-null value fail. Row 74 (one failing test) is not discussed in the paper; it fails by identity as well.
 
 ## 26. Targets with passing tests that stay pseudo-tested (Section V.B)
 
 **Status: reproduced.** 12 PDFBox targets keep passing tests and stay pseudo-tested, with both test sets; each has
-only null observations and a single `null` mutant, as the paper explains (`results/day8/prediction_check_*.txt`).
+only null observations and a single `null` mutant, as the paper explains (`results/08-failure-analysis/prediction_check_*.txt`).
 With Broadleaf (2) and Jicofo (1) from Table III this gives the paper's 15.
 
 ## 27. Font methods: the authors' font cache and fonts

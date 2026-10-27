@@ -84,7 +84,7 @@ jobs:
           mkdir -p generated
           archive=$(find tests-archive -name generated-tests.tar.zst | head -1)
           zstd -dc "$archive" | tar -x -C generated
-          python3 scripts/pankti/keep_passing_tests.py generated/tests results/day6/reproduction/test_outcomes_tests.csv.gz \
+          python3 scripts/pankti/keep_passing_tests.py generated/tests results/06-test-execution/reproduction/test_outcomes_tests.csv.gz \
             | tee out/kept-tests.txt
 
       - name: Keep the authors' passing tests
@@ -97,7 +97,7 @@ jobs:
           mkdir -p generated
           mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/tests generated/tests
           mv extracted/pankti-data/pdfbox/pankti-generated-junit-tests/resource-files generated/resources
-          python3 scripts/pankti/keep_passing_tests.py generated/tests results/day6/authors/test_outcomes_tests.csv.gz \
+          python3 scripts/pankti/keep_passing_tests.py generated/tests results/06-test-execution/authors/test_outcomes_tests.csv.gz \
             | tee out/kept-tests.txt
 
       - name: Integrate the tests
@@ -111,7 +111,7 @@ jobs:
           python3 - "${{ matrix.module }}" > target-classes.txt <<'EOF'
           import csv, sys
           module = sys.argv[1]
-          rows = csv.DictReader(open("results/day4/full/profiles/invoked-methods.csv", encoding="utf-8"))
+          rows = csv.DictReader(open("results/04-workload/full/profiles/invoked-methods.csv", encoding="utf-8"))
           classes = sorted({r["parent-FQN"] for r in rows})
           print(",".join(c for c in classes if c.startswith("org.apache.fontbox") == (module == "fontbox")))
           EOF

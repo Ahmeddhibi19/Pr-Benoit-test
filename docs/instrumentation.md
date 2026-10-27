@@ -8,7 +8,7 @@ PANKTI code of the paper's period actually records, as far as it matters for the
 ## Frozen target list
 
 `results/targets.csv` is the list of methods to instrument. It is a byte-for-byte copy of
-`results/day2/instrumentation-candidates-pdfbox.csv`: the 138 methods that pankti-extract and `find-pseudo-tested.py`
+`results/02-descartes-before/instrumentation-candidates-pdfbox.csv`: the 138 methods that pankti-extract and `find-pseudo-tested.py`
 obtain from the authors' Descartes "before" reports (assumption A8 in [assumptions.md](assumptions.md)). Its sha256 is
 in `results/targets.sha256`, and every run of the `production-run` workflow records it. The list uses PANKTI's own
 column format (`visibility, parent-FQN, method-name, param-list, ...`), which is what `instrument.py` reads.
@@ -36,7 +36,7 @@ Consequences for the metrics (checked in the code, `discrepancies.md` §9):
   (`file.length() / (1024 * 1024) >= 200`). The check reads the files on disk, so it is also cumulative over JVM
   launches. Invocations are still counted afterwards, which is why #COLLECTED can be lower than #INVOCATIONS. The
   authors' data confirms it: each of the 19 methods with #COLLECTED < #INVOCATIONS has an XML file of at least
-  200 MiB (`results/day1/authors_profile_stats.txt`).
+  200 MiB (`results/01-paper-vs-artifacts/authors_profile_stats.txt`).
 - XStream uses a few custom converters (Thread, ThreadGroup, Inflater, Cleaner); a serialisation error is logged and
   that part of the profile is skipped.
 
@@ -54,7 +54,7 @@ In addition, the size of a profile is computed as the growth of the files betwee
 field per aspect: nested calls of the same target record wrong sizes. The authors changed this design in December
 2020, after the PDFBox run (PANKTI issues #39/#40). The reproduction keeps the original behaviour, as in the paper,
 and measures it: for every method, the number of XML fragments in the receiving, params and returned files is
-compared with #COLLECTED (Day 4).
+compared with #COLLECTED (workload stage).
 
 ## Build and installation
 
@@ -65,13 +65,13 @@ compared with #COLLECTED (Day 4).
 | Application | `scripts/pdfbox/build-app.sh <pdfbox> <out>` | `pdfbox-app-2.0.21.jar` built from the tag (assumption A12); size and sha256 in `app-jar.txt` |
 | Agent check | `scripts/glowroot/check-agent.sh <glowroot> <app.jar> <out>` | pdfbox-app started under the agent without a command: Glowroot starts without warnings, registers the plugin `panktiplugin`, and no profile is written. The check fails if the plugin is missing (tested). |
 
-The `production-run` workflow runs these steps on the Linux runner (mode `dry-run`); the workload modes are added on
-Day 4.
+The `production-run` workflow runs these steps on the Linux runner (mode `dry-run`); the modes `smoke` and
+`full` run the workload.
 
 ## Results of the dry run
 
 Run [39431056888](https://github.com/Ahmeddhibi19/Pr-Benoit-test/actions/runs/39431056888) (2026-10-20), outputs in
-`results/day3/production_dry_run/`:
+`results/03-instrumentation/production_dry_run/`:
 
 | Check | Result |
 |---|---|
@@ -81,7 +81,7 @@ Run [39431056888](https://github.com/Ahmeddhibi19/Pr-Benoit-test/actions/runs/39
 | pdfbox-app | built from tag 2.0.21: 9,890,413 bytes (the authors' jar: 9,890,400) |
 | Agent check | 5 / 5 (`agent-checks.txt`); no profile written, as expected without a command |
 
-**The app jar is the same as the authors'.** `analysis/compare_jars.py` (`results/day3/app_jar_vs_authors.txt`): the two
+**The app jar is the same as the authors'.** `analysis/compare_jars.py` (`results/03-instrumentation/app_jar_vs_authors.txt`): the two
 jars have the same 5,786 entries, all 5,644 class files are byte-identical, and the only differences are the build
 metadata (`MANIFEST.MF`, the copyright year in `NOTICE`, the build date in `pom.properties`). The authors' jar was
 therefore built from tag 2.0.21 with the same JDK, on 2020-09-21. A build on the Windows laptop differs in 118 text
@@ -102,7 +102,7 @@ replaced (assumption A14), 50 JVM launches. The job then computes the metrics (`
 summaries and archives the raw profiles (about 5.7 GB, 326 MB compressed, kept 3 days) for test generation.
 Mode `smoke` runs `PDFToImage` on one PDF twice and checks that isFill is recorded and that counts accumulate.
 
-Results (run 39444526027, `results/day4/full/`): see [experiments.md](experiments.md) (E11) and
+Results (run 39444526027, `results/04-workload/full/`): see [experiments.md](experiments.md) (E11) and
 [discrepancies.md](discrepancies.md) (item 20). Summary against Table III:
 
 | | Paper | Reproduction |
@@ -117,7 +117,7 @@ Results (run 39444526027, `results/day4/full/`): see [experiments.md](experiment
 
 ## Environment sensitivity of the font methods
 
-Experiment E22 (`results/day8/sensitivity/`, `analysis/sensitivity_table.py`) reruns the full workload twice, each
+Experiment E22 (`results/08-failure-analysis/sensitivity/`, `analysis/sensitivity_table.py`) reruns the full workload twice, each
 time changing one factor through the inputs of `production-run.yml`:
 
 | Run | Fonts | Font cache | Effective targets | #INVOCATIONS / #COLLECTED / #UNIQUE | `getName` (inv. / unique) | Rows as the paper |

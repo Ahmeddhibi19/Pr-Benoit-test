@@ -70,7 +70,7 @@ La chaîne de l'étude de cas comporte cinq étapes ; les métriques sont défin
 4. **Exécution.** Chaque test est exécuté (5 fois, contre le non-déterminisme), ce qui donne #PASSING et #FAILING.
 5. **Évaluation.** Descartes est relancé avec les nouveaux tests. Une cible qui n'est plus pseudo-testée est « bien testée » (métrique 14 : « not pseudo-tested anymore »), c'est-à-dire *tested* ou *partially-tested* pour Descartes.
 
-**[Artefacts]** Avec cette lecture, les derniers rapports Descartes des auteurs redonnent exactement les 46 statuts du tableau III (`results/day1/authors_report_vs_paper.csv`).
+**[Artefacts]** Avec cette lecture, les derniers rapports Descartes des auteurs redonnent exactement les 46 statuts du tableau III (`results/01-paper-vs-artifacts/authors_report_vs_paper.csv`).
 
 L'article ne précise pas : la version de PANKTI, celles de Descartes et de PIT, la configuration de Descartes, ni le script exact de la charge de travail. Tous ces éléments ont été retrouvés dans les artefacts des auteurs (section 6).
 
@@ -107,7 +107,7 @@ Des scripts Python dans `analysis/` calculent les métriques à partir des sorti
 - les 19 méthodes plafonnées ;
 - la taille minimale (158 octets) et la taille totale (5,49 Gio).
 
-(`results/day4/authors_profile_metrics.txt`)
+(`results/04-workload/authors_profile_metrics.txt`)
 
 ## 4. Environnement expérimental
 
@@ -169,7 +169,7 @@ Les choix qui orientent toute la reproduction, et leur lien avec l'article :
 7. **Version du générateur et retouches manuelles.** Les tests publiés par les auteurs n'ont pas été produits par la version de PANKTI utilisée pour la charge de travail (`0fddf27`). Ils contiennent des méthodes `deserializeObject()` que le générateur n'écrit qu'à partir du commit `7afc584` (12 novembre 2020), une méthode `setUpXStream()` dont l'appel est commenté dans le code du générateur, et des imports ajoutés à la main. L'hypothèse a été vérifiée en régénérant tous les tests à partir des profils des auteurs (section 8.6).
 8. **Niveau de compilation des tests.** Les tests générés utilisent des convertisseurs qui dépendent de `java.lang.ref.Cleaner` (Java 9). Sous JDK 11, un profil de PDFBox impose `<release>6</release>` à toute compilation, ce qui annulait le réglage `testSource`/`testTarget` ; la compilation échouait. Seule la compilation des tests reçoit désormais `<release>9</release>`.
 9. **Mémoire.** pankti-generate charge chaque fichier de profils (jusqu'à 210 Mo) en DOM ; la génération demande environ 12 Go et s'exécute sur l'exécuteur d'intégration continue, le portable n'ayant pas assez de mémoire libre.
-10. **Découpage des classes de tests.** La première exécution a donné 301 échecs inattendus dans `HorizontalMetricsTable`. Cause : mon script de découpage des grandes classes supprimait la méthode `setUpXStream()`, que le générateur place entre les tests de deux méthodes cibles ; sans elle, le convertisseur nécessaire à la désérialisation d'un descripteur de fichier n'était pas enregistré. Corrigé, avec un test unitaire ; le résultat erroné est conservé comme trace (`results/day6/run-39641425498-split-bug/`).
+10. **Découpage des classes de tests.** La première exécution a donné 301 échecs inattendus dans `HorizontalMetricsTable`. Cause : mon script de découpage des grandes classes supprimait la méthode `setUpXStream()`, que le générateur place entre les tests de deux méthodes cibles ; sans elle, le convertisseur nécessaire à la désérialisation d'un descripteur de fichier n'était pas enregistré. Corrigé, avec un test unitaire ; le résultat erroné est conservé comme trace (`results/06-test-execution/run-39641425498-split-bug/`).
 11. **Tests publiés non compilables.** 18 des 22 classes publiées par les auteurs utilisent `@Before` sans l'importer ; l'import manquant a été ajouté à ces classes seulement (hypothèse A20).
 12. **Sélection des tests par PIT.** Pour limiter Descartes « après » aux classes des cibles, j'ai restreint `targetClasses`. Un essai local a montré que toutes les méthodes devenaient « non couvertes » : pitest-maven restreint aussi, par défaut, les tests à ce même motif, et n'exécutait donc aucun test. Les tests sont désormais toujours désignés explicitement (`targetTests`).
 13. **Un test instable sur une cible.** L'exécution de contrôle sans test généré a rendu `XrefTrailerResolver.getXrefType` « testée ». Le mutant `null` est tué par `TestOptionalContentGroups.testOCGConsumption` dans une exécution et pas dans l'autre. Ce test relit un fichier PDF laissé dans `target/test-output` et ne le régénère que s'il est absent ; le résultat dépend donc des fichiers écrits auparavant (section 8.8).
@@ -212,7 +212,7 @@ M. Baudry invitait à faire des hypothèses simplificatrices en cas de problème
 - **[Artefacts]** Aucun fichier des auteurs ne présente de décalage entre le nombre de receveurs, d'arguments et de valeurs renvoyées. Le risque d'appariement identifié dans le code de PANKTI (un appel qui lève une exception n'écrit pas de valeur renvoyée) ne s'est pas réalisé dans leur exécution.
 - **[Artefacts]** Sur les 11 730 tests générés pour `GlyfSimpleDescript.getFlags`, seuls 117 ont été exécutés. Les 13 614 tests « qui passent » de l'article en comptent 11 613 jamais exécutés. Tests réellement exécutés : 2 238, dont 2 001 passent (89,4 %, contre 98,3 % annoncés).
 - **[Artefacts]** Le jar `pdfbox-app` des auteurs est PDFBox 2.0.21 sans modification, construit le 21 septembre 2020 avec le même JDK.
-- **[Artefacts]** Dans la charge de travail des auteurs, seules 39 commandes sur 50 réussissent. Les 9 erreurs concernent toutes le fichier `000809.pdf`, déjà chiffré, ce qui fait échouer `Encrypt` et toutes les étapes suivantes. Les 2 messages d'usage viennent de `PDFMerger` (`results/day4/`, `analysis/workload_log.py`).
+- **[Artefacts]** Dans la charge de travail des auteurs, seules 39 commandes sur 50 réussissent. Les 9 erreurs concernent toutes le fichier `000809.pdf`, déjà chiffré, ce qui fait échouer `Encrypt` et toutes les étapes suivantes. Les 2 messages d'usage viennent de `PDFMerger` (`results/04-workload/`, `analysis/workload_log.py`).
 
 ### 8.2 Méthodes pseudo-testées et cibles (piste B)
 
@@ -228,7 +228,7 @@ M. Baudry invitait à faire des hypothèses simplificatrices en cas de problème
 - **[Mesuré]** Test de fumée (`PDFToImage` sur un PDF, deux fois) :
   - `isFill` est enregistrée, avec des profils de 158 octets et un seul profil distinct, comme dans l'article ;
   - le compteur d'invocations s'additionne d'un lancement de JVM à l'autre (4 349 puis 8 698) ;
-  - même cette petite exécution produit 3,4 Go de profils, et 11 méthodes atteignent déjà le seuil de 200 Mo (`results/day4/smoke/`).
+  - même cette petite exécution produit 3,4 Go de profils, et 11 méthodes atteignent déjà le seuil de 200 Mo (`results/04-workload/smoke/`).
 - **[Mesuré]** Charge de travail complète (exécution 39444526027, 50 lancements de JVM, 11 min 27 s) : les 50 commandes ont le même résultat que dans le journal des auteurs (39 réussites, 9 erreurs sur `000809.pdf`, 2 messages d'usage de `PDFMerger`).
 
 | Colonnes 1 à 3 du tableau III | Article | Reproduction |
@@ -243,7 +243,7 @@ M. Baudry invitait à faire des hypothèses simplificatrices en cas de problème
 | `RenderingMode.isFill` | 30 944 / 30 944 / 1 profil de 158 o | **identique** |
 | Lignes identiques au tableau III (INV / COLL / UNIQ) | — | 41 / 40 / 38 sur 46 |
 
-  (`results/day4/table3_comparison.*`, `results/day4/full/`)
+  (`results/04-workload/table3_comparison.*`, `results/04-workload/full/`)
 - **[Mesuré]** Les lignes qui diffèrent sont des méthodes liées aux polices : `NamingTable.getName` (650 → 1 457 invocations, 273 → 976 profils uniques), `PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`, `FontCache.getFont`. S'y ajoutent deux méthodes dont les profils collectés dépendent de ce qui a été stocké avant le seuil (`DefaultResourceCache.getColorSpace`, `COSParser.getEncryption`), et la cible supplémentaire `getOS2Windows`, elle aussi liée aux polices.
 - **[Interprétation]** Cause : l'environnement des polices. PDFBox remplace les polices non incorporées par des polices du système et garde la liste des polices dans un cache sur disque ; deux exécutions de sensibilité le vérifient (section 8.12).
 
@@ -253,19 +253,19 @@ M. Baudry invitait à faire des hypothèses simplificatrices en cas de problème
 
 ### 8.5 Figure 5 : taille des profils
 
-![Figure 5 reproduite](../results/day5/fig5.png)
+![Figure 5 reproduite](../results/05-test-generation/fig5.png)
 
 | Tranche (Mio) | 0-10 | 10-20 | 20-30 | 30-40 | 40-50 | 50-60 |
 |---|---|---|---|---|---|---|
 | Données des auteurs (= figure 5 de l'article) | 57 458 | 71 | 3 | 23 | 5 | 3 |
 | Reproduction | 58 563 | 75 | 3 | 23 | 5 | 3 |
 
-**[Mesuré]** Même forme que la figure de l'article ; les tranches au-delà de 20 Mio, qui correspondent aux méthodes plafonnées, sont identiques. (`results/day5/fig5.csv`)
+**[Mesuré]** Même forme que la figure de l'article ; les tranches au-delà de 20 Mio, qui correspondent aux méthodes plafonnées, sont identiques. (`results/05-test-generation/fig5.csv`)
 
 ### 8.6 Génération des tests
 
-- **[Mesuré sur les artefacts]** À partir des profils des auteurs, pankti-generate `7afc584` (avec `setUpXStream()` activé) produit 13 851 tests, **tous identiques, méthode par méthode, aux 13 851 tests publiés** ; #PANKTI_TESTS = #UNIQUE pour les 46 méthodes. L'étape de génération est donc reproduite exactement. (`results/day5/authors_generation/`)
-- **[Mesuré]** À partir de nos profils : 14 679 tests pour 47 méthodes, égal à #UNIQUE pour chaque méthode (article : 13 851). Les écarts avec l'article sont ceux de #UNIQUE, concentrés sur les méthodes liées aux polices. (`results/day5/table3_partial.csv`)
+- **[Mesuré sur les artefacts]** À partir des profils des auteurs, pankti-generate `7afc584` (avec `setUpXStream()` activé) produit 13 851 tests, **tous identiques, méthode par méthode, aux 13 851 tests publiés** ; #PANKTI_TESTS = #UNIQUE pour les 46 méthodes. L'étape de génération est donc reproduite exactement. (`results/05-test-generation/authors_generation/`)
+- **[Mesuré]** À partir de nos profils : 14 679 tests pour 47 méthodes, égal à #UNIQUE pour chaque méthode (article : 13 851). Les écarts avec l'article sont ceux de #UNIQUE, concentrés sur les méthodes liées aux polices. (`results/05-test-generation/table3_partial.csv`)
 - **[Mesuré]** Intégration vérifiée d'abord localement sur un échantillon : les tests compilent et passent ; l'exécution complète (5 fois) est en section 8.7.
 
 ### 8.7 Exécution des tests générés
@@ -283,7 +283,7 @@ Chaque test est exécuté 5 fois, chaque fois dans une nouvelle JVM, avec les r�
 - **[Mesuré]** Aucun test instable sur 5 exécutions.
 - **[Interprétation]** L'exécution des tests est reproduite ; les écarts viennent des profils collectés, pas de l'exécution. Les causes des échecs sont analysées en section 8.9.
 
-(`results/day6/table3_execution.csv`, `docs/execution.md`)
+(`results/06-test-execution/table3_execution.csv`, `docs/execution.md`)
 
 ### 8.8 Statut final des cibles
 
@@ -296,7 +296,7 @@ Descartes est relancé (même configuration, 1 fil) avec les tests générés qu
 | **[Mesuré]** Tests de la reproduction | **28 / 46 (17 + 11)** | **46 / 46** |
 | **[Mesuré]** Contrôle, sans test généré | 1 / 46 | 19 / 46 |
 
-- **[Mesuré]** Le statut final est reproduit exactement, avec nos tests comme avec ceux des auteurs. Les deux jeux de tests donnent la même classification pour les 465 méthodes analysées, bien que nos tests diffèrent pour 8 méthodes : les tests en plus ne changent aucun statut. La 47e cible, `getOS2Windows`, n'a aucun test qui réussit et reste pseudo-testée. (`results/day7/table3_status.csv`)
+- **[Mesuré]** Le statut final est reproduit exactement, avec nos tests comme avec ceux des auteurs. Les deux jeux de tests donnent la même classification pour les 465 méthodes analysées, bien que nos tests diffèrent pour 8 méthodes : les tests en plus ne changent aucun statut. La 47e cible, `getOS2Windows`, n'a aucun test qui réussit et reste pseudo-testée. (`results/07-descartes-after/table3_status.csv`)
 - **[Mesuré]** Exemples de l'article :
   - `RenderingMode.isFill` est **partiellement testée** : la seule valeur observée est `true`, donc le test généré tue le mutant `false` mais pas le mutant `true` ;
   - `NamingTable.getName` est **testée** : les mutants `null`, `"A"` et `""` sont tous tués (section II.C de l'article).
@@ -305,7 +305,7 @@ Descartes est relancé (même configuration, 1 fil) avec les tests générés qu
 - **[Mesuré]** L'un de ces écarts touche une cible : le mutant `null` de `XrefTrailerResolver.getXrefType` survit aux 183 tests qui la couvrent dans l'exécution complète « avant », mais est tué par le 53e d'entre eux dans le contrôle.
 - **[Interprétation]** Le statut « pseudo-testée avant » de `getXrefType` n'est donc pas stable. En ne comptant que les cibles pseudo-testées dans les deux exécutions sans test généré, **27 des 46 cibles** sont améliorées de façon robuste par les tests de PANKTI ; le nombre publié (28) reste exact pour la configuration de l'article.
 
-(`results/day7/`, `docs/descartes.md`, `docs/discrepancies.md` §23-24)
+(`results/07-descartes-after/`, `docs/descartes.md`, `docs/discrepancies.md` §23-24)
 
 ### 8.9 Pourquoi des tests générés échouent (section V.A)
 
@@ -321,7 +321,7 @@ L'article analyse à la main un échantillon de tests en échec et propose quatr
 - **[Mesuré]** Second mécanisme : la recherche dans un cache renvoie `null`. Les caches de `DefaultResourceCache` et de `FontCache` sont des tables dont les clés (`COSObject`, `FontInfo`) ne redéfinissent ni `equals()` ni `hashCode()`. Dans un test, le receveur et le paramètre sont désérialisés séparément ; le paramètre n'est donc jamais la clé du cache. Une vérification à l'exécution sur trois tests des auteurs (`analysis/java/CacheLookupCheck.java`) le confirme : le cache désérialisé est complet (3, 4 et 7 entrées, toutes encore référencées), l'appel avec le paramètre renvoie `null`, l'appel avec la clé du cache renvoie l'objet attendu (par exemple `PDTrueTypeFont BJEDFM+ArialMT`).
 - **[Interprétation]** L'article explique 5 lignes (37, 44, 45, 46, 50) par des caches à base de `SoftReference` « non disponibles » pendant le test, et 4 lignes (33, 34, 35, 53) par des champs transitoires. Les données montrent un autre mécanisme : le cache est bien là mais indexé par identité, et les classes renvoyées n'ont pas d'`equals`, ce qui suffit à faire échouer ces tests. Les deux diagnostics s'accordent sur le résultat (ces tests échouent dans tout environnement) ; je n'ai pas vérifié si les champs transitoires différeraient aussi lors d'une comparaison champ par champ. La ligne 74 (un test en échec), non discutée dans l'article, relève du premier mécanisme.
 
-(`results/day8/failure_analysis_*.txt`, `results/day8/cache_lookup_check.txt`, `docs/failures.md`)
+(`results/08-failure-analysis/failure_analysis_*.txt`, `results/08-failure-analysis/cache_lookup_check.txt`, `docs/failures.md`)
 
 ### 8.10 Tests qui réussissent sans améliorer la suite (section V.B) et prédiction du statut
 
@@ -330,7 +330,7 @@ L'article analyse à la main un échantillon de tests en échec et propose quatr
 - **[Mesuré]** Les 28 cibles bien testées renvoient toutes un type primitif (17), une chaîne ou une enveloppe (8), un tableau (2) ou une énumération (1). Les 19 qui restent pseudo-testées renvoient toutes un autre objet, dont la classe compare par identité.
 - **[Interprétation]** Dans cette étude de cas, le résultat final (28 / 46) découle donc des types de retour des cibles et des valeurs observées en production : pour un objet sans `equals`, seuls les tests qui ont observé `null` réussissent, et ils ne peuvent pas tuer le mutant `null`.
 
-(`results/day8/prediction_check_*.txt`, `docs/failures.md`)
+(`results/08-failure-analysis/prediction_check_*.txt`, `docs/failures.md`)
 
 ### 8.11 Synthèse de la comparaison
 
@@ -371,7 +371,7 @@ Pour tester l'explication des écarts sur les méthodes liées aux polices, la c
 - **[Mesuré sur les artefacts]** Le journal d'exécution des auteurs ne contient pas le message « Building on-disk font cache », que notre exécution à cache vide affiche à la première commande. Il contient les six mêmes remplacements de polices TrueType que notre exécution à cache construit (par exemple `LiberationSerif` pour `TimesNewRomanPSMT`), mais aucun remplacement pour les polices standard Symbol et ZapfDingbats, que nos exécutions remplacent cinq fois chacune.
 - **[Interprétation]** Les auteurs ont exécuté la charge avec un cache de polices déjà construit, sur une machine qui avait les polices Liberation et des polices pour Symbol et ZapfDingbats. Les écarts restants (`PDFontDescriptor.getFlags`, `isSerif`, `isItalic`, `isFixedPitch`, une partie de `getName`) sont compatibles avec ces deux polices manquantes ; ce n'est pas testé. Le total presque exact de la variante à cache construit (13 852) vient en partie d'écarts qui se compensent : 38 lignes sont identiques, comme dans l'exécution principale.
 
-(`results/day8/sensitivity/`, `docs/instrumentation.md`, `docs/discrepancies.md` §27)
+(`results/08-failure-analysis/sensitivity/`, `docs/instrumentation.md`, `docs/discrepancies.md` §27)
 
 ## 9. Observations et analyse
 

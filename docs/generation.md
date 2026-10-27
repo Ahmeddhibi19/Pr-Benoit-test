@@ -47,7 +47,7 @@ PDFBox 2.0.21 sources. pankti-generate re-prints the whole Spoon model of PDFBox
 with `getClass().getClassLoader().getResource(...)`).
 
 The `generate-tests` workflow runs it twice, in parallel:
-- on the profiles of production-run 39444526027 (this reproduction): the test set used from Day 6 on;
+- on the profiles of production-run 39444526027 (this reproduction): the test set used from the test-execution stage on;
 - on the authors' profiles from Zenodo, and compares the result with the 13,851 tests they published.
 
 Results: see [experiments.md](experiments.md).

@@ -39,18 +39,18 @@ The reproduction follows two tracks:
 
 | Step | State | Evidence |
 |---|---|---|
-| PDFBox 2.0.21 builds and its test suite runs on CI | done | [`results/day1/env-check/`](results/day1/env-check/) |
-| Authors' artifacts downloaded and checked against the paper | done | [`docs/discrepancies.md`](docs/discrepancies.md), [`results/day1/`](results/day1/) |
-| Profile facts of Section IV.C recomputed from the authors' data | done | [`results/day1/authors_profile_stats.txt`](results/day1/authors_profile_stats.txt) |
-| #TARGET recomputed with the authors' tools (138, as in the paper) | done | [`results/day2/targets_authors_reports.txt`](results/day2/targets_authors_reports.txt) |
-| Descartes "before" run of the reproduction, compared with the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/day2/`](results/day2/) |
+| PDFBox 2.0.21 builds and its test suite runs on CI | done | [`results/01-paper-vs-artifacts/env-check/`](results/01-paper-vs-artifacts/env-check/) |
+| Authors' artifacts downloaded and checked against the paper | done | [`docs/discrepancies.md`](docs/discrepancies.md), [`results/01-paper-vs-artifacts/`](results/01-paper-vs-artifacts/) |
+| Profile facts of Section IV.C recomputed from the authors' data | done | [`results/01-paper-vs-artifacts/authors_profile_stats.txt`](results/01-paper-vs-artifacts/authors_profile_stats.txt) |
+| #TARGET recomputed with the authors' tools (138, as in the paper) | done | [`results/02-descartes-before/targets_authors_reports.txt`](results/02-descartes-before/targets_authors_reports.txt) |
+| Descartes "before" run of the reproduction, compared with the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/02-descartes-before/`](results/02-descartes-before/) |
 | Target list frozen (138 methods) | done | [`results/targets.csv`](results/targets.csv) |
-| Instrumentation built and installed in Glowroot (dry run, no workload) | done | [`docs/instrumentation.md`](docs/instrumentation.md), [`results/day3/`](results/day3/) |
-| Workload under the instrumentation, profile metrics (Table III columns 1-3) | done | [`results/day4/`](results/day4/), [`docs/instrumentation.md`](docs/instrumentation.md) |
-| Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/day5/`](results/day5/) |
-| Test execution (5 separate runs, our tests and the authors') | done | [`docs/execution.md`](docs/execution.md), [`results/day6/`](results/day6/) |
-| Descartes "after" (PANKTI_STATUS), our tests and the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/day7/`](results/day7/) |
-| Why tests fail (V.A), null-only check (V.B), prediction check | done | [`docs/failures.md`](docs/failures.md), [`results/day8/`](results/day8/) |
+| Instrumentation built and installed in Glowroot (dry run, no workload) | done | [`docs/instrumentation.md`](docs/instrumentation.md), [`results/03-instrumentation/`](results/03-instrumentation/) |
+| Workload under the instrumentation, profile metrics (Table III columns 1-3) | done | [`results/04-workload/`](results/04-workload/), [`docs/instrumentation.md`](docs/instrumentation.md) |
+| Test generation (and regeneration of the authors' tests from their profiles) | done | [`docs/generation.md`](docs/generation.md), [`results/05-test-generation/`](results/05-test-generation/) |
+| Test execution (5 separate runs, our tests and the authors') | done | [`docs/execution.md`](docs/execution.md), [`results/06-test-execution/`](results/06-test-execution/) |
+| Descartes "after" (PANKTI_STATUS), our tests and the authors' | done | [`docs/descartes.md`](docs/descartes.md), [`results/07-descartes-after/`](results/07-descartes-after/) |
+| Why tests fail (V.A), null-only check (V.B), prediction check | done | [`docs/failures.md`](docs/failures.md), [`results/08-failure-analysis/`](results/08-failure-analysis/) |
 | Three-way comparison: paper, authors' artifacts, reproduction | done | [`results/comparison/`](results/comparison/) |
 
 ## Results
@@ -66,7 +66,7 @@ The reproduction follows two tracks:
 | Methods hitting the 200 MB threshold | 19 | 19 | 19 |
 | Profile sizes | 158 B to about 55 MB, 5.5 GB | 158 B to 54.7 MiB, 5.49 GiB | 158 B to 54.7 MiB, 5.30 GiB |
 | Maximum nesting depth | 36 (undefined) | 73 (XML element depth) | 73 (same measure) |
-| Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/day5/fig5.png`](results/day5/fig5.png)) |
+| Figure 5 (profile sizes, 10 MiB bins) | histogram | 57,458 / 71 / 3 / 23 / 5 / 3 | 58,563 / 75 / 3 / 23 / 5 / 3 ([`results/05-test-generation/fig5.png`](results/05-test-generation/fig5.png)) |
 | #PANKTI_TESTS | 13,851 | 13,851; regenerated from their profiles: all 13,851 identical to the published tests | 14,679 (= #UNIQUE for each of the 47 methods) |
 | #PASSING / #FAILING (5 runs, 0 flaky) | 13,614 / 237 | their 13,851 tests run here: 13,614 / 237, all 46 rows identical | 14,314 / 365 of 14,679 (38 of 46 rows identical; differences follow #UNIQUE) |
 | Why generated tests fail (V.A) | 4 causes from a sample | their 237 failing tests run here: 151 `equals` by identity, 86 cache lookups returning `null` | 365: 265 / 98 / 2 exceptions. A test passes exactly when production returned `null`; the caches are not missing but keyed by identity ([`docs/failures.md`](docs/failures.md)) |
@@ -129,20 +129,20 @@ The raw outputs of every CI run used in the report are committed under `results/
 compared with the committed file (`git diff` shows no change):
 
 ```bash
-I=results/day4/full/profiles/invoked-methods.csv; T=results/day1/authors_report_vs_paper.csv
+I=results/04-workload/full/profiles/invoked-methods.csv; T=results/01-paper-vs-artifacts/authors_report_vs_paper.csv
 # PANKTI_STATUS (Table III, last column): "before" reports, "after" runs, control run without generated tests
-python analysis/pankti_status.py results/day2/descartes_before results/day7/reproduction $I \
-       results/day7/pankti_status_reproduction --table3 $T --control results/day7/none
-python analysis/compare_descartes_runs.py results/day7/reproduction results/day7/authors \
-       results/day7/reproduction_vs_authors --labels reproduction authors --table3 $I
+python analysis/pankti_status.py results/02-descartes-before/descartes_before results/07-descartes-after/reproduction $I \
+       results/07-descartes-after/pankti_status_reproduction --table3 $T --control results/07-descartes-after/none
+python analysis/compare_descartes_runs.py results/07-descartes-after/reproduction results/07-descartes-after/authors \
+       results/07-descartes-after/reproduction_vs_authors --labels reproduction authors --table3 $I
 # the restriction to the target classes checked against the full "before" run (assumption A21)
-python analysis/compare_descartes_runs.py results/day2/descartes_before results/day7/none \
-       results/day7/restriction_check --labels full-before restricted-none --table3 $I --only-b
+python analysis/compare_descartes_runs.py results/02-descartes-before/descartes_before results/07-descartes-after/none \
+       results/07-descartes-after/restriction_check --labels full-before restricted-none --table3 $I --only-b
 python analysis/mutant_tests.py org.apache.pdfbox.pdmodel.graphics.state.RenderingMode isFill \
-       results/day7/reproduction/pdfbox.mutations.json.gz          # the isFill example: mutant false killed, true not
+       results/07-descartes-after/reproduction/pdfbox.mutations.json.gz          # the isFill example: mutant false killed, true not
 # font sensitivity (experiment E22)
-R=results/day8/sensitivity
-python analysis/sensitivity_table.py $R/font_methods main=results/day4/table3_comparison.csv \
+R=results/08-failure-analysis/sensitivity
+python analysis/sensitivity_table.py $R/font_methods main=results/04-workload/table3_comparison.csv \
        warm-cache=$R/warm-cache/table3_comparison.csv dejavu-only=$R/dejavu-only/table3_comparison.csv
 # the three-way comparison and its figure
 python analysis/comparison.py results results/comparison
@@ -161,36 +161,36 @@ W=$HOME/pankti-work; bash setup/fetch-artifacts.sh $W
 P=$W/data/pankti-data-v1/pankti-data/pdfbox/pankti-collected-object-profiles   # the authors' profiles
 G=$W/data/pankti-data-v1/pankti-data/pdfbox/pankti-generated-junit-tests/tests # the authors' generated tests
 E=$W/src/pankti-experiments-2021/pdfbox                                       # their Descartes reports and run.sh
-I=results/day4/full/profiles/invoked-methods.csv; T=results/day1/authors_report_vs_paper.csv
+I=results/04-workload/full/profiles/invoked-methods.csv; T=results/01-paper-vs-artifacts/authors_report_vs_paper.csv
 T3=analysis/paper/table3_pdfbox.csv
 
 # Track A: the paper against the authors' artifacts
-python analysis/check_paper_table3.py $T3 results/day1/paper_table3_checks.txt
+python analysis/check_paper_table3.py $T3 results/01-paper-vs-artifacts/paper_table3_checks.txt
 python analysis/compare_authors_report.py $E $P/invoked-methods.csv $T
-python analysis/profile_stats.py $P results/day1/authors_profile_stats \
+python analysis/profile_stats.py $P results/01-paper-vs-artifacts/authors_profile_stats \
        --listing $W/data/pankti-data-v1.listing.csv pankti-data/pdfbox/pankti-collected-object-profiles/
 # #TARGET with the authors' tools (needs a PDFBox checkout and pankti-extract, see scripts/pankti/extract-targets.sh)
 bash scripts/pdfbox/checkout.sh $W/work/pdfbox
 bash scripts/pankti/extract-targets.sh $W/src/pankti $W/work/pdfbox $E/descartes/before $W/work/targets
-python analysis/count_targets.py $W/work/targets $E/descartes/before $P/invoked-methods.csv results/day2/targets_authors_reports
-python analysis/compare_descartes_runs.py results/day2/descartes_before $E/descartes/before \
-       results/day2/descartes_before_vs_authors --labels reproduction authors --table3 $P/invoked-methods.csv
+python analysis/count_targets.py $W/work/targets $E/descartes/before $P/invoked-methods.csv results/02-descartes-before/targets_authors_reports
+python analysis/compare_descartes_runs.py results/02-descartes-before/descartes_before $E/descartes/before \
+       results/02-descartes-before/descartes_before_vs_authors --labels reproduction authors --table3 $P/invoked-methods.csv
 # our Descartes "after" run against the authors' published one (whole modules)
 python analysis/compare_descartes_runs.py $W/data/pankti-data-v1/pankti-data/pdfbox/descartes-pseudo-tested-method-reports/after \
-       results/day7/reproduction results/day7/reproduction_vs_authors_published \
+       results/07-descartes-after/reproduction results/07-descartes-after/reproduction_vs_authors_published \
        --labels authors-published reproduction --table3 $I --only-b
 # Sections V.A and V.B, prediction check, on the authors' published tests
-python analysis/pankti_status.py results/day2/descartes_before results/day7/authors $P/invoked-methods.csv \
-       results/day7/pankti_status_authors --table3 $T --control results/day7/none
-python analysis/failure_analysis.py $G results/day6/authors/test_outcomes_tests.csv.gz $I \
-       results/day8/failure_analysis_authors --table3 $T3
-python analysis/prediction_check.py $G results/day6/authors/test_outcomes_tests.csv.gz results/day7/authors $I \
-       results/day8/prediction_check_authors --table3 $T3 --sources $W/work/pdfbox
+python analysis/pankti_status.py results/02-descartes-before/descartes_before results/07-descartes-after/authors $P/invoked-methods.csv \
+       results/07-descartes-after/pankti_status_authors --table3 $T --control results/07-descartes-after/none
+python analysis/failure_analysis.py $G results/06-test-execution/authors/test_outcomes_tests.csv.gz $I \
+       results/08-failure-analysis/failure_analysis_authors --table3 $T3
+python analysis/prediction_check.py $G results/06-test-execution/authors/test_outcomes_tests.csv.gz results/07-descartes-after/authors $I \
+       results/08-failure-analysis/prediction_check_authors --table3 $T3 --sources $W/work/pdfbox
 ```
 
 The same two analyses on this reproduction's tests take, instead of `$G`, the `generated-tests` artifact of a
-generate-tests run, unpacked (`zstd -dc generated-tests.tar.zst | tar -x`), with `results/day6/reproduction` and
-`results/day7/reproduction`. The run-time check of the cache lookups (`analysis/java/CacheLookupCheck.java`) gives its
+generate-tests run, unpacked (`zstd -dc generated-tests.tar.zst | tar -x`), with `results/06-test-execution/reproduction` and
+`results/07-descartes-after/reproduction`. The run-time check of the cache lookups (`analysis/java/CacheLookupCheck.java`) gives its
 command in its header.
 
 ### 3. The full pipeline on GitHub Actions
@@ -259,7 +259,7 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar $W/src/pankti-expe
   reproduction.
 - [docs/environment.md](docs/environment.md) and [docs/artifacts.md](docs/artifacts.md): toolchains, external inputs,
   versions and checksums.
-- [docs/journal.md](docs/journal.md): day-by-day work log.
+- [docs/journal.md](docs/journal.md): dated work log.
 - [results/README.md](results/README.md): what each results folder holds and which run or script produced it.
 
 ## Deviations from the original setup (summary)

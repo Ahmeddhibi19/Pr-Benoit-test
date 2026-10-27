@@ -1,8 +1,8 @@
 # Work journal
 
-## Day 1 - 2026-10-14: repository, toolchain, CI baseline, authors' artifacts
+## 2026-10-14: Repository, toolchain, CI baseline, authors' artifacts
 
-**Goal of the day:** working toolchains (CI and laptop), all external inputs downloaded and checked, a first
+**Goal:** working toolchains (CI and laptop), all external inputs downloaded and checked, a first
 comparison between the paper and the authors' artifacts.
 
 ### Done
@@ -19,9 +19,9 @@ comparison between the paper and the authors' artifacts.
 - Authors' artifacts: pankti at `0fddf27` and `326a753`, pankti-experiments at `7bc7791` and `1d8f9aa`
   (sparse checkout of `pdfbox/`). The Zenodo archive (1.37 GB) downloads at 50-450 KB/s and is still running.
 - Table III transcribed (`analysis/paper/table3_pdfbox.csv`) and checked: every sum matches the printed totals
-  (`results/day1/paper_table3_checks.txt`).
-- Paper vs authors' artifacts, method by method (`results/day1/authors_report_vs_paper.csv`), and summary of
-  the 14 Descartes reports of the authors (`results/day1/authors_descartes_reports.csv`).
+  (`results/01-paper-vs-artifacts/paper_table3_checks.txt`).
+- Paper vs authors' artifacts, method by method (`results/01-paper-vs-artifacts/authors_report_vs_paper.csv`), and summary of
+  the 14 Descartes reports of the authors (`results/01-paper-vs-artifacts/authors_descartes_reports.csv`).
 - PANKTI's instrumentation code (`MethodAspect0.java`) read to understand how invocations are counted and how
   profiles are written.
 
@@ -63,7 +63,7 @@ comparison between the paper and the authors' artifacts.
 - The Maven cache was not saved when the job failed. It is now restored and saved in separate steps.
 - Decision: all generated tests will be executed; non-executed tests will never be counted as passing.
 
-### Baseline on the CI runner (run 38542374578, results in `results/day1/env-check/`)
+### Baseline on the CI runner (run 38542374578, results in `results/01-paper-vs-artifacts/env-check/`)
 
 Runner image ubuntu22 20261004.315.1, 4 vCPU (AMD EPYC 7763), 15 GiB RAM, AdoptOpenJDK 11.0.8+10, 57 fonts
 (16 Liberation entries). PDFBox commit `fa8029d8` (tag 2.0.21). Build and tests: 143 s.
@@ -78,26 +78,26 @@ Runner image ubuntu22 20261004.315.1, 4 vCPU (AMD EPYC 7763), 15 GiB RAM, AdoptO
 | examples | 24 | 13 (expired test keystore) |
 | total | 1,678 | 13 |
 
-### Next (Day 2)
+### Next steps
 
 Fix the baseline build if needed. Set up PIT 1.4.x + Descartes 1.2.x with the 21 operators and start the "before"
 runs for the 6 modules. Recompute #TARGET from the authors' "before" reports with pankti-extract.
 
-## 15-19 Oct: no progress
+## 2026-10-15 to 2026-10-19: Pause, move to a new machine
 
-No work was done on these days. On 20 Oct the work moved to another computer. The local toolchain and the authors'
+Work paused from 15 to 19 October. On 20 October the work moved to another computer. The local toolchain and the authors'
 artifacts were rebuilt with the repository's own scripts (`setup/windows/install-tools.ps1`,
-`setup/fetch-artifacts.sh`; about 30 minutes, 7.4 GB). On the new machine, the Day-1 analyses give byte-identical
+`setup/fetch-artifacts.sh`; about 30 minutes, 7.4 GB). On the new machine, the analyses of 14 October give byte-identical
 results, and a local build of the PDFBox fontbox and pdfbox modules passes its 558 tests.
 
-## Day 2 - 2026-10-20: pseudo-tested methods and targets
+## 2026-10-20: Pseudo-tested methods and targets
 
-**Goal of the day (plan):** Descartes "before" runs on CI for the six modules, the target count from the authors'
+**Goal:** Descartes "before" runs on CI for the six modules, the target count from the authors'
 reports, and a script that compares two sets of Descartes reports.
 
 ### Done
 
-- Two Day-1 fixes:
+- Two fixes to the work of 14 October:
   - `analysis/descartes.py` identifies methods by class, name and parameter descriptor. The previous comparison
     merged overloads, which gave wrong "before" statuses for Table III rows 31 and 35. With the fix, all 46 targets
     are pseudo-tested in the authors' "before" reports and all 46 "after" statuses match the paper.
@@ -152,20 +152,20 @@ All 46 effective targets of Table III are pseudo-tested in the reproduction's "b
   Its full method list is written in hash-map order, so two runs differ in row order only.
 - **OS sensitivity:** a local Windows run of fontbox differs from the authors on 4 font-directory-finder methods,
   which match on Linux. This confirms that every measurement must run on the Linux runner.
-- **Target list for Day 3:** frozen from the authors' reports, as decided (assumption A8). The reproduction's own
+- **Target list for the instrumentation stage:** frozen from the authors' reports, as decided (assumption A8). The reproduction's own
   list differs by one method in each direction.
 
-### Next (Day 3)
+### Next steps
 
-Freeze `results/targets.csv` from `results/day2/instrumentation-candidates-pdfbox.csv`. Then start the production
+Freeze `results/targets.csv` from `results/02-descartes-before/instrumentation-candidates-pdfbox.csv`. Then start the production
 run as a dry run: download Glowroot 0.13.6, build pankti-instrument at `0fddf27`, generate the aspects with
 `instrument.py`, build the plugin jar, and install it into Glowroot on CI.
 
-## Day 3 - 2026-10-20: frozen targets and instrumentation dry run
+## 2026-10-20: Frozen targets and instrumentation dry run
 
-**Goal of the day (plan):** freeze the target list and check that the instrumentation builds and installs on CI,
+**Goal:** freeze the target list and check that the instrumentation builds and installs on CI,
 without running the workload yet. Plan tasks 3.1 and 3.2 (download and compare the Descartes reports, own #TARGET)
-were already done on Day 2.
+were already done in the previous entry.
 
 ### Done
 
@@ -177,7 +177,7 @@ were already done on Day 2.
   pdfbox-app under the agent without a command. It verifies that Glowroot starts without warnings and registers the
   plugin, and that no profile is written. It was tested both ways: it passes with the plugin and fails without it.
 - `scripts/pdfbox/build-app.sh` and `analysis/compare_jars.py`.
-- Workflow `production-run`, mode `dry-run`: run 39431056888 is green, outputs in `results/day3/`.
+- Workflow `production-run`, mode `dry-run`: run 39431056888 is green, outputs in `results/03-instrumentation/`.
 - Documentation:
   - new `docs/instrumentation.md`: what PANKTI records, the build, the dry-run results and the known limitations;
   - new `docs/experiments.md`: experiment log E1-E8;
@@ -204,7 +204,7 @@ were already done on Day 2.
 - The checksum of `results/targets.csv` must be computed on the committed (LF) content. It was first computed on a
   Windows working copy with CRLF line endings and corrected before the push.
 
-### Next (Day 4)
+### Next steps
 
 Add the `smoke` and `full` modes to `production-run`:
 - smoke: one PDF and one command; `isFill` profiles must appear in `/tmp/pankti-object-data`, the XML must parse, and
@@ -213,9 +213,9 @@ Add the `smoke` and `full` modes to `production-run`:
   receiving/params/returned fragment counts (pairing check), and a comparison of the console log with the authors'
   `execution.log`.
 
-## Day 4 - 2026-10-20: the workload under PANKTI, Table III columns 1-3
+## 2026-10-20: The workload under PANKTI, Table III columns 1-3
 
-**Goal of the day (plan):** run the authors' workload with the instrumentation and measure #INVOCATIONS,
+**Goal:** run the authors' workload with the instrumentation and measure #INVOCATIONS,
 #COLLECTED, #UNIQUE, the threshold, the sizes and the depth, then compare them with Table III.
 
 ### Done
@@ -257,7 +257,7 @@ Add the `smoke` and `full` modes to `production-run`:
 - The differences on font methods are most likely caused by the fonts installed. Checking this would need a run
   with another font set, which is a sensitivity run dropped for time.
 
-### Next (Day 5)
+### Next steps
 
 - Figure 5 from the reproduction's sizes, next to the authors' data.
 - pankti-generate on the reproduction's profiles (archived for 3 days, and also kept locally), checking that the
@@ -265,21 +265,21 @@ Add the `smoke` and `full` modes to `production-run`:
 - Prepare the integration of the generated tests into fontbox and pdfbox (XStream test dependency, compiler level 9,
   animal-sniffer).
 
-## Day 5 - 2026-10-21: Figure 5, test generation, integration
+## 2026-10-21: Figure 5, test generation, integration
 
-**Goal of the day (plan):** Figure 5 and the size facts; generate the tests and check #PANKTI_TESTS = #UNIQUE;
+**Goal:** Figure 5 and the size facts; generate the tests and check #PANKTI_TESTS = #UNIQUE;
 prepare the integration of the tests into PDFBox.
 
 ### Done
 
-- `analysis/figure5.py` -> `results/day5/fig5.{png,csv}`.
+- `analysis/figure5.py` -> `results/05-test-generation/fig5.{png,csv}`.
 - pankti-generate:
   - built at `7afc584` with `setUpXStream()` enabled (`scripts/pankti/build-generator.sh`);
   - run by `scripts/pankti/generate-tests.sh`;
   - tests counted by `analysis/count_generated_tests.py` and compared by `analysis/compare_generated_tests.py`;
   - workflow `generate-tests`.
 - Integration: `scripts/pankti/integrate-tests.sh` and `scripts/pankti/split_test_classes.py`.
-- `results/day5/table3_partial.csv`: Table III columns 1-4 for the paper, the authors' data and this reproduction.
+- `results/05-test-generation/table3_partial.csv`: Table III columns 1-4 for the paper, the authors' data and this reproduction.
 - Documentation:
   - new `docs/generation.md`;
   - E12-E15 in `docs/experiments.md`, A17-A18 in `docs/assumptions.md`;
@@ -310,15 +310,15 @@ prepare the integration of the tests into PDFBox.
 - **Memory.** The generation needs about 12 GB (DOM parsing of profile files up to 210 MB). It runs on CI, since the
   laptop has too little free memory.
 
-### Next (Day 6)
+### Next steps
 
 Integrate the 14,679 tests into fontbox and pdfbox on the runner and run them 5 times, each time in a separate
 Maven/JVM run. Then count passing, failing and flaky tests per method, and compare them with Table III (PASS/FAIL)
 and with the executed tests of the authors.
 
-## Day 6 - 2026-10-21: executing the generated tests
+## 2026-10-21: Executing the generated tests
 
-**Goal of the day (plan):** run the generated tests 5 times, each in a separate JVM; #PASSING, #FAILING and flaky
+**Goal:** run the generated tests 5 times, each in a separate JVM; #PASSING, #FAILING and flaky
 tests per method; a Track A check that separates the environment from the profiles.
 
 ### Done
@@ -327,7 +327,7 @@ tests per method; a Track A check that separates the environment from the profil
   `analysis/test_outcomes.py` (verdicts over the runs, failure types, comparison with Table III and with the tests
   the authors executed), `analysis/table3_execution.py`, workflow `assess-tests` (our tests and the authors' published
   tests, in the same environment).
-- Day-5 leftover: three representative generated classes in `results/day5/sample-tests/`.
+- Left over from the previous entry: three representative generated classes in `results/05-test-generation/sample-tests/`.
 - Documentation:
   - research log entries E16-E18 in the new format;
   - assumptions A19 (run protocol) and A20 (repair of the published tests);
@@ -358,16 +358,16 @@ tests per method; a Track A check that separates the environment from the profil
 - **Memory.** No `OutOfMemoryError` occurred with PDFBox's 768 MB test heap, so the secondary run planned in A19 was
   not needed.
 
-### Next (Day 7)
+### Next steps
 
 Keep the passing, non-flaky generated tests and run Descartes "after" on fontbox and pdfbox with the same
 configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it with Table III (28 / 46).
 
-## Day 7 - 2026-10-22: Descartes "after" and PANKTI_STATUS
+## 2026-10-22: Descartes "after" and PANKTI_STATUS
 
 ### Done
 
-- `scripts/pankti/keep_passing_tests.py`: keeps the tests that passed in all five runs of Day 6 (14,314 of ours,
+- `scripts/pankti/keep_passing_tests.py`: keeps the tests that passed in all five runs of the test execution (14,314 of ours,
   13,614 of the authors'), with a unit test.
 - `scripts/pdfbox/run-descartes.sh`: `TARGET_CLASSES` restricts the mutated classes; the tests are always given
   explicitly (pitest-maven otherwise restricts them too and selects none, found in a local check, E19).
@@ -375,7 +375,7 @@ configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it 
   jobs successful.
 - `analysis/pankti_status.py` (with a control run), `analysis/table3_status.py`, `analysis/mutant_tests.py`; unit
   tests (12 in total).
-- Results in `results/day7/`; docs: descartes.md, assumptions A21-A22, experiments E19-E20, discrepancies §23-24.
+- Results in `results/07-descartes-after/`; docs: descartes.md, assumptions A21-A22, experiments E19-E20, discrepancies §23-24.
 
 ### Results
 
@@ -394,12 +394,12 @@ configuration as "before" (1 thread). Then compute PANKTI_STATUS and compare it 
 - **Restriction.** Mutating only the 22 target classes shortens the pdfbox run from 68 to 16-21 minutes; validated
   by the control run (A21).
 
-### Next (Day 8)
+### Next steps
 
 Analyse the failing tests (categories of Section V.A) and the targets that stay pseudo-tested although they have
 passing tests (Section V.B); collect the final comparison in `results/comparison/`.
 
-## Day 8 - 2026-10-22: comparison and failure analysis
+## 2026-10-22: Comparison and failure analysis
 
 ### Done
 
@@ -436,7 +436,7 @@ passing tests (Section V.B); collect the final comparison in `results/comparison
 - `extracted-methods-pdfbox.csv` has 3,588 rows but 3,587 distinct methods (one duplicate row); the docs said 3,588
   and the result files 3,587. Both are now stated.
 
-## Day 9 - 2026-10-25: repository for a reviewer, report version 1
+## 2026-10-25: Repository for a reviewer, report version 1
 
 ### Done
 
@@ -446,7 +446,7 @@ passing tests (Section V.B); collect the final comparison in `results/comparison
 - `requirements.txt` (Python packages); `results/README.md` (what each results folder holds and which run produced
   it); [deviations.md](deviations.md) (one-page overview of every deviation, linked to the assumptions and
   discrepancies).
-- `analysis/compare_descartes_runs.py --only-b`: the two Day 7 comparisons that had been filtered to the 465 analysed
+- `analysis/compare_descartes_runs.py --only-b`: the two Descartes "after" comparisons that had been filtered to the 465 analysed
   methods by hand (`restriction_check`, `reproduction_vs_authors_published`) are now produced by a command; same
   numbers (460 / 465).
 - Usage lines added to the scripts that had none; validation cells of A8 and A11 completed; discrepancy 7 updated.
@@ -463,7 +463,7 @@ passing tests (Section V.B); collect the final comparison in `results/comparison
 - Every number of 100 or more and every percentage of the report is found in a result file, or is a ratio of
   numbers given next to it.
 
-## Day 10 - 2026-10-25: fresh-clone check, report PDF, delivery
+## 2026-10-25: Fresh-clone check, report PDF, delivery
 
 ### Done
 

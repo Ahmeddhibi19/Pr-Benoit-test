@@ -41,11 +41,11 @@ pankti-generate writes that method after the tests of the first target method of
 class splitter kept only the text before the first test and after the last one: the two split parts of the class had
 no `setUpXStream()`. The splitter now keeps every member found between tests in every part (unit test in
 `tests/test_analysis.py`). The same run showed that the authors' published classes do not compile as published
-(assumption A20). Its summary is kept in `results/day6/run-39641425498-split-bug/` as evidence; it is not a result.
+(assumption A20). Its summary is kept in `results/06-test-execution/run-39641425498-split-bug/` as evidence; it is not a result.
 
 ## Results
 
-Run 39644913295 (`results/day6/`, `results/day6/table3_execution.*`; details in [experiments.md](experiments.md),
+Run 39644913295 (`results/06-test-execution/`, `results/06-test-execution/table3_execution.*`; details in [experiments.md](experiments.md),
 E17 and E18):
 
 | | Tests | Passing in all 5 runs | Failing in all 5 runs | Flaky | Pass rate |

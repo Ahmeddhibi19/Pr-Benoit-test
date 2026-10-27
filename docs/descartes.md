@@ -54,7 +54,7 @@ Reports of the reproduction: runs [39409510406](https://github.com/Ahmeddhibi19/
 (all modules, 4 threads) and [39415980930](https://github.com/Ahmeddhibi19/Pr-Benoit-test/actions/runs/39415980930)
 (pdfbox, 1 thread), 2026-10-20. They are compared with the authors' reports of 2020-09-21 by
 `analysis/compare_descartes_runs.py` (methods matched by class, name and parameter descriptor). The reports used
-below are stored in `results/day2/descartes_before/`, and the comparison in `results/day2/descartes_before_vs_authors/`.
+below are stored in `results/02-descartes-before/descartes_before/`, and the comparison in `results/02-descartes-before/descartes_before_vs_authors/`.
 
 | Module | Methods | Tested | Partially | Pseudo-tested | Not covered | Same classification as the authors | Jaccard (pseudo-tested) | Descartes time |
 |---|---|---|---|---|---|---|---|---|
@@ -101,7 +101,7 @@ With 1 thread the timeouts fall back to 64 and the result matches the authors'. 
 minutes, consistent with a single thread. The configuration therefore uses 1 thread for every module (assumption A3).
 The effect on the case study would be large: with the 4-thread pdfbox report, pankti-extract and
 `find-pseudo-tested.py` select 91 targets instead of 138, and only 21 of the 46 effective targets of Table III.
-The 4-thread reports are kept in `results/day2/descartes_before_pdfbox_4_threads/` with their comparison.
+The 4-thread reports are kept in `results/02-descartes-before/descartes_before_pdfbox_4_threads/` with their comparison.
 
 A local run of fontbox on Windows differs from the authors' report on 4 methods, all OS-specific font-directory
 finders (discrepancies.md §15); on Linux the four methods match.
@@ -115,12 +115,12 @@ one row, `PlainTextFormatter$Builder.textAlign(int)`, appears twice; `count_targ
 
 | Descartes reports used | #TARGET | Effective targets included | Output |
 |---|---|---|---|
-| authors' "before" reports | **138** (paper: 138) | 46 / 46 | `results/day2/targets_authors_reports.{csv,txt}` |
-| reproduction's "before" reports | **138** | 46 / 46 | `results/day2/targets_own_reports.{csv,txt}` |
+| authors' "before" reports | **138** (paper: 138) | 46 / 46 | `results/02-descartes-before/targets_authors_reports.{csv,txt}` |
+| reproduction's "before" reports | **138** | 46 / 46 | `results/02-descartes-before/targets_own_reports.{csv,txt}` |
 
 The two lists share 137 methods (Jaccard index 0.986): `PDFontDescriptor.getFontFile()` is a target only with the
-authors' reports, `PDAnnotation.isNoRotate()` only with the reproduction's. The list instrumented from Day 3 on is
-the one from the authors' reports (`results/day2/instrumentation-candidates-pdfbox.csv`, assumption A8).
+authors' reports, `PDAnnotation.isNoRotate()` only with the reproduction's. The list instrumented from the instrumentation stage on is
+the one from the authors' reports (`results/02-descartes-before/instrumentation-candidates-pdfbox.csv`, assumption A8).
 
 ## "After" run: PANKTI_STATUS
 
@@ -130,20 +130,20 @@ Descartes 1.2.6, 21 operators, 1 thread). Three sources of tests, each on fontbo
 | Source | Tests added | fontbox: tested / partially / pseudo / not covered | pdfbox: tested / partially / pseudo / not covered | pdfbox time |
 |---|---|---|---|---|
 | none (control) | 0 | 34 / 1 / 9 / 18 | 150 / 23 / 98 / 132 | 21 min |
-| reproduction | 14,314 passing tests of 14,679 (Day 6) | 40 / 1 / 3 / 18 | 162 / 34 / 75 / 132 | 18 min |
+| reproduction | 14,314 passing tests of 14,679 (test execution) | 40 / 1 / 3 / 18 | 162 / 34 / 75 / 132 | 18 min |
 | authors | 13,614 passing published tests of 13,851 | 40 / 1 / 3 / 18 | 162 / 34 / 75 / 132 | 16 min |
 
-Only the tests that passed in all five runs of Day 6 are added (`scripts/pankti/keep_passing_tests.py`, assumption
+Only the tests that passed in all five runs of the test execution are added (`scripts/pankti/keep_passing_tests.py`, assumption
 A22): PIT needs a green suite. Mutation is restricted to the 22 classes that declare the effective targets (5 in
 fontbox, 17 in pdfbox; 465 methods), with all the tests of the module (A21).
 
 **Restriction check.** The control run (no generated test) is compared with the full "before" run on the 465
-methods (`results/day7/restriction_check/`): fontbox 62 / 62 identical, pdfbox 398 / 403. The 5 differences are not
+methods (`results/07-descartes-after/restriction_check/`): fontbox 62 / 62 identical, pdfbox 398 / 403. The 5 differences are not
 caused by the restriction but by unstable tests of PDFBox (discrepancies.md §23): 4 come from mutants killed by
 `TestOptionalContentGroups.testOCGConsumption` in the control run and not in the full run, 1 from a mutant that timed
 out in the full run. One of the five is an effective target: `XrefTrailerResolver.getXrefType`.
 
-**PANKTI_STATUS** (`analysis/pankti_status.py`, `analysis/table3_status.py`, outputs `results/day7/`):
+**PANKTI_STATUS** (`analysis/pankti_status.py`, `analysis/table3_status.py`, outputs `results/07-descartes-after/`):
 
 | | Well-tested (tested + partially tested) | Same status as Table III |
 |---|---|---|
@@ -154,12 +154,12 @@ out in the full run. One of the five is an effective target: `XrefTrailerResolve
 
 The 47th target of the reproduction, `TrueTypeFont.getOS2Windows`, has no passing test and stays pseudo-tested.
 With our tests and with the authors', the Descartes classification is the same for all 465 analysed methods
-(`results/day7/reproduction_vs_authors/`). The authors' own "after" reports (Zenodo) analyse the whole modules; on the
+(`results/07-descartes-after/reproduction_vs_authors/`). The authors' own "after" reports (Zenodo) analyse the whole modules; on the
 465 methods analysed here they agree on 460, including all 46 targets. The 5 other methods are not targets and differ
 through the same unstable tests (`TestOptionalContentGroups`, `TestPublicKeyEncryption`, `TestTextStripper`;
-`results/day7/reproduction_vs_authors_published/`).
+`results/07-descartes-after/reproduction_vs_authors_published/`).
 
-**Examples of the paper** (`analysis/mutant_tests.py`, `results/day7/examples_mutants.txt`):
+**Examples of the paper** (`analysis/mutant_tests.py`, `results/07-descartes-after/examples_mutants.txt`):
 - `RenderingMode.isFill` is partially tested: the single observed value is `true`, so the generated test kills the
   `false` mutant and not the `true` mutant. This is the paper's example (Section IV.C).
 - `NamingTable.getName` is tested: the mutants `null`, `"A"` and `""` are all killed (Section II.C). Most observed
