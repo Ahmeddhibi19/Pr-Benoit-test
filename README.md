@@ -22,8 +22,7 @@ Figure 5 and the `isFill` example.
 #PASSING / #FAILING of the authors' tests, PANKTI_STATUS (28 / 46, all 46 statuses), the `isFill` example and
 Section V.B. Reproduced in shape: the workload columns of Table III (38 of 46 rows identical; the others are font
 methods, whose values depend on the installed fonts). Not reproduced: the nesting depth of 36, which the paper does
-not define. Section V.A is reproduced on every failing test, with a different mechanism for 9 rows. The research
-report is [`report/rapport.md`](report/rapport.md) (in French).
+not define. Section V.A is reproduced on every failing test, with a different mechanism for 9 rows.
 
 The full comparison, one line per published number with its source file, is in
 [`results/comparison/comparison.txt`](results/comparison/comparison.txt); row by row in
@@ -90,7 +89,6 @@ scripts/glowroot/    Glowroot installation and agent check
 setup/               local setup (portable toolchain, download of the authors' artifacts)
 analysis/            analysis scripts; analysis/paper/ holds Table III as printed in the paper
 results/             outputs of the runs and of the analyses, one folder per stage (index: results/README.md)
-report/              the research report (French), Markdown and PDF
 tests/               unit tests of the analysis scripts (python -m unittest discover -s tests)
 requirements.txt     Python packages (Python 3.11)
 docs/                methodology notes, assumptions, discrepancies, environment, artifacts, work journal
@@ -237,9 +235,6 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar $W/src/pankti-expe
 
 ## Documentation
 
-- [report/rapport.md](report/rapport.md) ([PDF](report/rapport.pdf)): the research report (in French): method,
-  difficulties, assumptions, results, observations and reflections. The PDF is built from the Markdown by
-  `python report/build_pdf.py` (needs Chrome or Chromium).
 - [docs/descartes.md](docs/descartes.md): how pseudo-tested methods are computed, and how the results compare with
   the authors'.
 - [docs/instrumentation.md](docs/instrumentation.md): what PANKTI's instrumentation records, how it is built and
@@ -276,9 +271,8 @@ python analysis/compare_jars.py out/app/pdfbox-app-2.0.21.jar $W/src/pankti-expe
 
 See [docs/deviations.md](docs/deviations.md) for the full list.
 
-## License and attribution
+## Attribution
 
-The code of this repository is under the MIT license ([LICENSE](LICENSE)). It runs, without modifying them, the
-tools and data of the original study: PANKTI and its experiment repository (ASSERT-KTH), the replication data on
-Zenodo (record 4298605), Apache PDFBox 2.0.21, PIT and Descartes, Glowroot and XStream, each under its own license.
-The paper is cited at the top of this page; the report lists all references.
+This repository runs, without modifying them, the tools and data of the original study: PANKTI and its experiment
+repository (ASSERT-KTH), the replication data on Zenodo (record 4298605), Apache PDFBox 2.0.21, PIT and Descartes,
+Glowroot and XStream, each under its own license. The paper is cited at the top of this page.

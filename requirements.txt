@@ -3,5 +3,3 @@
 pandas==1.5.3
 numpy==1.26.4
 matplotlib==3.8.4
-# only to build report/rapport.pdf (report/build_pdf.py, which also needs Chrome or Chromium)
-markdown==3.7
